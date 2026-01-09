@@ -24,17 +24,32 @@ CONSIGNE : Ne jamais inventer de modalités d'examen. Si une demande de l'utilis
 
 class GeminiService:
     def __init__(self):
+        self._model_name = None
         if not API_KEY:
-             print("⚠️ WARNING: GOOGLE_API_KEY is missing in environment variables. Gemini features will fail.")
+             print("⚠️ WARNING: GOOGLE_API_KEY is missing. Gemini features will fail.")
              return
         
         try:
             genai.configure(api_key=API_KEY)
-            self.model_name = self._find_best_model()
-            print(f"✅ Gemini Service initialized with model: {self.model_name}")
+            # Lazy loading: Don't call _find_best_model() here to avoid blocking startup
+            # self.model_name will be resolved on first property access
         except Exception as e:
-            print(f"❌ Gemini initialization failed: {e}")
-            self.model_name = "gemini-1.5-flash"
+            print(f"❌ Gemini config failed: {e}")
+
+    @property
+    def model_name(self):
+        if self._model_name:
+            return self._model_name
+        
+        try:
+            print("🕵️ Auto-detecting best Gemini model...")
+            self._model_name = self._find_best_model()
+            print(f"✅ Selected model: {self._model_name}")
+        except Exception as e:
+             print(f"⚠️ Model detection failed ({e}). Fallback to flash.")
+             self._model_name = "gemini-1.5-flash"
+        
+        return self._model_name
 
     def _find_best_model(self):
         """Auto-detects the best available model, preferring Flash."""
@@ -49,6 +64,8 @@ class GeminiService:
                 best = next((m for m in available if "1.5" in m), available[0])
             return best
         except Exception as e:
+            # Re-raise to be caught by the property
+            raise e
             print(f"⚠️ Model discovery failed: {e}. Defaulting to 'gemini-1.5-flash'.")
             return "gemini-1.5-flash"
 
