@@ -12,72 +12,49 @@ router = APIRouter()
 
 # Specialized prompts for each document type
 PROMPTS = {
-    "dossier_prof": """Tu es un expert en création de cours pour le BTS NDRC.
+    "dossier_prof": REGULATORY_GROUNDING + """Tu es un expert en création de cours pour le BTS NDRC.
 Génère un DOSSIER PROFESSEUR complet avec la structure suivante :
-**NOTE CRITIQUE** : Si le thème concerne le **Bloc 2**, ne mentionne JAMAIS de CCF (le Bloc 2 n'est pas en CCF).
 
 # Dossier Professeur : [Titre]
 
 ## Présentation de la Séquence
-- Bloc de compétences visé
-- Place dans la progression annuelle
-- Pré-requis élèves
+- Bloc de compétences visé et savoirs associés.
+- Place dans la progression annuelle.
 
-## Objectifs Pédagogiques
-- Compétences visées (référentiel)
-- Savoirs associés
-- Critères de réussite
+## Déroulement de la Séance (Conducteur)
+Détaille le scénario pédagogique étape par étape.
 
-## Déroulement Détaillé
-Pour chaque séance :
-### Séance X : [Titre] (XX min)
-| Phase | Durée | Activité Prof | Activité Élève | Supports |
-|-------|-------|---------------|----------------|----------|
-| ...   | ...   | ...           | ...            | ...      |
+## CORRIGÉ DÉTAILLÉ (LIEN DOSSIER ÉLÈVE)
+**IMPORTANT** : Pour chaque question posée dans le dossier élève, fournis ici la réponse attendue, les éléments de barème et des conseils de remédiation. 
+Distingue bien :
+- Corrigé de l'Activité 1 : [Réponses précises]
+- Corrigé de l'Activité 2 : [Réponses précises]
 
-## Corrigés et Points de Vigilance
-- Réponses attendues aux activités
-- Erreurs fréquentes à anticiper
-- Remédiations proposées
-
-## Prolongements Possibles
-- Liens avec autres chapitres
-- Ouverture professionnelle
+## Points de Vigilance & Prolongements
+- Astuces pour l'animation.
+- Liens avec les épreuves (CCF/Ponctuel).
 """,
 
-    "dossier_eleve": """Tu es un expert en création de supports pédagogiques pour le BTS NDRC.
-Génère un DOSSIER ÉLÈVE complet et prêt à imprimer avec :
+    "dossier_eleve": REGULATORY_GROUNDING + """Tu es un expert en création de supports pédagogiques pour le BTS NDRC.
+Génère un DOSSIER ÉLÈVE clair, structuré et incitant à l'action :
 
 # Dossier Élève : [Titre]
 
-## Mise en Situation Professionnelle
-[Contexte d'entreprise fictif mais réaliste]
+## Contexte Professionnel
+[Une mise en situation concrète dans une entreprise pour ancrer les questions]
 
-## Documents Ressources
-- Document 1 : [Titre]
-[Contenu du document]
-- Document 2 : [Titre]
-[Contenu]
+## Documents de Travail
+[Fiches outils, extraits de documents ou données nécessaires pour répondre]
 
-## Activités
-### Activité 1 : [Titre]
-**Consigne** : ...
-**Travail à réaliser** :
-1. ...
-2. ...
+## TRAVAIL À RÉALISER (ACTIVITÉS)
+Propose des questions progressives et numérotées, directement liées au contexte et aux documents fournis.
+Chaque question doit solliciter une compétence du référentiel.
 
-### Activité 2 : [Titre]
-...
-
-## Fiche de Synthèse à Compléter
-[Schéma ou tableau à trous pour la prise de notes]
-
-## Auto-évaluation
-[ ] J'ai compris...
-[ ] Je suis capable de...
+## Synthèse Personnelle
+[Zone pour que l'élève récapitule les notions clés apprises]
 """,
 
-    "fiche_deroulement": """Tu es un expert en ingénierie pédagogique pour le BTS NDRC.
+    "fiche_deroulement": REGULATORY_GROUNDING + """Tu es un expert en ingénierie pédagogique pour le BTS NDRC.
 Génère une FICHE DE DÉROULEMENT DE COURS détaillée :
 
 # Fiche de Déroulement : [Titre]
@@ -115,71 +92,47 @@ Génère une FICHE DE DÉROULEMENT DE COURS détaillée :
 - [ ] ...
 """,
 
-    "evaluation": """Tu es un expert en évaluation pour le BTS NDRC.
+    "evaluation": REGULATORY_GROUNDING + """Tu es un expert en évaluation pour le BTS NDRC.
 Génère une ÉVALUATION COMPLÈTE avec :
 
 # Évaluation : [Titre]
 
-## Corrigé Type
-[Réponses attendues avec barème détaillé]
+## Mise en situation d'examen
+[Un scénario réaliste conforme aux épreuves E4, E5 ou E6]
+
+## Travail à réaliser
+[Questions précises avec barème de points]
+
+## Corrigé Type et Barème
+[Réponses attendues détaillées avec critères d'évaluation officiels]
 """,
 
-    "quiz": """Tu es un expert en évaluation formative pour le BTS NDRC.
+    "quiz": REGULATORY_GROUNDING + """Tu es un expert en évaluation formative pour le BTS NDRC.
 Génère un QUIZ / QCM complet et pédagogique :
 
 # Quiz de Révision : [Titre du Thème]
 
-## Instructions
-- Durée : 15-20 minutes
-- Objectif : Vérifier la compréhension des notions clés
-
 ## Questions
+Génère 5 à 10 questions (QCM ou questions ouvertes courtes).
 
-### Partie 1 : Questions à Choix Multiples (QCM)
-Génère 5 à 10 questions avec :
-1. [Question]
-   a) [Option A]
-   b) [Option B]
-   c) [Option C]
-   d) [Option D]
-
-### Partie 2 : Questions de Compréhension
-Génère 3 questions ouvertes demandant une explication courte.
-
-### Partie 3 : Mini Étude de Situation
-Un court scénario (3-4 lignes) suivi de 2 questions d'analyse.
-
-## Corrigé et Explications
-[Fournis les réponses correctes ET une brève explication pour chaque question afin de favoriser l'apprentissage]
-**NOTE CRITIQUE** : Si le thème concerne le **Bloc 2**, ne mentionne JAMAIS de CCF (le Bloc 2 n'est pas en CCF).
+## Corrigé et Explications (Lien Pédagogique)
+**IMPORTANT** : Pour chaque question, fournis la réponse correcte ET une explication détaillée du "Pourquoi" basée sur le référentiel.
 """,
 
-    "planning_annuel": """Tu es un expert en ingénierie de formation pour le BTS NDRC.
+    "planning_annuel": REGULATORY_GROUNDING + """Tu es un expert en ingénierie de formation pour le BTS NDRC.
 Génère une PROGRESSION ANNUELLE détaillée et structurée :
-**NOTE CRITIQUE** : Si le thème concerne le **Bloc 2**, ne mentionne JAMAIS de CCF (le Bloc 2 n'est pas en CCF).
 
 # Progression Annuelle : [Nom de la Matière/Bloc]
-## Année Scolaire 202X-202X
 
-### Objectifs Généraux
-- [Lister les grands objectifs du référentiel]
+## Calendrier de la Progression
+| Période | Chapitre | Notions Clés | Compétences Visées | Activités prévues |
+|---------|----------|--------------|-------------------|--------------------|
+| ...     | ...      | ...          | ...               | ...                |
 
-### Calendrier de la Progression
-Génère un tableau mois par mois ou semaine par semaine :
-
-| Période | Chapitre | Notions Clés | Compétences Visées | Activités / Cas prévus |
-|---------|----------|--------------|-------------------|------------------------|
-| Sept.   | ...      | ...          | ...               | ...                    |
-| Oct.    | ...      | ...          | ...               | ...                    |
-| ...     | ...      | ...          | ...               | ...                    |
-
-### Modalités d'Évaluation
-- Fréquence des DS
-- Planning des CCF / Oraux
-
-### Ressources & Supports
-- [Lister les outils, manuels et sources de la base de connaissance utilisés]
-"""
+## Modalités d'Évaluation (Conforme Règlement)
+- Planning des DS et des examens blancs.
+- Rappel des modalités officielles (Ponctuel/CCF) selon le référentiel fourni.
+""",
 }
 
 class GenerateRequest(BaseModel):
