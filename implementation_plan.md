@@ -52,3 +52,25 @@ C'est le cœur du réacteur. Tant que nous n'avons pas prouvé que Gemini "compr
 **Ma suggestion pour démarrer maintenant :**
 1.  Je crée la structure du projet (dossiers, fichiers de config).
 2.  On développe un script Python simple (prototype) pour tester la connexion Drive -> Gemini Cache -> Question. Cela validera la faisabilité technique immédiatement.
+## Phase 5 : Mise en ligne & Beta Test
+Passage d'un environnement local à un environnement cloud pour tests réels.
+
+### Objectifs
+- Migration de SQLite vers **PostgreSQL (Supabase)**.
+- Déploiement du Backend (FastAPI) sur **Railway**.
+- Déploiement du Frontend (Next.js) sur **Vercel**.
+
+### Changements Prévus
+#### [MODIFY] [database.py](file:///Users/imac2jacques/Desktop/antigravity/profvirtuel/backend/app/database.py)
+- Support de la variable d'environnement `DATABASE_URL`.
+- Switch dynamique entre SQLite (local) et PostgreSQL (cloud).
+
+#### [MODIFY] [main.py](file:///Users/imac2jacques/Desktop/antigravity/profvirtuel/backend/main.py)
+- Configuration CORS pour autoriser l'URL de production.
+
+---
+
+## Verification Plan
+### Automated Tests
+- Vérification de la connexion à Supabase via un script de test local.
+- Test des endpoints `/api/dashboard/stats` sur Railway après déploiement.
