@@ -1,0 +1,68 @@
+from fastapi import APIRouter, UploadFile, File, HTTPException
+from backend.app.services.gemini_service import gemini_service
+import shutil
+import os
+import tempfile
+import docx
+
+router = APIRouter()
+
+@router.post("/upload")
+async def upload_document(file: UploadFile = File(...)):
+    """
+    Uploads a file (PDF, etc.) to Gemini and returns the file handle.
+    Converts DOCX to TXT before upload.
+    """
+    try:
+        # Save temp file
+        original_suffix = f"_{file.filename}"
+        with tempfile.NamedTemporaryFile(delete=False, suffix=original_suffix) as tmp:
+            shutil.copyfileobj(file.file, tmp)
+            tmp_path = tmp.name
+
+        # Determine mime type
+        mime_type = file.content_type or "application/pdf"
+        final_path = tmp_path
+        final_mime = mime_type
+
+        # Handle DOCX -> TXT conversion
+        if "wordprocessingml" in mime_type or file.filename.endswith(".docx"):
+            print(f"🔄 Converting {file.filename} from DOCX to TXT...")
+            try:
+                doc = docx.Document(tmp_path)
+                full_text = []
+                for para in doc.paragraphs:
+                    full_text.append(para.text)
+                text_content = "\n".join(full_text)
+                
+                # Setup new txt file
+                txt_path = tmp_path + ".txt"
+                with open(txt_path, "w", encoding="utf-8") as f:
+                    f.write(text_content)
+                
+                # Switch to new file for upload
+                final_path = txt_path
+                final_mime = "text/plain"
+            except Exception as e:
+                print(f"⚠️ DOCX Conversion failed: {e}")
+                # Fallback to original attempts
+        
+        # Upload to Gemini
+        gemini_file = gemini_service.upload_file_to_gemini(final_path, mime_type=final_mime)
+        
+        # Cleanup temp file(s)
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+        if final_path != tmp_path and os.path.exists(final_path):
+            os.unlink(final_path)
+
+        return {
+            "status": "success",
+            "filename": file.filename,
+            "gemini_file_name": gemini_file.name,
+            "gemini_file_uri": gemini_file.uri
+        }
+
+    except Exception as e:
+        print(f"Upload error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
