@@ -66,8 +66,6 @@ class GeminiService:
         except Exception as e:
             # Re-raise to be caught by the property
             raise e
-            print(f"⚠️ Model discovery failed: {e}. Defaulting to 'gemini-1.5-flash'.")
-            return "gemini-1.5-flash"
 
     def get_model(self, custom_system_instruction: str = ""):
         """Returns a GenerativeModel with regulatory grounding and custom instructions."""
