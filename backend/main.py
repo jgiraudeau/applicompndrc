@@ -36,8 +36,8 @@ app = FastAPI(title="Professeur Virtuel API", version="0.2.0", lifespan=lifespan
 # Configure CORS (allow frontend to connect)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For dev only, restrict in production
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,  # Set to False to allow wildcard origins in production
     allow_methods=["*"],
     allow_headers=["*"],
 )
