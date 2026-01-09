@@ -5,7 +5,7 @@ uvicorn
 python-multipart
 python-docx
 markdown
-xhtml2pdf
+fpdf2
 pandas
 openpyxl
 sqlalchemy
