@@ -16,9 +16,10 @@ async def lifespan(app: FastAPI):
     # Startup: Create tables
     print("📦 Initializing database...")
     try:
+        # Use run_sync for table creation if using async (but here we use sync engine)
         models.Base.metadata.create_all(bind=engine)
     except Exception as e:
-        print(f"⚠️ Database initialization failed: {e}")
+        print(f"⚠️ Database initialization failed (Non-fatal, continuing startup): {e}")
 
     # Startup: Load knowledge base (Non-blocking to avoid startup timeouts)
     print("🚀 Application starting up...")
