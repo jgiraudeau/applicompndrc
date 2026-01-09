@@ -20,13 +20,15 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"⚠️ Database initialization failed: {e}")
 
-    # Startup: Load knowledge base
+    # Startup: Load knowledge base (Non-blocking to avoid startup timeouts)
     print("🚀 Application starting up...")
     try:
+        import threading
         from backend.app.services.knowledge_service import knowledge_base
-        knowledge_base.scan_and_load()
+        # Run scan in background thread
+        threading.Thread(target=knowledge_base.scan_and_load, daemon=True).start()
     except Exception as e:
-        print(f"⚠️ Knowledge base loading failed: {e}")
+        print(f"⚠️ Knowledge base background start failed: {e}")
     yield
     # Shutdown
     print("👋 Application shutting down...")
