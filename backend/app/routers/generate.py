@@ -4,7 +4,7 @@ from typing import Optional, Literal
 from sqlalchemy.orm import Session
 from backend.app.database import get_db
 from backend.app.models import ActivityLog
-from backend.app.services.gemini_service import gemini_service
+from backend.app.services.gemini_service import gemini_service, REGULATORY_GROUNDING
 from backend.app.services.knowledge_service import knowledge_base
 import google.generativeai as genai
 
