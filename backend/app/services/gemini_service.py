@@ -10,6 +10,18 @@ load_dotenv(dotenv_path=env_path)
 print(f"DEBUG: Loading .env from {env_path}")
 API_KEY = os.getenv("GOOGLE_API_KEY")
 
+REGULATORY_GROUNDING = """
+RÈGLES OFFICIELLES BTS NDRC (Source : Circulaire 2024) - À APPLIQUER STRICTEMENT :
+- E4 (Relation client et négociation-vente) : Peut être en CCF ou Ponctuel Oral.
+- E5 A (Relation client à distance et digitalisation) : Épreuve exclusivement PONCTUELLE ÉCRITE (3h). Ne peut JAMAIS être au format CCF.
+- E5 B (Relation client à distance et digitalisation) : Épreuve exclusivement PONCTUELLE PRATIQUE (Poste informatique).
+- E6 (Relation client et animation de réseaux) : Peut être en CCF ou Ponctuel Oral.
+- E11 (Culture Générale) & E3 (CEJM) : Épreuves exclusivement PONCTUELLES ÉCRITES.
+- Bloc 2 (Animation Réseaux / Digitalisation) : Soumis à des règles de non-CCF pour certaines parties.
+
+CONSIGNE : Ne jamais inventer de modalités d'examen. Si une demande de l'utilisateur contredit ces règles (ex: demander un CCF pour l'E5), refuse poliment en citant le règlement.
+"""
+
 class GeminiService:
     def __init__(self):
         if not API_KEY:
@@ -33,6 +45,17 @@ class GeminiService:
         except Exception as e:
             print(f"⚠️ Model discovery failed: {e}. Defaulting to 'gemini-1.5-flash'.")
             return "gemini-1.5-flash"
+
+    def get_model(self, custom_system_instruction: str = ""):
+        """Returns a GenerativeModel with regulatory grounding and custom instructions."""
+        full_system_instruction = REGULATORY_GROUNDING
+        if custom_system_instruction:
+            full_system_instruction += "\n" + custom_system_instruction
+        
+        return genai.GenerativeModel(
+            model_name=self.model_name,
+            system_instruction=full_system_instruction
+        )
 
     def upload_file_to_gemini(self, file_path: str, mime_type: str = None):
         """Uploads a file to Gemini and waits for processing."""
@@ -64,7 +87,7 @@ class GeminiService:
     def chat_with_file(self, message: str, file_obj):
         """Chat with a specific file context."""
         try:
-            model = genai.GenerativeModel(self.model_name)
+            model = self.get_model()
             response = model.generate_content([file_obj, message])
             return response.text
         except Exception as e:
@@ -73,7 +96,7 @@ class GeminiService:
     def chat_with_history(self, message: str, history: list = [], file_uri: str = None):
         """Chat with conversation history and optional file context."""
         try:
-            model = genai.GenerativeModel(self.model_name)
+            model = self.get_model()
             
             chat_history = []
             

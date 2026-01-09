@@ -214,10 +214,7 @@ async def generate_document(request: GenerateRequest, db: Session = Depends(get_
 
         user_prompt += "\nUtilise le référentiel BTS NDRC et les synthèses de cours disponibles."
 
-        model = genai.GenerativeModel(
-            gemini_service.model_name,
-            system_instruction=system_prompt
-        )
+        model = gemini_service.get_model(custom_system_instruction=system_prompt)
         
         content_parts = []
         kb_files = knowledge_base.get_all_file_ids()
