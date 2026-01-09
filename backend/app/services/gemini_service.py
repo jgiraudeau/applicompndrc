@@ -25,10 +25,16 @@ CONSIGNE : Ne jamais inventer de modalités d'examen. Si une demande de l'utilis
 class GeminiService:
     def __init__(self):
         if not API_KEY:
-             raise ValueError("GOOGLE_API_KEY is missing in environment variables.")
-        genai.configure(api_key=API_KEY)
-        self.model_name = self._find_best_model()
-        print(f"✅ Gemini Service initialized with model: {self.model_name}")
+             print("⚠️ WARNING: GOOGLE_API_KEY is missing in environment variables. Gemini features will fail.")
+             return
+        
+        try:
+            genai.configure(api_key=API_KEY)
+            self.model_name = self._find_best_model()
+            print(f"✅ Gemini Service initialized with model: {self.model_name}")
+        except Exception as e:
+            print(f"❌ Gemini initialization failed: {e}")
+            self.model_name = "gemini-1.5-flash"
 
     def _find_best_model(self):
         """Auto-detects the best available model, preferring Flash."""
