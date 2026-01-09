@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { GraduationCap, Sparkles, ArrowLeft, Copy, Check, FileText, Users, ListChecks, ClipboardCheck, Download, FileDown, HelpCircle, Calendar, Share2, ExternalLink } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
+import { API_BASE_URL } from "@/lib/api";
 
 const DOCUMENT_TYPES = [
     { id: "dossier_prof", label: "Dossier Professeur", icon: FileText, color: "text-blue-600 bg-blue-50 border-blue-200" },
@@ -42,7 +43,7 @@ export default function GeneratePage() {
         setGeneratedContent("");
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/api/generate/course", {
+            const response = await fetch(`${API_BASE_URL}/api/generate/course`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -77,7 +78,7 @@ export default function GeneratePage() {
         if (!logId || !generatedContent) return;
         setIsPublishing(true);
         try {
-            const response = await fetch("http://127.0.0.1:8000/api/student/publish", {
+            const response = await fetch(`${API_BASE_URL}/api/student/publish`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

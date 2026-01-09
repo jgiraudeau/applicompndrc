@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Send, User, Bot, GraduationCap, Sparkles, LayoutDashboard } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
+import { API_BASE_URL } from "@/lib/api";
 
 interface Message {
   role: "user" | "bot";
@@ -76,7 +77,7 @@ export default function Home() {
         const formData = new FormData();
         formData.append("file", fileToUpload);
 
-        const uploadRes = await fetch("http://127.0.0.1:8000/api/documents/upload", {
+        const uploadRes = await fetch(`${API_BASE_URL}/api/documents/upload`, {
           method: "POST",
           body: formData
         });
@@ -89,7 +90,7 @@ export default function Home() {
       }
 
       // 2. Send Message with HISTORY and PERSISTENT FILE ID
-      const response = await fetch("http://127.0.0.1:8000/api/chat", {
+      const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

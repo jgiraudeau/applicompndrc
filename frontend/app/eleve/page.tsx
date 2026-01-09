@@ -17,6 +17,7 @@ import {
     X
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { API_BASE_URL } from "@/lib/api";
 
 interface QuizData {
     title: string;
@@ -45,7 +46,7 @@ export default function StudentPage() {
         setIsLoading(true);
         setError(null);
         try {
-            const res = await fetch(`http://127.0.0.1:8000/api/student/quiz/${code.toUpperCase()}`);
+            const res = await fetch(`${API_BASE_URL}/api/student/quiz/${code.toUpperCase()}`);
             if (!res.ok) throw new Error("Code invalide ou quiz expiré");
             const data = await res.json();
             setQuiz(data);
@@ -68,7 +69,7 @@ export default function StudentPage() {
         setIsThinking(true);
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/api/chat", {
+            const response = await fetch(`${API_BASE_URL}/api/chat`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -196,8 +197,8 @@ export default function StudentPage() {
                             {tutorMessages.map((msg, idx) => (
                                 <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                     <div className={`p-3 rounded-2xl text-sm max-w-[85%] ${msg.role === 'user'
-                                            ? "bg-indigo-600 text-white rounded-tr-none shadow-md"
-                                            : "bg-white text-slate-700 border border-slate-200 rounded-tl-none shadow-sm"
+                                        ? "bg-indigo-600 text-white rounded-tr-none shadow-md"
+                                        : "bg-white text-slate-700 border border-slate-200 rounded-tl-none shadow-sm"
                                         }`}>
                                         <ReactMarkdown>{msg.content}</ReactMarkdown>
                                     </div>

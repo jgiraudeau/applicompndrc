@@ -17,6 +17,7 @@ import {
     ExternalLink
 } from "lucide-react";
 import Link from "next/link";
+import { API_BASE_URL } from "@/lib/api";
 
 interface Activity {
     id: number;
@@ -55,7 +56,7 @@ export default function DashboardPage() {
 
     useEffect(() => {
         setMounted(true);
-        fetch("http://127.0.0.1:8000/api/dashboard/stats")
+        fetch(`${API_BASE_URL}/api/dashboard/stats`)
             .then(res => res.json())
             .then(data => {
                 setStats(data);
