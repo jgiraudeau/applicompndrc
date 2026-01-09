@@ -21,11 +21,10 @@ COPY . .
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
-ENV PORT=8000
-
-# Expose port
+# Expose port (informative)
 EXPOSE 8000
 
 # Start command
-# We use backend.main:app because the Dockerfile is at the root
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# We use the shell form to allow environment variable expansion ($PORT)
+# Railway provides the PORT variable at runtime.
+CMD uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}
