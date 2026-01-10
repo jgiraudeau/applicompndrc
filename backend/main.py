@@ -26,6 +26,12 @@ async def lifespan(app: FastAPI):
     # Use POST /api/admin/scan to trigger the scan after deployment
     print("🚀 Application starting up...")
     print("ℹ️ Knowledge base scan is DISABLED at startup. Use POST /api/admin/scan to load files.")
+    
+    # DEBUG: Print all registered routes
+    print("🛣️  Registered Routes:")
+    for route in app.routes:
+        print(f"   - {route.path} [{','.join(route.methods)}]")
+        
     yield
     # Shutdown
     print("👋 Application shutting down...")
