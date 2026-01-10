@@ -7,6 +7,7 @@ from backend.app.routers import generate
 from backend.app.routers import export
 from backend.app.routers import dashboard
 from backend.app.routers import student
+from backend.app.routers import admin
 from backend.app.database import engine, Base
 import backend.app.models as models
 
@@ -21,15 +22,10 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"⚠️ Database initialization failed (Non-fatal, continuing startup): {e}")
 
-    # Startup: Load knowledge base (Non-blocking to avoid startup timeouts)
+    # Startup: Knowledge base scan is now MANUAL to avoid Railway startup timeouts
+    # Use POST /api/admin/scan to trigger the scan after deployment
     print("🚀 Application starting up...")
-    try:
-        import threading
-        from backend.app.services.knowledge_service import knowledge_base
-        # Run scan in background thread
-        threading.Thread(target=knowledge_base.scan_and_load, daemon=True).start()
-    except Exception as e:
-        print(f"⚠️ Knowledge base background start failed: {e}")
+    print("ℹ️ Knowledge base scan is DISABLED at startup. Use POST /api/admin/scan to load files.")
     yield
     # Shutdown
     print("👋 Application shutting down...")
@@ -52,6 +48,7 @@ app.include_router(generate.router, prefix="/api/generate", tags=["generate"])
 app.include_router(export.router, prefix="/api/export", tags=["export"])
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["dashboard"])
 app.include_router(student.router, prefix="/api/student", tags=["student"])
+app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 
 @app.get("/")
 def read_root():
