@@ -47,6 +47,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# DEBUG: Log every incoming request
+from fastapi import Request
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    print(f"📥 Incoming Request: {request.method} {request.url.path}")
+    response = await call_next(request)
+    print(f"📤 Response Status: {response.status_code}")
+    return response
+
 # Include routers
 app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
 app.include_router(documents.router, prefix="/api/documents", tags=["documents"])
