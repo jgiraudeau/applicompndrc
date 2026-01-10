@@ -105,8 +105,8 @@ export default function GeneratePage() {
 
         // Path logic: /api/export/pdf, /api/export/docx OR /api/export/quiz/gift, etc.
         const endpoint = ["pdf", "docx"].includes(format)
-            ? `http://127.0.0.1:8000/api/export/${format}`
-            : `http://127.0.0.1:8000/api/export/quiz/${format}`;
+            ? `${API_BASE_URL}/api/export/${format}`
+            : `${API_BASE_URL}/api/export/quiz/${format}`;
 
         try {
             const response = await fetch(endpoint, {
