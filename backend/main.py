@@ -26,12 +26,6 @@ async def lifespan(app: FastAPI):
     # Use POST /api/admin/scan to trigger the scan after deployment
     print("🚀 Application starting up...")
     print("ℹ️ Knowledge base scan is DISABLED at startup. Use POST /api/admin/scan to load files.")
-    
-    # DEBUG: Print all registered routes
-    print("🛣️  Registered Routes:")
-    for route in app.routes:
-        print(f"   - {route.path} [{','.join(route.methods)}]")
-        
     yield
     # Shutdown
     print("👋 Application shutting down...")
@@ -46,15 +40,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# DEBUG: Log every incoming request
-from fastapi import Request
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    print(f"📥 Incoming Request: {request.method} {request.url.path}")
-    response = await call_next(request)
-    print(f"📤 Response Status: {response.status_code}")
-    return response
 
 # Include routers
 app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
