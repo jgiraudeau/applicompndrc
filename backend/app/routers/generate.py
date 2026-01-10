@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from backend.app.database import get_db
 from backend.app.models import ActivityLog
 from backend.app.services.gemini_service import gemini_service, REGULATORY_GROUNDING
-from backend.app.services.knowledge_service import knowledge_base
+# Lazy import: knowledge_base will be imported inside functions to avoid startup delays
 import google.generativeai as genai
 
 router = APIRouter()
@@ -170,6 +170,9 @@ async def generate_document(request: GenerateRequest, db: Session = Depends(get_
         model = gemini_service.get_model(custom_system_instruction=system_prompt)
         
         content_parts = []
+        
+        # Lazy import to avoid startup delays
+        from backend.app.services.knowledge_service import knowledge_base
         kb_files = knowledge_base.get_all_file_ids()
         
         for file_id in kb_files[:3]:
