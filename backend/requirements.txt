@@ -11,6 +11,6 @@ openpyxl
 sqlalchemy
 psycopg2-binary
 passlib[bcrypt]
-python-jose[cryptography]
+python-jose
 bcrypt==4.0.1
 
