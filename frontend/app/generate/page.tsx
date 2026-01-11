@@ -240,12 +240,9 @@ export default function GeneratePage() {
                     </Button>
                 </div>
             </header>
-            {/* Debug Bar */}
+            {/* Debug Bar - Simplified */}
             <div className="bg-slate-100 text-[10px] text-slate-400 p-1 text-center">
-                STATUS: {isLoading ? "Generating..." : "Idle"} |
-                USER: {session?.user?.email} |
-                GOOGLE: {session?.googleAccessToken ? "✅ Connected" : `❌ Disconnected (${session?.authError || "Login required"})`} |
-                API: {API_BASE_URL}
+                STATUS: {isLoading ? "Generating..." : "Idle"} | API: {API_BASE_URL}
             </div>
 
             {/* Main Content */}
@@ -418,6 +415,7 @@ export default function GeneratePage() {
                                             Google Forms (CSV)
                                         </Button>
 
+                                        {/* Google Classroom Button - DISABLED due to Auth issues
                                         {session?.googleAccessToken && (
                                             <Button
                                                 variant="outline"
@@ -432,6 +430,7 @@ export default function GeneratePage() {
                                                 Classroom
                                             </Button>
                                         )}
+                                        */}
 
                                         {!shareCode ? (
                                             <Button
