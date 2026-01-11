@@ -223,11 +223,9 @@ export default function Home() {
           <LogOut className="w-5 h-5" />
         </Button>
       </header>
-      {/* Debug Bar */}
+      {/* Debug Bar - Simplified */}
       <div className="bg-slate-100 text-[10px] text-slate-400 p-1 text-center">
-        STATUS: {isLoading ? "Generating..." : "Idle"} |
-        GOOGLE: {session?.googleAccessToken ? "✅ Connected" : "❌ Disconnected (Login required)"} |
-        API: {API_BASE_URL}
+        STATUS: {isLoading ? "Generating..." : "Idle"} | API: {API_BASE_URL}
       </div>
 
       {/* Chat Area */}
@@ -260,7 +258,8 @@ export default function Home() {
                       <p>{msg.content}</p>
                     )}
                   </Card>
-                  {msg.role === "bot" && session?.googleAccessToken && (
+                  {/* Classroom Export - DISABLED
+                   {msg.role === "bot" && session?.googleAccessToken && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -274,6 +273,7 @@ export default function Home() {
                       Envoyer vers Classroom
                     </Button>
                   )}
+                  */}
                 </div>
               </div>
             ))}
