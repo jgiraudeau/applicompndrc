@@ -99,11 +99,12 @@ const handler = NextAuth({
                         } else {
                             const err = await res.text();
                             console.error("Failed to sync Google User with Backend", err);
-                            // CRITICAL: Throw error to prevent partial login
-                            throw new Error(`Backend Sync Failed: ${err}`);
+                            // Store error in token to show in client
+                            token.authError = `Sync Error: ${err}`;
                         }
-                    } catch (e) {
+                    } catch (e: any) {
                         console.error("Backend Google Login Error", e);
+                        token.authError = `Fetch Error: ${e.message}`;
                     }
                 }
                 // If logging in with Credentials, we already have the token
@@ -116,6 +117,7 @@ const handler = NextAuth({
         async session({ session, token }: { session: any, token: any }) {
             session.accessToken = token.accessToken;
             session.googleAccessToken = token.googleAccessToken;
+            session.authError = token.authError;
             return session
         }
     },
