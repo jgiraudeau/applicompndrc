@@ -464,46 +464,46 @@ export default function GeneratePage() {
                     </div>
                 </div>
             </div>
-        </div>
 
-            {/* Modal Google Classroom */ }
-    {
-        isClassroomModalOpen && (
-            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                <Card className="w-full max-w-md bg-white">
-                    <div className="p-6">
-                        <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                            <span className="text-green-600">Google Classroom</span>
-                            Exporter le contenu
-                        </h2>
-                        <p className="text-sm text-gray-500 mb-4">
-                            Sélectionnez le cours dans lequel créer un devoir brouillon.
-                        </p>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="text-xs font-semibold uppercase text-gray-400 block mb-1">Cours</label>
-                                <select
-                                    className="w-full border rounded p-2 text-sm"
-                                    value={selectedCourseId}
-                                    onChange={(e) => setSelectedCourseId(e.target.value)}
-                                >
-                                    {courses.map(c => (
-                                        <option key={c.id} value={c.id}>{c.name} {c.section ? `(${c.section})` : ''}</option>
-                                    ))}
-                                </select>
+
+            {/* Modal Google Classroom */}
+            {
+                isClassroomModalOpen && (
+                    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                        <Card className="w-full max-w-md bg-white">
+                            <div className="p-6">
+                                <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                                    <span className="text-green-600">Google Classroom</span>
+                                    Exporter le contenu
+                                </h2>
+                                <p className="text-sm text-gray-500 mb-4">
+                                    Sélectionnez le cours dans lequel créer un devoir brouillon.
+                                </p>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="text-xs font-semibold uppercase text-gray-400 block mb-1">Cours</label>
+                                        <select
+                                            className="w-full border rounded p-2 text-sm"
+                                            value={selectedCourseId}
+                                            onChange={(e) => setSelectedCourseId(e.target.value)}
+                                        >
+                                            {courses.map(c => (
+                                                <option key={c.id} value={c.id}>{c.name} {c.section ? `(${c.section})` : ''}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="flex justify-end gap-2 pt-2">
+                                        <Button variant="ghost" onClick={() => setIsClassroomModalOpen(false)}>Annuler</Button>
+                                        <Button onClick={handleExportToClassroom} disabled={exportLoading} className="bg-green-600 hover:bg-green-700 text-white">
+                                            {exportLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : "Créer le devoir"}
+                                        </Button>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="flex justify-end gap-2 pt-2">
-                                <Button variant="ghost" onClick={() => setIsClassroomModalOpen(false)}>Annuler</Button>
-                                <Button onClick={handleExportToClassroom} disabled={exportLoading} className="bg-green-600 hover:bg-green-700 text-white">
-                                    {exportLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : "Créer le devoir"}
-                                </Button>
-                            </div>
-                        </div>
+                        </Card>
                     </div>
-                </Card>
-            </div>
-        )
-    }
+                )
+            }
         </div >
     );
 }
