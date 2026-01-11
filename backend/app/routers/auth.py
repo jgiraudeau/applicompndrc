@@ -14,6 +14,8 @@ import os
 # GOOGLE_CLIENT_ID should be fetched from environment
 # to ensure it matches the frontend's configuration.
 
+router = APIRouter()
+
 # Schemas
 class UserCreate(BaseModel):
     email: str
