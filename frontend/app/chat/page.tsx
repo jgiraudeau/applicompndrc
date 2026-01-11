@@ -6,11 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, User, Bot, GraduationCap, Sparkles, LayoutDashboard, Share, Loader2 } from "lucide-react";
+import { Send, User, Bot, GraduationCap, Sparkles, LayoutDashboard, Share, Loader2, LogOut } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 
 interface Message {
   role: "user" | "bot";
@@ -213,6 +213,15 @@ export default function Home() {
             Générer un cours
           </Button>
         </Link>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-red-400 hover:text-red-600 hover:bg-red-50 ml-2"
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          title="Se déconnecter"
+        >
+          <LogOut className="w-5 h-5" />
+        </Button>
       </header>
       {/* Debug Bar */}
       <div className="bg-slate-100 text-[10px] text-slate-400 p-1 text-center">

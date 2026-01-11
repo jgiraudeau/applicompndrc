@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { GraduationCap, Sparkles, ArrowLeft, Copy, Check, FileText, Users, ListChecks, ClipboardCheck, Download, FileDown, HelpCircle, Calendar, Share2, ExternalLink, Share, Loader2 } from "lucide-react";
+import { GraduationCap, Sparkles, ArrowLeft, Copy, Check, FileText, Users, ListChecks, ClipboardCheck, Download, FileDown, HelpCircle, Calendar, Share2, ExternalLink, Share, Loader2, LogOut } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
@@ -227,6 +227,17 @@ export default function GeneratePage() {
                 <div>
                     <h1 className="font-bold text-xl text-slate-800">Générateur de Cours</h1>
                     <p className="text-xs text-slate-500">Créez des documents pédagogiques complets</p>
+                </div>
+                <div className="ml-auto">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-red-400 hover:text-red-600 hover:bg-red-50"
+                        onClick={() => signOut({ callbackUrl: "/login" })}
+                        title="Se déconnecter"
+                    >
+                        <LogOut className="w-5 h-5" />
+                    </Button>
                 </div>
             </header>
             {/* Debug Bar */}
