@@ -24,9 +24,9 @@
     - [x] Stockage du plan en base de données
     - [x] Déploiement Cloud (Vercel + Railway) et corrections CORS
 - [ ] Phase 1.7: Export Google Classroom
-    - [ ] Configuration OAuth Google
-    - [ ] Service Backend Classroom
-    - [ ] Bouton "Envoyer vers Classroom"
+    - [x] Configuration OAuth Google
+    - [x] Service Backend Classroom (Auth Login)
+    - [ ] Bouton "Envoyer vers Classroom" (Implémentation API)
 - [ ] Phase 2: Gestion Académique (Moodle LTI)
     - [ ] Recherche bibliothèque LTI 1.3
     - [ ] Configuration Tool Provider

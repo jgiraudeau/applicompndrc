@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, User, Bot, GraduationCap, Sparkles, LayoutDashboard } from "lucide-react";
+import { Send, User, Bot, GraduationCap, Sparkles, LayoutDashboard, Share, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
+import { useSession } from "next-auth/react";
 
 interface Message {
   role: "user" | "bot";
@@ -47,6 +48,70 @@ export default function Home() {
       setSelectedFile(e.target.files[0]);
     }
   };
+
+  const { data: session }: any = useSession();
+  const [courses, setCourses] = useState<any[]>([]);
+  const [isClassroomModalOpen, setIsClassroomModalOpen] = useState(false);
+  const [contentToExport, setContentToExport] = useState<string>("");
+  const [selectedCourseId, setSelectedCourseId] = useState<string>("");
+  const [exportLoading, setExportLoading] = useState(false);
+
+  const fetchCourses = async () => {
+    if (!session?.googleAccessToken) {
+      alert("Veuillez vous reconnecter avec Google pour utiliser cette fonctionnalité.");
+      return;
+    }
+    try {
+      setExportLoading(true);
+      const res = await fetch(`${API_BASE_URL}/api/classroom/courses`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: session.googleAccessToken })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCourses(data);
+        if (data.length > 0) setSelectedCourseId(data[0].id);
+        setIsClassroomModalOpen(true);
+      } else {
+        alert("Impossible de récupérer vos cours Google Classroom.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Erreur technique lors de la communication avec Google.");
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const handleExportToClassroom = async () => {
+    if (!selectedCourseId) return;
+    setExportLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/classroom/coursework`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token: session.googleAccessToken,
+          courseId: selectedCourseId,
+          title: "Exercice généré par Professeur Virtuel",
+          description: contentToExport
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        alert(`Devoir créé avec succès ! Lien : ${data.url}`);
+        setIsClassroomModalOpen(false);
+      } else {
+        alert("Erreur lors de la création du devoir.");
+      }
+    } catch (e) {
+      alert("Erreur technique.");
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
 
   const handleSend = async () => {
     if (!input.trim() && !selectedFile) return;
@@ -162,20 +227,36 @@ export default function Home() {
                   </AvatarFallback>
                 </Avatar>
 
-                <Card className={`p-4 max-w-[80%] text-sm leading-relaxed shadow-sm ${msg.role === "user"
-                  ? "bg-primary text-primary-foreground rounded-tr-none"
-                  : "bg-white text-slate-700 rounded-tl-none border-slate-200"
-                  }`}>
-                  {msg.role === "bot" ? (
-                    <div className="prose prose-sm max-w-none dark:prose-invert prose-p:my-1 prose-ul:my-1">
-                      <ReactMarkdown>
-                        {msg.content}
-                      </ReactMarkdown>
-                    </div>
-                  ) : (
-                    <p>{msg.content}</p>
+                <div className={`max-w-[80%] flex flex-col gap-1 ${msg.role === "user" ? "items-end" : "items-start"}`}>
+                  <Card className={`p-4 text-sm leading-relaxed shadow-sm ${msg.role === "user"
+                    ? "bg-primary text-primary-foreground rounded-tr-none"
+                    : "bg-white text-slate-700 rounded-tl-none border-slate-200"
+                    }`}>
+                    {msg.role === "bot" ? (
+                      <div className="prose prose-sm max-w-none dark:prose-invert prose-p:my-1 prose-ul:my-1">
+                        <ReactMarkdown>
+                          {msg.content}
+                        </ReactMarkdown>
+                      </div>
+                    ) : (
+                      <p>{msg.content}</p>
+                    )}
+                  </Card>
+                  {msg.role === "bot" && session?.googleAccessToken && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 text-xs text-slate-400 hover:text-green-600"
+                      onClick={() => {
+                        setContentToExport(msg.content);
+                        fetchCourses();
+                      }}
+                    >
+                      <Share className="w-3 h-3 mr-1" />
+                      Envoyer vers Classroom
+                    </Button>
                   )}
-                </Card>
+                </div>
               </div>
             ))}
             {isLoading && (
@@ -192,6 +273,43 @@ export default function Home() {
             )}
             <div ref={scrollRef} />
           </div>
+
+          {/* Modal Google Classroom */}
+          {isClassroomModalOpen && (
+            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+              <Card className="w-full max-w-md bg-white">
+                <div className="p-6">
+                  <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                    <span className="text-green-600">Google Classroom</span>
+                    Exporter le contenu
+                  </h2>
+                  <p className="text-sm text-gray-500 mb-4">
+                    Sélectionnez le cours dans lequel créer un devoir brouillon.
+                  </p>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs font-semibold uppercase text-gray-400 block mb-1">Cours</label>
+                      <select
+                        className="w-full border rounded p-2 text-sm"
+                        value={selectedCourseId}
+                        onChange={(e) => setSelectedCourseId(e.target.value)}
+                      >
+                        {courses.map(c => (
+                          <option key={c.id} value={c.id}>{c.name} {c.section ? `(${c.section})` : ''}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex justify-end gap-2 pt-2">
+                      <Button variant="ghost" onClick={() => setIsClassroomModalOpen(false)}>Annuler</Button>
+                      <Button onClick={handleExportToClassroom} disabled={exportLoading}>
+                        {exportLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : "Créer le devoir"}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          )}
         </ScrollArea>
       </div>
 

@@ -9,6 +9,7 @@ from backend.app.routers import dashboard
 from backend.app.routers import student
 from backend.app.routers import admin
 from backend.app.routers import auth
+from backend.app.routers import classroom
 from backend.app.database import engine, Base
 import backend.app.models as models
 
@@ -51,6 +52,7 @@ app.include_router(dashboard.router, prefix="/api/dashboard", tags=["dashboard"]
 app.include_router(student.router, prefix="/api/student", tags=["student"])
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
+app.include_router(classroom.router, prefix="/api/classroom", tags=["classroom"])
 
 @app.get("/")
 def read_root():
