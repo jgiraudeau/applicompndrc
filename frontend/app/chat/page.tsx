@@ -165,14 +165,17 @@ export default function Home() {
         }),
       });
 
-      if (!response.ok) throw new Error("Erreur réseau");
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Erreur ${response.status}: ${errorText || response.statusText}`);
+      }
 
       const data = await response.json();
       const botMsg: Message = { role: "bot", content: data.response };
       setMessages((prev) => [...prev, botMsg]);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      const errorMsg: Message = { role: "bot", content: "❌ Désolé, je rencontre un problème technique." };
+      const errorMsg: Message = { role: "bot", content: `❌ Désolé, je rencontre un problème technique : ${error.message}` };
       setMessages((prev) => [...prev, errorMsg]);
     } finally {
       setIsLoading(false);
