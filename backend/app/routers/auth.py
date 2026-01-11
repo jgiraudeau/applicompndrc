@@ -97,3 +97,49 @@ def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
         "organization_name": current_user.organization.name,
         "role": current_user.role
     }
+
+class GoogleToken(BaseModel):
+    token: str
+
+@router.post("/google", response_model=Token)
+def google_login(token_data: GoogleToken, db: Session = Depends(get_db)):
+    try:
+        token = token_data.token
+        # Validate Google Token
+        idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), GOOGLE_CLIENT_ID) 
+        
+        email = idinfo['email']
+        name = idinfo.get('name', 'Utilisateur Google')
+        
+        # Check if user exists
+        user = db.query(models.User).filter(models.User.email == email).first()
+        
+        if not user:
+            # Create a new user automatically
+            org_name = f"Org de {name}"
+            new_org = models.Organization(name=org_name, plan=models.PlanType.FREE)
+            db.add(new_org)
+            db.flush()
+            
+            hashed_pwd = auth.get_password_hash(secrets.token_urlsafe(16)) # Random password
+            new_user = models.User(
+                email=email,
+                hashed_password=hashed_pwd,
+                full_name=name,
+                organization_id=new_org.id,
+                role=models.UserRole.TEACHER
+            )
+            db.add(new_user)
+            db.commit()
+            db.refresh(new_user)
+            user = new_user
+            
+        access_token = auth.create_access_token(data={"sub": user.email})
+        return {"access_token": access_token, "token_type": "bearer"}
+        
+    except ValueError as ve:
+         print(f"Google Token Validation Error: {ve}")
+         raise HTTPException(status_code=400, detail="Invalid Google Token")
+    except Exception as e:
+        print(f"Google Login Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
