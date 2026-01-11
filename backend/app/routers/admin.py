@@ -49,5 +49,33 @@ async def get_scan_status():
 
 @router.get("/health")
 async def health_check():
-    """Simple health check endpoint."""
-    return {"status": "healthy"}
+    """Deep health check endpoint."""
+    status = {
+        "status": "healthy",
+        "env": {},
+        "gemini": "unknown"
+    }
+    
+    # 1. Check Env
+    import os
+    key = os.getenv("GOOGLE_API_KEY")
+    status["env"]["GOOGLE_API_KEY_PRESENT"] = bool(key)
+    if key:
+        status["env"]["GOOGLE_API_KEY_LENGTH"] = len(key)
+        
+    # 2. Check Gemini
+    try:
+        from backend.app.services.gemini_service import gemini_service
+        # Test Generation
+        response = gemini_service.chat_with_history("Ping check")
+        if "Error" in response or "Désolé" in response:
+            status["gemini"] = f"Failed: {response}"
+            status["status"] = "degraded"
+        else:
+            status["gemini"] = "operational"
+            status["gemini_response_sample"] = response[:50]
+    except Exception as e:
+        status["gemini"] = f"Exception: {str(e)}"
+        status["status"] = "unhealthy"
+        
+    return status
