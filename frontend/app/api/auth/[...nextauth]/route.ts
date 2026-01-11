@@ -1,7 +1,14 @@
 import NextAuth from "next-auth"
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials"
+import { API_BASE_URL } from "@/lib/api";
 
+// Helper to ensure API_BASE_URL is available
+const getApiUrl = () => {
+    // If running on server side, we might need to rely on the fallback in lib/api
+    // or ensure NEXT_PUBLIC_API_URL is available.
+    return API_BASE_URL;
+}
 const handler = NextAuth({
     providers: [
         GoogleProvider({
@@ -9,6 +16,9 @@ const handler = NextAuth({
             clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
             authorization: {
                 params: {
+                    prompt: "consent",
+                    access_type: "offline",
+                    response_type: "code",
                     scope: "openid email profile https://www.googleapis.com/auth/classroom.courses.readonly https://www.googleapis.com/auth/classroom.coursework.students"
                 }
             }
@@ -23,9 +33,9 @@ const handler = NextAuth({
                 try {
                     if (!credentials?.username || !credentials?.password) return null;
 
-                    console.log("Attempting login to:", `${process.env.NEXT_PUBLIC_API_URL}/auth/token`);
+                    console.log("Attempting login to:", `${getApiUrl()}/auth/token`);
 
-                    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/token`, {
+                    const res = await fetch(`${getApiUrl()}/auth/token`, {
                         method: 'POST',
                         body: new URLSearchParams({
                             'username': credentials.username,
@@ -72,7 +82,10 @@ const handler = NextAuth({
                 if (account.provider === 'google') {
                     console.log("Google Login: Exchanging token with backend...");
                     try {
-                        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google`, {
+                        const apiUrl = getApiUrl();
+                        console.log(`Google Login: Exchanging token with backend at ${apiUrl}...`);
+
+                        const res = await fetch(`${apiUrl}/auth/google`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ token: account.id_token })
@@ -86,6 +99,8 @@ const handler = NextAuth({
                         } else {
                             const err = await res.text();
                             console.error("Failed to sync Google User with Backend", err);
+                            // CRITICAL: Throw error to prevent partial login
+                            throw new Error(`Backend Sync Failed: ${err}`);
                         }
                     } catch (e) {
                         console.error("Backend Google Login Error", e);

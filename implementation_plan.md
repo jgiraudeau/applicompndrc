@@ -30,10 +30,17 @@ Développer un MVP (Produit Minimum Viable) opérationnel permettant aux enseign
 - [ ] **Page de Pricing** : Intégrée au flux d'inscription.
 - [ ] **Sélection du Plan** : Free, Pro, Enterprise.
 - [ ] **Backend** : Stockage du `plan` choisi dans la table Organization.
+
+### Étape 1.7 : Export Google Classroom (Terminé)
+- [x] **Configuration Google Cloud** : Création projet + OAuth 2.0.
+- [x] **Auth** : Login via Google + Scope Classroom.
+- [x] **Backend** : Router Classroom (via Requests pour éviter conflits).
+- [x] **Frontend** : Bouton Export dans le Chat ET le Générateur de Cours.
+- [x] **Debug** : Indicateur de statut Google (Barre Debug).
 ## Phase 2 : Outils Pédagogiques (Création de contenu)
 **Objectif :** Passer du "Chat" à la "Création".
 
-- [ ] **Générateur de Cours** : Formulaire pour demander "Une séquence sur la Négociation" -> L'IA génère le plan et le contenu en Markdown.
+- [x] **Générateur de Cours** : Formulaire pour demander "Une séquence sur la Négociation" -> L'IA génère le plan et le contenu en Markdown.
 - [ ] **Export PDF** : Transformer le cours généré en PDF propre pour les élèves.
 - [ ] **Générateur de Quiz** : Création automatique de QCM à partir d'un chapitre du cours.
 
