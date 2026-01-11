@@ -1,10 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Body
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from typing import Optional
 from .. import models, auth
 from ..database import get_db
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+import secrets
+
+GOOGLE_CLIENT_ID = "217122577762-f6glm4d9hod0vc2jlee2th8nhmaeinlf.apps.googleusercontent.com"
 
 router = APIRouter()
 

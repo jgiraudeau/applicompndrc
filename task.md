@@ -22,7 +22,14 @@
 - [x] Phase 1.6: Monétisation (MVP)
     - [x] Ajout de la sélection du Plan à l'inscription
     - [x] Stockage du plan en base de données
-- [ ] Phase 2: Gestion Académique
+    - [x] Déploiement Cloud (Vercel + Railway) et corrections CORS
+- [ ] Phase 1.7: Export Google Classroom
+    - [ ] Configuration OAuth Google
+    - [ ] Service Backend Classroom
+    - [ ] Bouton "Envoyer vers Classroom"
+- [ ] Phase 2: Gestion Académique (Moodle LTI)
+    - [ ] Recherche bibliothèque LTI 1.3
+    - [ ] Configuration Tool Provider
     - [ ] Gestion des Classes (CRUD)
     - [ ] Gestion des Élèves
     - [ ] Tableaux de bord (Dashboard)
