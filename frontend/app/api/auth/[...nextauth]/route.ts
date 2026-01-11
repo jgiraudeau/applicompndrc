@@ -107,6 +107,11 @@ const handler = NextAuth({
                         token.authError = `Fetch Error: ${e.message}`;
                     }
                 }
+                // Debug: Check what's in the account object if token is missing
+                if (!token.googleAccessToken && account) {
+                    token.authError = `MISSING TOKEN. Account Keys: ${Object.keys(account).join(', ')}`;
+                }
+
                 // If logging in with Credentials, we already have the token
                 else if (user.accessToken) {
                     token.accessToken = user.accessToken;
