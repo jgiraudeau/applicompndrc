@@ -9,3 +9,21 @@
         - [x] Setup Shadcn/UI
         - [x] Installer les composants UI
         - [x] Créer la page de Chat
+- [x] Tester la version locale
+    - [x] Démarrer le Backend
+    - [x] Démarrer le Frotend
+    - [x] Vérifier la communication
+
+- [x] Phase 1.5: Authentification & Sécurisation
+    - [x] Configurer NextAuth.js (Frontend)
+    - [x] Middleware d'authentification (Backend)
+    - [x] Page de Login / Register
+    - [x] Page d'accueil (Landing Page)
+- [x] Phase 1.6: Monétisation (MVP)
+    - [x] Ajout de la sélection du Plan à l'inscription
+    - [x] Stockage du plan en base de données
+- [ ] Phase 2: Gestion Académique
+    - [ ] Gestion des Classes (CRUD)
+    - [ ] Gestion des Élèves
+    - [ ] Tableaux de bord (Dashboard)
+

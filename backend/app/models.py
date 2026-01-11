@@ -1,7 +1,74 @@
-from sqlalchemy import Column, Integer, String, DateTime, Float
+from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, Enum, Text
+from sqlalchemy.orm import relationship
 from .database import Base
 from datetime import datetime
+import enum
+import uuid
 
+# Enums
+class PlanType(str, enum.Enum):
+    FREE = "free"
+    PRO = "pro"
+    ENTERPRISE = "enterprise"
+
+class UserRole(str, enum.Enum):
+    ADMIN = "admin" # SaaS Admin
+    SCHOOL_ADMIN = "school_admin" # Principal / Manager
+    TEACHER = "teacher"
+    STUDENT = "student"
+
+# SaaS Core Models
+class Organization(Base):
+    __tablename__ = "organizations"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    name = Column(String, unique=True, index=True)
+    plan = Column(Enum(PlanType), default=PlanType.FREE)
+    stripe_customer_id = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    users = relationship("User", back_populates="organization")
+    # We will eventually link other resources here
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    email = Column(String, unique=True, index=True)
+    hashed_password = Column(String)
+    full_name = Column(String)
+    role = Column(Enum(UserRole), default=UserRole.TEACHER)
+    
+    organization_id = Column(String, ForeignKey("organizations.id"))
+    organization = relationship("Organization", back_populates="users")
+    
+    chat_sessions = relationship("ChatSession", back_populates="user")
+
+# Chat History Models
+class ChatSession(Base):
+    __tablename__ = "chat_sessions"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String, ForeignKey("users.id"))
+    title = Column(String, default="Nouvelle conversation")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = relationship("User", back_populates="chat_sessions")
+    messages = relationship("ChatMessage", back_populates="session", cascade="all, delete-orphan")
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String, ForeignKey("chat_sessions.id"))
+    role = Column(String) # "user" or "model"
+    content = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    session = relationship("ChatSession", back_populates="messages")
+
+# Legacy / Feature Models (Updated for SaaS support later)
 class ActivityLog(Base):
     __tablename__ = "activity_logs"
 
@@ -11,8 +78,10 @@ class ActivityLog(Base):
     topic = Column(String)
     duration_hours = Column(Float, nullable=True)
     target_block = Column(String, nullable=True)
-    is_published = Column(DateTime, nullable=True) # If not null, it's public
+    is_published = Column(DateTime, nullable=True)
     share_code = Column(String, unique=True, index=True, nullable=True)
+    
+    # Ideally, we should link this to User/Org too, but keeping it loose for now
 
 class PublishedQuiz(Base):
     __tablename__ = "published_quizzes"
@@ -20,5 +89,5 @@ class PublishedQuiz(Base):
     id = Column(Integer, primary_key=True, index=True)
     share_code = Column(String, unique=True, index=True)
     title = Column(String)
-    content = Column(String) # The Markdown content
+    content = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)

@@ -24,7 +24,12 @@ Développer un MVP (Produit Minimum Viable) opérationnel permettant aux enseign
 - [x] Création de la page de Chat (style ChatGPT/Gemini).
 - [ ] Création de la page "Documents" pour voir l'état de la synchro Drive <-> Gemini.
 - [ ] Intégration du flux de streaming pour la réponse IA.
+- [ ] Intégration du flux de streaming pour la réponse IA.
 
+### Étape 1.6 : Monétisation & Abonnements (SaaS)
+- [ ] **Page de Pricing** : Intégrée au flux d'inscription.
+- [ ] **Sélection du Plan** : Free, Pro, Enterprise.
+- [ ] **Backend** : Stockage du `plan` choisi dans la table Organization.
 ## Phase 2 : Outils Pédagogiques (Création de contenu)
 **Objectif :** Passer du "Chat" à la "Création".
 

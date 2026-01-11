@@ -67,11 +67,18 @@ Le système tire parti de la multimodalité et du volume de contexte de Gemini p
 - **Base de données** : PostgreSQL (Supabase) pour les données relationnelles (utilisateurs, notes, planning).
 - **IA Provider** : Google Gemini API (Flash/Pro) avec gestion du caching.
 - **Stockage Fichiers** : Google Drive (via API) + Stockage temporaire pour upload.
-- **Auth** : NextAuth.js ou Supabase Auth (support SSO Google Workspace).
+- **Auth** : NextAuth.js (avec support Multi-Tenant).
+- **Architecture SaaS** : Isolation logique des données par `organization_id`.
 
-## 5. Rôles d'utilisateurs et permissions
+## 5. Rôles d'utilisateurs et permissions (SaaS)
 
-- **Administrateur** : Configuration globale, gestion des comptes, import référentiels.
+### Niveau SaaS (Super Admin)
+- **Super Admin** : Gestion de la plateforme, des abonnements (Stripe), et des tenants (Établissements).
+
+### Niveau Établissement (Tenant)
+- **Admin Établissement** : Directeur/Proviseur. Gère les abonnements de son école, ajoute les profs.
+- **Formateur** : Création de cours, notation, suivi des élèves au sein de son établissement.
+- **Élève** : Accès aux cours de son établissement uniquement.
 - **Formateur référent** : Gestion des classes, validation des stages, paramétrage CCF.
 - **Formateur** : Création de cours, notation, suivi des élèves.
 - **Tuteur entreprise** : Accès limité au livret de stage et évaluation stagiaire.
@@ -89,8 +96,10 @@ Le moteur analyse les résultats aux quiz et devoirs pour attribuer un "Score de
 - **Agnostique au programme** : Le "Référentiel" est une entité de données importable. On peut charger le JSON du BTS MCO, BTS GPME, etc.
 - **Système d'évaluation** : Configurable (Notes /20, Compétences A/NA, Echelles descriptives).
 
-## 8. Modèle de données (Simplifié)
+## 8. Modèle de données (Simplifié - SaaS)
 
+- `Organization` (Lycée Victor Hugo) -> Possède des `Users`, `Courses`, `Students`.
+- `User` (Professeur) -> Lié à une `Organization`.
 - `Program` (BTS NDRC) -> `Block` (E4) -> `Competence` (Négocier) -> `Criteria`.
 - `Course` -> `Sequence` -> `Session` -> `Activity`.
 - `User` (Student) -> `AssessmentResult` -> `SkillGap`.
