@@ -229,6 +229,12 @@ export default function GeneratePage() {
                     <p className="text-xs text-slate-500">Créez des documents pédagogiques complets</p>
                 </div>
             </header>
+            {/* Debug Bar */}
+            <div className="bg-slate-100 text-[10px] text-slate-400 p-1 text-center">
+                STATUS: {isLoading ? "Generating..." : "Idle"} |
+                GOOGLE: {session?.googleAccessToken ? "✅ Connected" : "❌ Disconnected (Login required)"} |
+                API: {API_BASE_URL}
+            </div>
 
             {/* Main Content */}
             <div className="flex-1 overflow-hidden flex">
