@@ -10,32 +10,44 @@ const handler = NextAuth({
                 password: { label: "Password", type: "password" }
             },
             async authorize(credentials, req) {
-                if (!credentials?.username || !credentials?.password) return null;
+                try {
+                    if (!credentials?.username || !credentials?.password) return null;
 
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/token`, {
-                    method: 'POST',
-                    body: new URLSearchParams({
-                        'username': credentials.username,
-                        'password': credentials.password,
-                        'grant_type': 'password'
-                    }),
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" }
-                })
+                    console.log("Attempting login to:", `${process.env.NEXT_PUBLIC_API_URL}/auth/token`);
 
-                const user = await res.json()
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/token`, {
+                        method: 'POST',
+                        body: new URLSearchParams({
+                            'username': credentials.username,
+                            'password': credentials.password,
+                            'grant_type': 'password'
+                        }),
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+                    })
 
-                // If no error and we have user data, return it
-                if (res.ok && user) {
-                    // We return the minimal needed to identify session. 
-                    // In a real app we might fetch profile here or in session callback.
-                    return {
-                        id: credentials.username, // Using email as ID for simple session matching
-                        email: credentials.username,
-                        accessToken: user.access_token
+                    console.log("Backend response status:", res.status);
+
+                    if (!res.ok) {
+                        const errorText = await res.text();
+                        console.error("Backend error response:", errorText);
+                        return null;
                     }
+
+                    const user = await res.json()
+
+                    // If no error and we have user data, return it
+                    if (res.ok && user) {
+                        return {
+                            id: credentials.username,
+                            email: credentials.username,
+                            accessToken: user.access_token
+                        }
+                    }
+                    return null
+                } catch (error) {
+                    console.error("Authorize error:", error);
+                    return null;
                 }
-                // Return null if user data could not be retrieved
-                return null
             }
         })
     ],
