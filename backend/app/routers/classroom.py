@@ -1,8 +1,7 @@
-from fastapi import APIRouter, HTTPException, Body, Depends
+from fastapi import APIRouter, HTTPException, Body
 from pydantic import BaseModel
-from google.oauth2.credentials import Credentials
-from googleapiclient.discovery import build
 import logging
+import requests
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -18,56 +17,69 @@ class CourseWorkCreate(BaseModel):
     courseId: str
     title: str
     description: str = ""
-    materials: list = [] # Future use for links/drive files
-
-def get_classroom_service(token: str):
-    """Builds and returns the Google Classroom service using the provided access token."""
-    try:
-        creds = Credentials(token=token)
-        service = build('classroom', 'v1', credentials=creds)
-        return service
-    except Exception as e:
-        logger.error(f"Failed to create Classroom service: {e}")
-        raise HTTPException(status_code=400, detail="Invalid Google Token or Service Error")
+    materials: list = [] 
 
 @router.post("/courses")
 async def list_courses(data: GoogleToken = Body(...)):
-    """List the courses the user is teaching."""
+    """List the courses the user is teaching using raw HTTP requests."""
     try:
-        service = get_classroom_service(data.token)
-        # teacherId='me' lists courses where user is a teacher
-        results = service.courses().list(teacherId='me', pageSize=10).execute()
+        url = "https://classroom.googleapis.com/v1/courses"
+        headers = {
+            "Authorization": f"Bearer {data.token}",
+            "Accept": "application/json"
+        }
+        params = {
+            "teacherId": "me",
+            "pageSize": 10,
+            "courseStates": "ACTIVE"
+        }
+        
+        response = requests.get(url, headers=headers, params=params)
+        
+        if response.status_code != 200:
+             logger.error(f"Google API Error ({response.status_code}): {response.text}")
+             raise HTTPException(status_code=response.status_code, detail="Failed to fetch courses from Google")
+             
+        results = response.json()
         courses = results.get('courses', [])
         
-        # Simplified response
         return [{"id": c['id'], "name": c['name'], "section": c.get('section', '')} for c in courses]
+        
+    except HTTPException as he:
+        raise he
     except Exception as e:
         logger.error(f"Error listing courses: {e}")
-        # If user has no courses or API not enabled, return empty list or error
-        # Often "403" if scope is missing.
-        raise HTTPException(status_code=500, detail=f"Google API Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 @router.post("/coursework")
 async def create_assignment(data: CourseWorkCreate = Body(...)):
-    """Create a DRAFT assignment in the specified course."""
+    """Create a DRAFT assignment using raw HTTP requests."""
     try:
-        service = get_classroom_service(data.token)
+        url = f"https://classroom.googleapis.com/v1/courses/{data.courseId}/courseWork"
+        headers = {
+            "Authorization": f"Bearer {data.token}",
+            "Content-Type": "application/json"
+        }
         
-        coursework = {
+        body = {
             'title': data.title,
             'description': data.description,
             'workType': 'ASSIGNMENT',
-            'state': 'DRAFT', # Safer default
+            'state': 'DRAFT',
             'submissionModificationMode': 'MODIFIABLE_UNTIL_TURNED_IN',
         }
         
-        created = service.courses().courseWork().create(
-            courseId=data.courseId,
-            body=coursework
-        ).execute()
+        response = requests.post(url, headers=headers, json=body)
         
+        if response.status_code != 200:
+             logger.error(f"Google API Work Creation Error ({response.status_code}): {response.text}")
+             raise HTTPException(status_code=response.status_code, detail="Failed to create assignment")
+             
+        created = response.json()
         return {"id": created.get('id'), "url": created.get('alternateLink')}
         
+    except HTTPException as he:
+        raise he
     except Exception as e:
         logger.error(f"Error creating coursework: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to create assignment: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
