@@ -70,7 +70,10 @@ const handler = NextAuth({
     pages: {
         signIn: '/login',
     },
-    secret: process.env.NEXTAUTH_SECRET,
+    debug: true, // Enable NextAuth debug logs
+    secret: process.env.NEXTAUTH_SECRET || "temporary_debug_secret_do_not_use_in_production",
 })
+
+console.log("DEBUG: NEXTAUTH_SECRET defined?", !!process.env.NEXTAUTH_SECRET);
 
 export { handler as GET, handler as POST }
