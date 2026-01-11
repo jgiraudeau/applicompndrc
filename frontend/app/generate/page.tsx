@@ -243,7 +243,8 @@ export default function GeneratePage() {
             {/* Debug Bar */}
             <div className="bg-slate-100 text-[10px] text-slate-400 p-1 text-center">
                 STATUS: {isLoading ? "Generating..." : "Idle"} |
-                GOOGLE: {session?.googleAccessToken ? "✅ Connected" : "❌ Disconnected (Login required)"} |
+                USER: {session?.user?.email} |
+                GOOGLE: {session?.googleAccessToken ? "✅ Connected" : `❌ Disconnected (${session?.authError || "Login required"})`} |
                 API: {API_BASE_URL}
             </div>
 
