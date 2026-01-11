@@ -9,9 +9,10 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 import secrets
 
-GOOGLE_CLIENT_ID = "217122577762-f6glm4d9hod0vc2jlee2th8nhmaeinlf.apps.googleusercontent.com"
+import os
 
-router = APIRouter()
+# GOOGLE_CLIENT_ID should be fetched from environment
+# to ensure it matches the frontend's configuration.
 
 # Schemas
 class UserCreate(BaseModel):
@@ -105,8 +106,15 @@ class GoogleToken(BaseModel):
 def google_login(token_data: GoogleToken, db: Session = Depends(get_db)):
     try:
         token = token_data.token
+        
+        # Fetch Client ID from Env
+        client_id = os.getenv("GOOGLE_CLIENT_ID")
+        if not client_id:
+            # Fallback for local debugging if .env is missing, but prefer Env.
+            client_id = "217122577762-f6glm4d9hod0vc2jlee2th8nhmaeinlf.apps.googleusercontent.com"
+
         # Validate Google Token
-        idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), GOOGLE_CLIENT_ID) 
+        idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), client_id) 
         
         email = idinfo['email']
         name = idinfo.get('name', 'Utilisateur Google')
