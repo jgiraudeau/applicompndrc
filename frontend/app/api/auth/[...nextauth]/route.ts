@@ -1,4 +1,4 @@
-import NextAuth from "next-auth"
+import NextAuth, { AuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials"
 import { API_BASE_URL } from "@/lib/api";
@@ -9,7 +9,7 @@ const getApiUrl = () => {
     // or ensure NEXT_PUBLIC_API_URL is available.
     return API_BASE_URL;
 }
-const handler = NextAuth({
+const authOptions: AuthOptions = {
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID || "",
@@ -33,9 +33,9 @@ const handler = NextAuth({
                 try {
                     if (!credentials?.username || !credentials?.password) return null;
 
-                    console.log("Attempting login to:", `${getApiUrl()}/auth/token`);
+                    console.log("Attempting login to:", `${getApiUrl()}/api/auth/token`);
 
-                    const res = await fetch(`${getApiUrl()}/auth/token`, {
+                    const res = await fetch(`${getApiUrl()}/api/auth/token`, {
                         method: 'POST',
                         body: new URLSearchParams({
                             'username': credentials.username,
@@ -85,7 +85,7 @@ const handler = NextAuth({
                         const apiUrl = getApiUrl();
                         console.log(`Google Login: Exchanging token with backend at ${apiUrl}...`);
 
-                        const res = await fetch(`${apiUrl}/auth/google`, {
+                        const res = await fetch(`${apiUrl}/api/auth/google`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ token: account.id_token })
@@ -117,6 +117,13 @@ const handler = NextAuth({
                     token.accessToken = user.accessToken;
                 }
             }
+
+
+            // Debug: Log token keys and estimated size
+            const tokenSize = JSON.stringify(token).length;
+            console.log(`[JWT Debug] Token keys: ${Object.keys(token).join(', ')}`);
+            console.log(`[JWT Debug] Estimated Token Size: ${tokenSize} characters`);
+
             return token
         },
         async session({ session, token }: { session: any, token: any }) {
@@ -131,7 +138,11 @@ const handler = NextAuth({
     },
     debug: true,
     secret: process.env.NEXTAUTH_SECRET || "temporary_debug_secret_do_not_use_in_production",
-})
+}
+
+const handler = NextAuth(authOptions);
+
+export { authOptions };
 
 console.log("DEBUG: NEXTAUTH_SECRET defined?", !!process.env.NEXTAUTH_SECRET);
 

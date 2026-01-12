@@ -1,0 +1,1 @@
+Le NPS (Net Promoter Score) se calcule en soustrayant le % de détracteurs au % de promoteurs.

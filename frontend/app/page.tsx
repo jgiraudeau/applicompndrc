@@ -3,7 +3,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle2, Sparkles, GraduationCap, BarChart3, ArrowRight } from "lucide-react"
 
-export default function LandingPage() {
+import { getServerSession } from "next-auth"
+import { authOptions } from "./api/auth/[...nextauth]/route"
+
+export default async function LandingPage() {
+    const session = await getServerSession(authOptions);
+
     return (
         <div className="min-h-screen bg-white">
             {/* Navigation */}
@@ -12,12 +17,20 @@ export default function LandingPage() {
                     Professeur Virtuel
                 </div>
                 <div className="gap-4 flex">
-                    <Link href="/login">
-                        <Button variant="ghost">Connexion</Button>
-                    </Link>
-                    <Link href="/register">
-                        <Button>Essai Gratuit</Button>
-                    </Link>
+                    {session ? (
+                        <Link href="/dashboard">
+                            <Button>Tableau de Bord</Button>
+                        </Link>
+                    ) : (
+                        <>
+                            <Link href="/login">
+                                <Button variant="ghost">Connexion</Button>
+                            </Link>
+                            <Link href="/register">
+                                <Button>Essai Gratuit</Button>
+                            </Link>
+                        </>
+                    )}
                 </div>
             </nav>
 
@@ -37,16 +50,27 @@ export default function LandingPage() {
                         Profitez d'une IA spécialisée pour créer des ressources pédagogiques en quelques secondes.
                     </p>
                     <div className="mt-10 flex items-center justify-center gap-x-6">
-                        <Link href="/register">
-                            <Button size="lg" className="h-12 px-8 text-lg shadow-lg hover:shadow-xl transition-all">
-                                Commencer l'essai de 15 jours
-                            </Button>
-                        </Link>
-                        <Link href="/login">
-                            <Button variant="outline" size="lg" className="h-12 px-8 text-lg">
-                                Démo en direct
-                            </Button>
-                        </Link>
+                        {session ? (
+                            <Link href="/generate">
+                                <Button size="lg" className="h-12 px-8 text-lg shadow-lg hover:shadow-xl transition-all">
+                                    Générer un cours
+                                </Button>
+                            </Link>
+                        ) : (
+                            <Link href="/register">
+                                <Button size="lg" className="h-12 px-8 text-lg shadow-lg hover:shadow-xl transition-all">
+                                    Commencer l'essai de 15 jours
+                                </Button>
+                            </Link>
+                        )}
+
+                        {!session && (
+                            <Link href="/login">
+                                <Button variant="outline" size="lg" className="h-12 px-8 text-lg">
+                                    Démo en direct
+                                </Button>
+                            </Link>
+                        )}
                     </div>
                 </div>
             </section>
@@ -109,11 +133,19 @@ export default function LandingPage() {
                         Aucune carte bancaire requise pour l'essai.
                     </p>
                     <div className="mt-10 flex items-center justify-center gap-x-6">
-                        <Link href="/register">
-                            <Button size="lg" variant="secondary" className="h-12 px-8 text-lg font-semibold group">
-                                Démarrer mes 15 jours offerts <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                            </Button>
-                        </Link>
+                        {session ? (
+                            <Link href="/dashboard">
+                                <Button size="lg" variant="secondary" className="h-12 px-8 text-lg font-semibold group">
+                                    Accéder au Tableau de Bord <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                </Button>
+                            </Link>
+                        ) : (
+                            <Link href="/register">
+                                <Button size="lg" variant="secondary" className="h-12 px-8 text-lg font-semibold group">
+                                    Démarrer mes 15 jours offerts <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                </Button>
+                            </Link>
+                        )}
                     </div>
                 </div>
             </section>
