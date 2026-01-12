@@ -153,6 +153,11 @@ const authOptions: AuthOptions = {
                     }
                 } catch (e) {
                     console.error("Error fetching user profile in JWT callback", e);
+                    // Keep existing role if backend fails (Resilience)
+                    if (token.role) {
+                        console.log("DEBUG: Backend unreachable, keeping existing role:", token.role);
+                        return token;
+                    }
                 }
             }
 
