@@ -42,13 +42,18 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    # Map string plan to Enum
+    # Map string plan to Enum and User Plan Selection
     plan_map = {
         "free": models.PlanType.FREE,
         "pro": models.PlanType.PRO,
         "enterprise": models.PlanType.ENTERPRISE
     }
     selected_plan = plan_map.get(user_data.plan, models.PlanType.FREE)
+    
+    # Map to user-level plan_selection (for onboarding bypass/pre-fill)
+    user_plan_selection = "trial"
+    if user_data.plan in ["pro", "enterprise"]:
+        user_plan_selection = "subscription"
 
     # 3. Create Organization
     new_org = models.Organization(
@@ -68,7 +73,10 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
         hashed_password=hashed_pwd,
         full_name=user_data.full_name,
         organization_id=new_org.id,
-        role=models.UserRole.SCHOOL_ADMIN # First user is Admin of their school
+        role=models.UserRole.SCHOOL_ADMIN, # First user is Admin of their school
+        plan_selection=user_plan_selection,
+        status=models.UserStatus.PENDING,
+        is_active=True 
     )
     db.add(new_user)
     db.commit()

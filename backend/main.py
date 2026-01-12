@@ -48,8 +48,15 @@ async def lifespan(app: FastAPI):
                 conn.execute(text("SELECT status FROM users LIMIT 1"))
             except Exception:
                 print("⚠️ Column 'status' missing. Adding it...")
-                conn.execute(text("ALTER TABLE users ADD COLUMN status VARCHAR DEFAULT 'pending'"))
+                conn.execute(text("ALTER TABLE users ADD COLUMN status VARCHAR DEFAULT 'PENDING'"))
                 conn.commit()
+            
+            # Fix any legacy lowercase 'pending' status
+            try:
+                conn.execute(text("UPDATE users SET status='PENDING' WHERE status='pending'"))
+                conn.commit()
+            except Exception:
+                pass
 
             try:
                 # Check if plan_selection exists
@@ -92,7 +99,7 @@ app.include_router(dashboard.router, prefix="/api/dashboard", tags=["dashboard"]
 app.include_router(student.router, prefix="/api/student", tags=["student"])
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
-app.include_router(admin.router, prefix="/api/admin", tags=["admin"]) # This line was added as per instruction, resulting in a duplicate
+# app.include_router(admin.router, prefix="/api/admin", tags=["admin"]) # Removed duplicate
 app.include_router(users.router, prefix="/api/users", tags=["users"]) # Added this line
 
 @app.get("/")

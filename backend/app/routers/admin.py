@@ -26,7 +26,7 @@ def get_all_users(
     limit: int = 100, 
     status: Optional[str] = None, # Add status filter
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_admin_user)
+    current_user: models.User = Depends(auth.get_current_admin_user)
 ):
     query = db.query(models.User)
     if status:
@@ -56,7 +56,7 @@ class StatusUpdate(BaseModel):
 def update_user_status(
     user_id: str,
     status_update: StatusUpdate,
-    current_user: models.User = Depends(get_current_admin_user),
+    current_user: models.User = Depends(auth.get_current_admin_user),
     db: Session = Depends(get_db)
 ):
     user = db.query(models.User).filter(models.User.id == user_id).first()
@@ -102,7 +102,7 @@ def update_user_status(
 @router.delete("/users/{user_id}")
 def delete_user(
     user_id: str,
-    current_user: models.User = Depends(get_current_admin_user), # Changed dependency
+    current_user: models.User = Depends(auth.get_current_admin_user), # Changed dependency
     db: Session = Depends(get_db)
 ):
     user = db.query(models.User).filter(models.User.id == user_id).first()
