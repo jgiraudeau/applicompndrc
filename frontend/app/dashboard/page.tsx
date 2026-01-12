@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -50,6 +51,7 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 export default function DashboardPage() {
+    const { data: session } = useSession();
     const [stats, setStats] = useState<Stats | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [mounted, setMounted] = useState(false);
@@ -89,8 +91,12 @@ export default function DashboardPage() {
                     <LayoutDashboard className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                    <h1 className="font-bold text-xl text-slate-800">Tableau de Bord</h1>
-                    <p className="text-xs text-slate-500">Suivi d'activité et statistiques</p>
+                    <h1 className="font-bold text-xl text-slate-800">
+                        {session?.user?.name ? `Bonjour, ${session.user.name}` : "Tableau de Bord"}
+                    </h1>
+                    <p className="text-xs text-slate-500">
+                        {session?.user?.name ? "Heureux de vous revoir !" : "Suivi d'activité et statistiques"}
+                    </p>
                 </div>
             </header>
 
