@@ -48,12 +48,14 @@ async def lifespan(app: FastAPI):
                 conn.execute(text("SELECT status FROM users LIMIT 1"))
             except Exception:
                 print("⚠️ Column 'status' missing. Adding it...")
-                conn.execute(text("ALTER TABLE users ADD COLUMN status VARCHAR DEFAULT 'PENDING'"))
+                conn.execute(text("ALTER TABLE users ADD COLUMN status VARCHAR DEFAULT 'pending'"))
                 conn.commit()
             
-            # Fix any legacy lowercase 'pending' status
+            # Fix uppercase Statuses (should be lowercase)
             try:
-                conn.execute(text("UPDATE users SET status='PENDING' WHERE status='pending'"))
+                conn.execute(text("UPDATE users SET status='pending' WHERE status='PENDING'"))
+                conn.execute(text("UPDATE users SET status='active' WHERE status='ACTIVE'"))
+                conn.execute(text("UPDATE users SET status='rejected' WHERE status='REJECTED'"))
                 conn.commit()
             except Exception:
                 pass

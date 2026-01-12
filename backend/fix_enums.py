@@ -14,11 +14,19 @@ def fix_enums():
     # SCHOOL_ADMIN -> school_admin
     cursor.execute("UPDATE users SET role='school_admin' WHERE role='SCHOOL_ADMIN'")
     
+    print("Fixing STATUSES (Uppercase -> Lowercase)...")
+    # PENDING -> pending
+    cursor.execute("UPDATE users SET status='pending' WHERE status='PENDING'")
+    # ACTIVE -> active
+    cursor.execute("UPDATE users SET status='active' WHERE status='ACTIVE'")
+    # REJECTED -> rejected
+    cursor.execute("UPDATE users SET status='rejected' WHERE status='REJECTED'")
+    
     conn.commit()
-    print("✅ Roles fixed.")
+    print("✅ Statuses fixed.")
     
     # Verify
-    rows = cursor.execute("SELECT email, role FROM users").fetchall()
+    rows = cursor.execute("SELECT email, role, status FROM users").fetchall()
     for row in rows:
         print(row)
         
