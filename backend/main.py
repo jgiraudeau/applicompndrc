@@ -19,15 +19,37 @@ async def lifespan(app: FastAPI):
     # Startup: Create tables
     print("📦 Initializing database...")
     try:
-        # Use run_sync for table creation if using async (but here we use sync engine)
-        # models.Base.metadata.create_all(bind=engine)
-        print("⏭️ Skipping DB init to debug startup hang")
+        # Create tables if they don't exist
+        models.Base.metadata.create_all(bind=engine)
+        print("✅ Database tables checked/created.")
+        
+        # Simple Migration: Add missing columns if they don't exist (SQLite/Postgres compatible-ish)
+        from sqlalchemy import text
+        with engine.connect() as conn:
+            try:
+                # Check if is_active exists
+                conn.execute(text("SELECT is_active FROM users LIMIT 1"))
+            except Exception:
+                print("⚠️ Column 'is_active' missing. Adding it...")
+                conn.execute(text("ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT 1"))
+                conn.commit()
+
+            try:
+                # Check if last_login exists
+                conn.execute(text("SELECT last_login FROM users LIMIT 1"))
+            except Exception:
+                print("⚠️ Column 'last_login' missing. Adding it...")
+                conn.execute(text("ALTER TABLE users ADD COLUMN last_login DATETIME"))
+                conn.commit()
+                
+        print("✅ Schema migration checks complete.")
+        
     except Exception as e:
-        print(f"⚠️ Database initialization failed (Non-fatal, continuing startup): {e}")
+        print(f"⚠️ Database initialization failed (Non-fatal): {e}")
 
     # Startup: Knowledge base scan is now MANUAL to avoid Railway startup timeouts
     # Use POST /api/admin/scan to trigger the scan after deployment
-    print("🚀 Application starting up... (Version 0.2.1)")
+    print("🚀 Application starting up... (Version 0.2.2)")
     print("ℹ️ Knowledge base scan is DISABLED at startup. Use POST /api/admin/scan to load files.")
     yield
     # Shutdown
