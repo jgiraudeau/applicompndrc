@@ -135,21 +135,20 @@ const authOptions: AuthOptions = {
             // Initial sign in or subsequent updates
             if (token.accessToken) {
                 try {
-                    // Only fetch if we don't have the role yet or if it's a fresh sign in
-                    if (!token.role) {
-                        const apiUrl = getApiUrl();
-                        const meRes = await fetch(`${apiUrl}/api/auth/me`, {
-                            headers: { Authorization: `Bearer ${token.accessToken}` }
-                        });
+                    // Always fetch user profile to sync role/status changes from backend
+                    // if (!token.role) { // REMOVED: Force sync
+                    const apiUrl = getApiUrl();
+                    const meRes = await fetch(`${apiUrl}/api/auth/me`, {
+                        headers: { Authorization: `Bearer ${token.accessToken}` }
+                    });
 
-                        if (meRes.ok) {
-                            const userProfile = await meRes.json();
-                            token.role = userProfile.role;
-                            token.id = userProfile.id; // Store backend ID
-                            token.email = userProfile.email;
-                            token.status = userProfile.status;
-                            token.plan_selection = userProfile.plan_selection;
-                        }
+                    if (meRes.ok) {
+                        const userProfile = await meRes.json();
+                        token.role = userProfile.role;
+                        token.id = userProfile.id; // Store backend ID
+                        token.email = userProfile.email;
+                        token.status = userProfile.status;
+                        token.plan_selection = userProfile.plan_selection;
                     }
                 } catch (e) {
                     console.error("Error fetching user profile in JWT callback", e);
