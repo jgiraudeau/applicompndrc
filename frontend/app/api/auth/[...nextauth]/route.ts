@@ -146,6 +146,9 @@ const authOptions: AuthOptions = {
                             const userProfile = await meRes.json();
                             token.role = userProfile.role;
                             token.id = userProfile.id; // Store backend ID
+                            token.email = userProfile.email;
+                            token.status = userProfile.status;
+                            token.plan_selection = userProfile.plan_selection;
                         }
                     }
                 } catch (e) {
@@ -163,6 +166,9 @@ const authOptions: AuthOptions = {
             if (session.user) {
                 session.user.role = token.role;
                 session.user.id = token.id;
+                session.user.email = token.email;
+                session.user.status = token.status;
+                session.user.plan_selection = token.plan_selection;
             }
             return session
         }

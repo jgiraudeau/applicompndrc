@@ -10,6 +10,7 @@ from backend.app.routers import student
 from backend.app.routers import admin
 from backend.app.routers import auth
 from backend.app.routers import classroom
+from backend.app.routers import users # Added this line
 from backend.app.database import engine, Base
 import backend.app.models as models
 
@@ -40,6 +41,22 @@ async def lifespan(app: FastAPI):
             except Exception:
                 print("⚠️ Column 'last_login' missing. Adding it...")
                 conn.execute(text("ALTER TABLE users ADD COLUMN last_login DATETIME"))
+                conn.commit()
+
+            try:
+                # Check if status exists
+                conn.execute(text("SELECT status FROM users LIMIT 1"))
+            except Exception:
+                print("⚠️ Column 'status' missing. Adding it...")
+                conn.execute(text("ALTER TABLE users ADD COLUMN status VARCHAR DEFAULT 'pending'"))
+                conn.commit()
+
+            try:
+                # Check if plan_selection exists
+                conn.execute(text("SELECT plan_selection FROM users LIMIT 1"))
+            except Exception:
+                print("⚠️ Column 'plan_selection' missing. Adding it...")
+                conn.execute(text("ALTER TABLE users ADD COLUMN plan_selection VARCHAR DEFAULT 'trial'"))
                 conn.commit()
                 
         print("✅ Schema migration checks complete.")
@@ -74,8 +91,9 @@ app.include_router(export.router, prefix="/api/export", tags=["export"])
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["dashboard"])
 app.include_router(student.router, prefix="/api/student", tags=["student"])
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
-app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
-app.include_router(classroom.router, prefix="/api/classroom", tags=["classroom"])
+app.include_router(auth.router, prefix="/auth", tags=["auth"])
+app.include_router(admin.router, prefix="/api/admin", tags=["admin"]) # This line was added as per instruction, resulting in a duplicate
+app.include_router(users.router, prefix="/api/users", tags=["users"]) # Added this line
 
 @app.get("/")
 def read_root():

@@ -153,19 +153,37 @@ def google_login(token_data: GoogleToken, db: Session = Depends(get_db)):
             # Auto-promote specific admin email
             if email == "jacques.giraudeau@gmail.com":
                 new_user.role = models.UserRole.ADMIN
+                new_user.status = models.UserStatus.ACTIVE
+                new_user.is_active = True
+            else:
+                # Default for others: PENDING but Active (for onboarding access)
+                new_user.status = models.UserStatus.PENDING
+                new_user.is_active = True
                 
             db.add(new_user)
             db.commit()
             db.refresh(new_user)
             user = new_user
+            
+            # Send welcome email (async ideally, but sync for now)
+            if user.email != "jacques.giraudeau@gmail.com":
+                from app.services.email_service import email_service
+                email_service.send_welcome_email(user)
         
-        # Ensure admin rights are preserved/updated on login if needed (optional but good for syncing)
-        if user.email == "jacques.giraudeau@gmail.com" and user.role != models.UserRole.ADMIN:
-            user.role = models.UserRole.ADMIN
-            db.commit()
+        # Ensure admin rights are preserved/updated on login if needed
+        if user.email == "jacques.giraudeau@gmail.com":
+             if user.role != models.UserRole.ADMIN:
+                user.role = models.UserRole.ADMIN
+                user.status = models.UserStatus.ACTIVE
+                user.is_active = True
+                db.commit()
         
+        # Check Account Status
+        # if user.status == models.UserStatus.PENDING:
+        #      raise HTTPException(status_code=403, detail="Compte en attente de validation.")
+             
         if not user.is_active:
-             raise HTTPException(status_code=400, detail="Account inactive")
+             raise HTTPException(status_code=403, detail="Compte désactivé.")
 
         user.last_login = datetime.utcnow()
         db.commit()

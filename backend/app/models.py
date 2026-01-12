@@ -17,6 +17,11 @@ class UserRole(str, enum.Enum):
     TEACHER = "teacher"
     STUDENT = "student"
 
+class UserStatus(str, enum.Enum):
+    PENDING = "pending"
+    ACTIVE = "active"
+    REJECTED = "rejected"
+
 # SaaS Core Models
 class Organization(Base):
     __tablename__ = "organizations"
@@ -38,7 +43,9 @@ class User(Base):
     hashed_password = Column(String)
     full_name = Column(String)
     role = Column(Enum(UserRole), default=UserRole.TEACHER)
-    is_active = Column(Boolean, default=True)
+    status = Column(Enum(UserStatus), default=UserStatus.PENDING)
+    plan_selection = Column(String, default="trial") # 'trial' or 'subscription'
+    is_active = Column(Boolean, default=True) # Technical active state (can be banned even if approved)
     last_login = Column(DateTime, nullable=True)
     
     organization_id = Column(String, ForeignKey("organizations.id"))
