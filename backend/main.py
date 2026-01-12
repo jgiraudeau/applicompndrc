@@ -110,7 +110,7 @@ app.include_router(export.router, prefix="/api/export", tags=["export"])
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["dashboard"])
 app.include_router(student.router, prefix="/api/student", tags=["student"])
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
-app.include_router(auth.router, prefix="/auth", tags=["auth"])
+app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 # app.include_router(admin.router, prefix="/api/admin", tags=["admin"]) # Removed duplicate
 app.include_router(users.router, prefix="/api/users", tags=["users"]) # Added this line
 
