@@ -149,7 +149,6 @@ def google_login(token_data: GoogleToken, db: Session = Depends(get_db)):
                 organization_id=new_org.id,
                 role=models.UserRole.TEACHER
             )
-            )
             
             # Auto-promote specific admin email
             if email == "jacques.giraudeau@gmail.com":
