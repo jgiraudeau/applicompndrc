@@ -64,7 +64,7 @@ export function Navbar() {
                         <span className="hidden sm:inline">Générateur</span>
                     </Button>
                 </Link>
-                {(session?.user as any)?.role === 'admin' && (
+                {(session?.user as any)?.role?.toLowerCase() === 'admin' && (
                     <Link href="/admin">
                         <Button
                             variant={isActive("/admin") ? "secondary" : "ghost"}
@@ -87,7 +87,7 @@ export function Navbar() {
                         <div className="text-xs">
                             <p className="font-medium text-slate-700">{session.user.name}</p>
                             <p className="text-slate-400">
-                                {(session.user as any)?.role === 'admin' ? 'Administrateur' : 'Enseignant'}
+                                {(session.user as any)?.role?.toLowerCase() === 'admin' ? 'Administrateur' : 'Enseignant'}
                             </p>
                         </div>
                     </div>

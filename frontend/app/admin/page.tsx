@@ -50,7 +50,7 @@ export default function AdminPage() {
         if (status === "unauthenticated") {
             router.push("/dashboard");
         } else if (status === "authenticated") {
-            if ((session?.user as any)?.role !== 'admin') {
+            if ((session?.user as any)?.role?.toLowerCase() !== 'admin') {
                 // Wait a bit or redirect
             } else {
                 fetchUsers();
@@ -145,7 +145,7 @@ export default function AdminPage() {
         return <div className="min-h-screen flex items-center justify-center text-slate-500">Chargement de la console...</div>;
     }
 
-    if ((session?.user as any)?.role !== 'admin') {
+    if ((session?.user as any)?.role?.toLowerCase() !== 'admin') {
         return (
             <div className="min-h-screen bg-slate-50">
                 <Navbar />
@@ -234,11 +234,11 @@ export default function AdminPage() {
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border ${user.role === 'admin'
-                                                    ? 'bg-purple-50 text-purple-700 border-purple-100'
-                                                    : 'bg-slate-50 text-slate-600 border-slate-100'
+                                            <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border ${user.role?.toLowerCase() === 'admin'
+                                                ? 'bg-purple-50 text-purple-700 border-purple-100'
+                                                : 'bg-slate-50 text-slate-600 border-slate-100'
                                                 }`}>
-                                                {user.role === 'admin' ? 'Administrateur' : 'Enseignant'}
+                                                {user.role?.toLowerCase() === 'admin' ? 'Administrateur' : 'Enseignant'}
                                             </span>
                                         </TableCell>
                                         <TableCell>
@@ -257,8 +257,8 @@ export default function AdminPage() {
                                                 </span>
                                             ) : (
                                                 <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${user.is_active
-                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-                                                        : 'bg-red-50 text-red-700 border-red-100'
+                                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                                                    : 'bg-red-50 text-red-700 border-red-100'
                                                     }`}>
                                                     {user.is_active ? 'Actif' : 'Désactivé'}
                                                 </span>

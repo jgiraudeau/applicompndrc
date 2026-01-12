@@ -144,6 +144,7 @@ const authOptions: AuthOptions = {
 
                     if (meRes.ok) {
                         const userProfile = await meRes.json();
+                        console.log("DEBUG: Backend /me response:", userProfile); // LOG ADDED
                         token.role = userProfile.role;
                         token.id = userProfile.id; // Store backend ID
                         token.email = userProfile.email;
