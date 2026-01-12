@@ -10,6 +10,7 @@ import { GraduationCap, Sparkles, ArrowLeft, Copy, Check, FileText, Users, ListC
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
+import { Navbar } from "@/components/Navbar";
 
 const DOCUMENT_TYPES = [
     { id: "dossier_prof", label: "Dossier Professeur", icon: FileText, color: "text-blue-600 bg-blue-50 border-blue-200" },
@@ -216,30 +217,7 @@ export default function GeneratePage() {
 
     return (
         <div className="flex flex-col h-screen bg-slate-50">
-            {/* Header */}
-            <header className="bg-white border-b p-4 flex items-center gap-3 shadow-sm sticky top-0 z-10">
-                <Link href="/" className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                    <ArrowLeft className="w-5 h-5 text-slate-500" />
-                </Link>
-                <div className="bg-amber-100 p-2 rounded-lg">
-                    <Sparkles className="w-6 h-6 text-amber-600" />
-                </div>
-                <div>
-                    <h1 className="font-bold text-xl text-slate-800">Générateur de Cours</h1>
-                    <p className="text-xs text-slate-500">Créez des documents pédagogiques complets</p>
-                </div>
-                <div className="ml-auto">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-red-400 hover:text-red-600 hover:bg-red-50"
-                        onClick={() => signOut({ callbackUrl: "/login" })}
-                        title="Se déconnecter"
-                    >
-                        <LogOut className="w-5 h-5" />
-                    </Button>
-                </div>
-            </header>
+            <Navbar />
             {/* Debug Bar - Simplified */}
             <div className="bg-slate-100 text-[10px] text-slate-400 p-1 text-center">
                 STATUS: {isLoading ? "Generating..." : "Idle"} | API: {API_BASE_URL}

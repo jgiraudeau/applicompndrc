@@ -11,6 +11,7 @@ import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
 import { useSession, signOut } from "next-auth/react";
+import { Navbar } from "@/components/Navbar";
 
 interface Message {
   role: "user" | "bot";
@@ -186,43 +187,22 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white border-b p-4 flex items-center gap-3 shadow-sm sticky top-0 z-10">
-        <div className="bg-primary/10 p-2 rounded-lg">
-          <GraduationCap className="w-6 h-6 text-primary" />
+      <Navbar />
+
+      {/* Context Sub-Header */}
+      {currentFileName && (
+        <div className="bg-blue-50 border-b border-blue-100 p-2 flex items-center justify-center gap-2 text-sm text-blue-700 animate-in slide-in-from-top-2">
+          <span>📄 Contexte actif : <span className="font-semibold">{currentFileName}</span></span>
+          <button
+            onClick={() => { setCurrentFileId(null); setCurrentFileName(null); }}
+            className="hover:bg-blue-100 p-1 rounded-full transition-colors"
+            title="Supprimer le contexte"
+          >
+            ✕
+          </button>
         </div>
-        <div>
-          <h1 className="font-bold text-xl text-slate-800">Professeur Virtuel</h1>
-          <p className="text-xs text-slate-500">BTS NDRC • Assistant Pédagogique IA</p>
-        </div>
-        {currentFileName && (
-          <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs border border-blue-100">
-            <span>📎 Contexte : {currentFileName}</span>
-            <button onClick={() => { setCurrentFileId(null); setCurrentFileName(null); }} className="hover:text-red-500 font-bold ml-1">×</button>
-          </div>
-        )}
-        <Link href="/dashboard" className="ml-auto">
-          <Button variant="ghost" className="gap-2 text-slate-600 hover:text-slate-900 border-transparent">
-            <LayoutDashboard className="w-4 h-4" />
-            Tableau de bord
-          </Button>
-        </Link>
-        <Link href="/generate">
-          <Button variant="outline" className="gap-2 text-amber-600 border-amber-200 hover:bg-amber-50">
-            <Sparkles className="w-4 h-4" />
-            Générer un cours
-          </Button>
-        </Link>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-red-400 hover:text-red-600 hover:bg-red-50 ml-2"
-          onClick={() => signOut({ callbackUrl: "/login" })}
-          title="Se déconnecter"
-        >
-          <LogOut className="w-5 h-5" />
-        </Button>
-      </header>
+      )}
+
       {/* Debug Bar - Simplified */}
       <div className="bg-slate-100 text-[10px] text-slate-400 p-1 text-center">
         STATUS: {isLoading ? "Generating..." : "Idle"} | API: {API_BASE_URL}

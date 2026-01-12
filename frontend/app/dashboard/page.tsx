@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
+import { Navbar } from "@/components/Navbar";
 
 interface Activity {
     id: number;
@@ -82,23 +83,7 @@ export default function DashboardPage() {
 
     return (
         <div className="flex flex-col h-screen bg-slate-50">
-            {/* Header */}
-            <header className="bg-white border-b p-4 flex items-center gap-3 shadow-sm sticky top-0 z-10">
-                <Link href="/" className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                    <ArrowLeft className="w-5 h-5 text-slate-500" />
-                </Link>
-                <div className="bg-blue-100 p-2 rounded-lg">
-                    <LayoutDashboard className="w-6 h-6 text-blue-600" />
-                </div>
-                <div>
-                    <h1 className="font-bold text-xl text-slate-800">
-                        {session?.user?.name ? `Bonjour, ${session.user.name}` : "Tableau de Bord"}
-                    </h1>
-                    <p className="text-xs text-slate-500">
-                        {session?.user?.name ? "Heureux de vous revoir !" : "Suivi d'activité et statistiques"}
-                    </p>
-                </div>
-            </header>
+            <Navbar />
 
             <main className="flex-1 overflow-y-auto p-6">
                 <div className="max-w-6xl mx-auto space-y-6">
