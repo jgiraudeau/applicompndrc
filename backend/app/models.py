@@ -42,8 +42,10 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     full_name = Column(String)
-    role = Column(Enum(UserRole), default=UserRole.TEACHER)
-    status = Column(Enum(UserStatus), default=UserStatus.PENDING)
+    full_name = Column(String)
+    # Using String for flexibility, validation handled by Pydantic/App logic
+    role = Column(String, default="teacher") 
+    status = Column(String, default="pending")
     plan_selection = Column(String, default="trial") # 'trial' or 'subscription'
     is_active = Column(Boolean, default=True) # Technical active state (can be banned even if approved)
     last_login = Column(DateTime, nullable=True)

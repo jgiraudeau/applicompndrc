@@ -38,11 +38,12 @@ def get_all_users(
             id=u.id,
             email=u.email,
             full_name=u.full_name,
-            role=u.role.value if u.role else "teacher",
+            # Role and Status are now Strings in the DB model, so we access them directly.
+            role=u.role if u.role else "teacher",
             organization_name=u.organization.name if u.organization else None,
             last_login=u.last_login,
             is_active=u.is_active if u.is_active is not None else True,
-            status=u.status.value if u.status else "pending",
+            status=u.status if u.status else "pending", # Just use the string
             plan_selection=u.plan_selection or "trial"
         )
         for u in users
@@ -74,26 +75,33 @@ def update_user_status(
         user.is_active = status_update.is_active
         
     # Handle Status Change (Validation)
+    # Handle Status Change (Validation)
     if status_update.status:
-        try:
-            new_user_status = models.UserStatus[status_update.status.upper()]
-        except KeyError:
-            raise HTTPException(status_code=400, detail=f"Invalid status: {status_update.status}")
+        # Validate roughly
+        new_status_str = status_update.status.lower() # Normalize to lowercase
+        if new_status_str not in ["active", "pending", "rejected"]:
+             raise HTTPException(status_code=400, detail=f"Invalid status: {status_update.status}")
 
         old_status = user.status
-        user.status = new_user_status
+        user.status = new_status_str
         
         # If moving to ACTIVE (Validation), ensure is_active is True and send email
-        if new_user_status == models.UserStatus.ACTIVE and old_status != models.UserStatus.ACTIVE:
+        if new_status_str == "active" and old_status != "active":
             user.is_active = True
-            from app.services.email_service import email_service
-            email_service.send_approval_email(user)
+            try:
+                from app.services.email_service import email_service
+                email_service.send_approval_email(user)
+            except Exception as e:
+                print(f"Warning: Email sending failed: {e}")
             
         # If REJECTED
-        if new_user_status == models.UserStatus.REJECTED:
+        if new_status_str == "rejected":
             user.is_active = False
-            from app.services.email_service import email_service
-            email_service.send_rejection_email(user)
+            try:
+                from app.services.email_service import email_service
+                email_service.send_rejection_email(user)
+            except Exception as e:
+                print(f"Warning: Email sending failed: {e}")
             
     db.commit()
     db.refresh(user)
