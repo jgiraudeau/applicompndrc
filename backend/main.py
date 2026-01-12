@@ -11,6 +11,7 @@ from backend.app.routers import admin
 from backend.app.routers import auth
 from backend.app.routers import classroom
 from backend.app.routers import users # Added this line
+from backend.app.routers import stripe_routes # Added this line
 from backend.app.database import engine, Base
 import backend.app.models as models
 
@@ -77,6 +78,14 @@ async def lifespan(app: FastAPI):
                 print("⚠️ Column 'plan_selection' missing. Adding it...")
                 conn.execute(text("ALTER TABLE users ADD COLUMN plan_selection VARCHAR DEFAULT 'trial'"))
                 conn.commit()
+
+            try:
+                # Check if stripe_customer_id exists
+                conn.execute(text("SELECT stripe_customer_id FROM users LIMIT 1"))
+            except Exception:
+                print("⚠️ Column 'stripe_customer_id' missing. Adding it...")
+                conn.execute(text("ALTER TABLE users ADD COLUMN stripe_customer_id VARCHAR"))
+                conn.commit()
                 
         print("✅ Schema migration checks complete.")
         
@@ -113,6 +122,7 @@ app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 # app.include_router(admin.router, prefix="/api/admin", tags=["admin"]) # Removed duplicate
 app.include_router(users.router, prefix="/api/users", tags=["users"]) # Added this line
+app.include_router(stripe_routes.router, prefix="/api/stripe", tags=["stripe"])
 
 @app.get("/")
 def read_root():
