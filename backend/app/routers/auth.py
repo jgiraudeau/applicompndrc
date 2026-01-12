@@ -180,11 +180,11 @@ def google_login(token_data: GoogleToken, db: Session = Depends(get_db)):
         
         # Ensure admin rights are preserved/updated on login if needed
         if user.email == "jacques.giraudeau@gmail.com":
-             if user.role != models.UserRole.ADMIN:
-                user.role = models.UserRole.ADMIN
-                user.status = models.UserStatus.ACTIVE
-                user.is_active = True
-                db.commit()
+             # Always force update to be sure
+             user.role = models.UserRole.ADMIN
+             user.status = models.UserStatus.ACTIVE
+             user.is_active = True
+             db.commit()
         
         # Check Account Status
         # if user.status == models.UserStatus.PENDING:
