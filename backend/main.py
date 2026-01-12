@@ -57,6 +57,16 @@ async def lifespan(app: FastAPI):
                 conn.commit()
             except Exception:
                 pass
+                
+            # Fix uppercase Roles (should be lowercase)
+            try:
+                conn.execute(text("UPDATE users SET role='admin' WHERE role='ADMIN'"))
+                conn.execute(text("UPDATE users SET role='teacher' WHERE role='TEACHER'"))
+                conn.execute(text("UPDATE users SET role='student' WHERE role='STUDENT'"))
+                conn.execute(text("UPDATE users SET role='school_admin' WHERE role='SCHOOL_ADMIN'"))
+                conn.commit()
+            except Exception:
+                pass
 
             try:
                 # Check if plan_selection exists
