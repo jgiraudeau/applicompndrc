@@ -4,7 +4,10 @@ from sqlalchemy.orm import sessionmaker
 import os
 
 # Get DATABASE_URL from env, fallback to local SQLite for development
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./profvirtuel.db")
+# Use absolute path to avoid confusion between CWDs (root vs backend/)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(BASE_DIR, "profvirtuel.db")
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DB_PATH}")
 
 # Fix for Heroku/Railway/Supabase style postgres:// which SQLAlchemy 1.4+ requires as postgresql://
 if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):

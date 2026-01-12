@@ -10,7 +10,8 @@ import {
     MessageSquare,
     LogOut,
     GraduationCap,
-    User
+    User,
+    ShieldAlert
 } from "lucide-react";
 
 export function Navbar() {
@@ -63,6 +64,17 @@ export function Navbar() {
                         <span className="hidden sm:inline">Générateur</span>
                     </Button>
                 </Link>
+                {(session?.user as any)?.role === 'admin' && (
+                    <Link href="/admin">
+                        <Button
+                            variant={isActive("/admin") ? "secondary" : "ghost"}
+                            className={`gap-2 ${isActive("/admin") ? "text-purple-600 bg-purple-50" : "text-slate-600"}`}
+                        >
+                            <ShieldAlert className="w-4 h-4" />
+                            <span className="hidden sm:inline">Administration</span>
+                        </Button>
+                    </Link>
+                )}
             </nav>
 
             {/* User & Actions */}
@@ -74,7 +86,9 @@ export function Navbar() {
                         </div>
                         <div className="text-xs">
                             <p className="font-medium text-slate-700">{session.user.name}</p>
-                            <p className="text-slate-400">Enseignant</p>
+                            <p className="text-slate-400">
+                                {(session.user as any)?.role === 'admin' ? 'Administrateur' : 'Enseignant'}
+                            </p>
                         </div>
                     </div>
                 )}

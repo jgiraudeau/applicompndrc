@@ -78,6 +78,10 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     access_token = auth.create_access_token(data={"sub": new_user.email})
     return {"access_token": access_token, "token_type": "bearer"}
 
+from datetime import datetime
+
+# ... imports 
+
 @router.post("/token", response_model=Token)
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == form_data.username).first()
@@ -88,6 +92,12 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
             headers={"WWW-Authenticate": "Bearer"},
         )
     
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="Account inactive")
+
+    user.last_login = datetime.utcnow()
+    db.commit()
+
     access_token = auth.create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -139,10 +149,27 @@ def google_login(token_data: GoogleToken, db: Session = Depends(get_db)):
                 organization_id=new_org.id,
                 role=models.UserRole.TEACHER
             )
+            )
+            
+            # Auto-promote specific admin email
+            if email == "jacques.giraudeau@gmail.com":
+                new_user.role = models.UserRole.ADMIN
+                
             db.add(new_user)
             db.commit()
             db.refresh(new_user)
             user = new_user
+        
+        # Ensure admin rights are preserved/updated on login if needed (optional but good for syncing)
+        if user.email == "jacques.giraudeau@gmail.com" and user.role != models.UserRole.ADMIN:
+            user.role = models.UserRole.ADMIN
+            db.commit()
+        
+        if not user.is_active:
+             raise HTTPException(status_code=400, detail="Account inactive")
+
+        user.last_login = datetime.utcnow()
+        db.commit()
             
         access_token = auth.create_access_token(data={"sub": user.email})
         return {"access_token": access_token, "token_type": "bearer"}

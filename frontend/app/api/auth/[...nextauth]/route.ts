@@ -108,8 +108,12 @@ const authOptions: AuthOptions = {
                     }
                 }
                 // Debug: Check what's in the account object if token is missing
-                if (!token.googleAccessToken && account) {
-                    token.authError = `MISSING TOKEN. Account Keys: ${Object.keys(account).join(', ')}`;
+                if (!token.googleAccessToken && account && !token.authError) {
+                    token.authError = `MISSING TOKEN. Provider: ${account.provider}. Account Keys: ${Object.keys(account).join(', ')}`;
+                }
+
+                if (account) {
+                    console.log(`[JWT Debug] Provider: ${account.provider}`);
                 }
 
                 // If logging in with Credentials, we already have the token
@@ -121,8 +125,33 @@ const authOptions: AuthOptions = {
 
             // Debug: Log token keys and estimated size
             const tokenSize = JSON.stringify(token).length;
+            console.log(`[JWT Debug] API URL being used: ${getApiUrl()}`);
             console.log(`[JWT Debug] Token keys: ${Object.keys(token).join(', ')}`);
+            if (token.authError) console.error(`[JWT Debug] Auth Error: ${token.authError}`);
+            console.log(`[JWT Debug] Has AccessToken: ${!!token.accessToken}`);
+            console.log(`[JWT Debug] Has Role: ${token.role}`);
             console.log(`[JWT Debug] Estimated Token Size: ${tokenSize} characters`);
+
+            // Initial sign in or subsequent updates
+            if (token.accessToken) {
+                try {
+                    // Only fetch if we don't have the role yet or if it's a fresh sign in
+                    if (!token.role) {
+                        const apiUrl = getApiUrl();
+                        const meRes = await fetch(`${apiUrl}/api/auth/me`, {
+                            headers: { Authorization: `Bearer ${token.accessToken}` }
+                        });
+
+                        if (meRes.ok) {
+                            const userProfile = await meRes.json();
+                            token.role = userProfile.role;
+                            token.id = userProfile.id; // Store backend ID
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error fetching user profile in JWT callback", e);
+                }
+            }
 
             return token
         },
@@ -130,6 +159,11 @@ const authOptions: AuthOptions = {
             session.accessToken = token.accessToken;
             session.googleAccessToken = token.googleAccessToken;
             session.authError = token.authError;
+            // Pass user details to session
+            if (session.user) {
+                session.user.role = token.role;
+                session.user.id = token.id;
+            }
             return session
         }
     },

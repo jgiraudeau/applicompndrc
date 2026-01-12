@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, Enum, Text
+from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, Enum, Text, Boolean
 from sqlalchemy.orm import relationship
 from .database import Base
 from datetime import datetime
@@ -38,6 +38,8 @@ class User(Base):
     hashed_password = Column(String)
     full_name = Column(String)
     role = Column(Enum(UserRole), default=UserRole.TEACHER)
+    is_active = Column(Boolean, default=True)
+    last_login = Column(DateTime, nullable=True)
     
     organization_id = Column(String, ForeignKey("organizations.id"))
     organization = relationship("Organization", back_populates="users")
