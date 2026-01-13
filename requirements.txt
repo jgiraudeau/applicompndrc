@@ -15,4 +15,4 @@ passlib[bcrypt]
 python-jose
 bcrypt==4.0.1
 stripe
-
+email-validator
