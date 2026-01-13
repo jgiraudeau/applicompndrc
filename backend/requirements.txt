@@ -15,4 +15,5 @@ passlib[bcrypt]
 python-jose
 bcrypt==4.0.1
 google-auth
+email-validator
 stripe
