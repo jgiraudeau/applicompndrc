@@ -12,6 +12,7 @@ from backend.app.routers import auth
 from backend.app.routers import classroom
 from backend.app.routers import users # Added this line
 from backend.app.routers import stripe_routes # Added this line
+from backend.app.routers import setup # Temporary admin setup endpoint
 from backend.app.database import engine, Base
 import backend.app.models as models
 
@@ -123,6 +124,7 @@ app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 # app.include_router(admin.router, prefix="/api/admin", tags=["admin"]) # Removed duplicate
 app.include_router(users.router, prefix="/api/users", tags=["users"]) # Added this line
 app.include_router(stripe_routes.router, prefix="/api/stripe", tags=["stripe"])
+app.include_router(setup.router, prefix="/api/setup", tags=["setup"])  # ⚠️ TEMPORARY - Disable after first admin creation
 
 @app.get("/")
 def read_root():
