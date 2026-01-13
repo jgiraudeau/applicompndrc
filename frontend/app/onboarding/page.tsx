@@ -42,19 +42,49 @@ export default function OnboardingPage() {
         const token = (session as any)?.accessToken || (session as any)?.user?.accessToken;
 
         try {
-            const res = await fetch(`${API_BASE_URL}/api/users/me/plan`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify({ plan: selectedPlan })
-            });
+            if (selectedPlan === 'subscription') {
+                // 1. Call Backend to create Stripe Session
+                const res = await fetch(`${API_BASE_URL}/api/stripe/create-checkout-session`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        priceId: "price_1Igx4HL...", // TODO: Replace with Real Stripe Price ID later or pass fake for test
+                        planType: "subscription",
+                        email: session?.user?.email,
+                        userId: (session?.user as any)?.id
+                    })
+                });
 
-            if (res.ok) {
-                setStep("confirmation");
+                if (res.ok) {
+                    const { url } = await res.json();
+                    if (url) {
+                        window.location.href = url; // Redirect to Stripe
+                    } else {
+                        alert("Erreur: Pas d'URL de paiement.");
+                    }
+                } else {
+                    alert("Erreur lors de l'initialisation du paiement.");
+                }
+
             } else {
-                alert("Une erreur est survenue. Veuillez réessayer.");
+                // 2. Default logic for Trial (Free)
+                const res = await fetch(`${API_BASE_URL}/api/users/me/plan`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ plan: selectedPlan })
+                });
+
+                if (res.ok) {
+                    setStep("confirmation");
+                } else {
+                    alert("Une erreur est survenue. Veuillez réessayer.");
+                }
             }
         } catch (error) {
             console.error(error);
@@ -103,8 +133,8 @@ export default function OnboardingPage() {
                     {/* Trial Plan */}
                     <div
                         className={`relative p-8 rounded-2xl border-2 transition-all cursor-pointer bg-white ${selectedPlan === 'trial'
-                                ? 'border-blue-500 shadow-xl scale-105 z-10'
-                                : 'border-slate-200 hover:border-blue-200 hover:shadow-lg'
+                            ? 'border-blue-500 shadow-xl scale-105 z-10'
+                            : 'border-slate-200 hover:border-blue-200 hover:shadow-lg'
                             }`}
                         onClick={() => handleSelectPlan('trial')}
                     >
@@ -139,8 +169,8 @@ export default function OnboardingPage() {
                     {/* Pro Plan */}
                     <div
                         className={`relative p-8 rounded-2xl border-2 transition-all cursor-pointer bg-white ${selectedPlan === 'subscription'
-                                ? 'border-purple-500 shadow-xl scale-105 z-10 ring-4 ring-purple-50'
-                                : 'border-slate-200 hover:border-purple-200 hover:shadow-lg'
+                            ? 'border-purple-500 shadow-xl scale-105 z-10 ring-4 ring-purple-50'
+                            : 'border-slate-200 hover:border-purple-200 hover:shadow-lg'
                             }`}
                         onClick={() => handleSelectPlan('subscription')}
                     >

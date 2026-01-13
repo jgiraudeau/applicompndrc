@@ -47,6 +47,7 @@ class User(Base):
     role = Column(String, default="teacher") 
     status = Column(String, default="pending")
     plan_selection = Column(String, default="trial") # 'trial' or 'subscription'
+    stripe_customer_id = Column(String, nullable=True) # Added for subscription tracking
     is_active = Column(Boolean, default=True) # Technical active state (can be banned even if approved)
     last_login = Column(DateTime, nullable=True)
     
