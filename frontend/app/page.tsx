@@ -37,11 +37,7 @@ export default async function LandingPage() {
             {/* Hero Section */}
             <section className="relative px-6 pt-14 lg:px-8">
                 <div className="mx-auto max-w-3xl py-12 sm:py-20 text-center">
-                    <div className="hidden sm:mb-8 sm:flex sm:justify-center">
-                        <div className="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
-                            Nouveau : Génération de quiz automatique <span className="text-indigo-600 font-semibold">Voir les nouveautés &rarr;</span>
-                        </div>
-                    </div>
+
                     <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-900 pb-2">
                         Votre assistant pédagogique intelligent pour le BTS NDRC
                     </h1>
