@@ -88,6 +88,11 @@ async def webhook_received(request: Request, stripe_signature: str = Header(None
                 user.plan_selection = "subscription"
                 user.stripe_customer_id = customer_id
                 # user.status = "active" # Optional: Auto-activate if they pay?
+                user.status = "active" # Auto-activate on payment
                 db.commit()
+                
+                # Send confirmation email
+                from ..services.email_service import email_service
+                email_service.send_subscription_confirmation_email(user)
 
     return {"status": "success"}

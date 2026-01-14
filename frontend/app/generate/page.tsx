@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { GraduationCap, Sparkles, ArrowLeft, Copy, Check, FileText, Users, ListChecks, ClipboardCheck, Download, FileDown, HelpCircle, Calendar, Share2, ExternalLink, Share, Loader2, LogOut } from "lucide-react";
+import { GraduationCap, Sparkles, ArrowLeft, Copy, Check, FileText, Users, ListChecks, ClipboardCheck, Download, FileDown, HelpCircle, Calendar, Share2, ExternalLink, Share, Loader2, LogOut, BookmarkPlus } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
@@ -41,6 +41,8 @@ export default function GeneratePage() {
     const [isClassroomModalOpen, setIsClassroomModalOpen] = useState(false);
     const [selectedCourseId, setSelectedCourseId] = useState<string>("");
     const [exportLoading, setExportLoading] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isSaved, setIsSaved] = useState(false);
 
     const fetchCourses = async () => {
         if (!session?.googleAccessToken) {
@@ -74,7 +76,31 @@ export default function GeneratePage() {
     const handleExportToClassroom = async () => {
         if (!selectedCourseId) return;
         setExportLoading(true);
+
         try {
+            let documentUrl = null;
+
+            // Pour "Dossier Élève" et "Évaluation", créer un Google Doc
+            if (docType === "dossier_eleve" || docType === "evaluation") {
+                const docRes = await fetch(`${API_BASE_URL}/api/google-docs/create`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        token: session.googleAccessToken,
+                        title: `${topic} - ${docType}`,
+                        content: generatedContent
+                    })
+                });
+
+                if (docRes.ok) {
+                    const docData = await docRes.json();
+                    documentUrl = docData.document_url;
+                } else {
+                    alert("Erreur lors de la création du Google Doc. Le devoir sera créé sans document attaché.");
+                }
+            }
+
+            // Créer le devoir Classroom
             const res = await fetch(`${API_BASE_URL}/api/classroom/coursework`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -82,20 +108,138 @@ export default function GeneratePage() {
                     token: session.googleAccessToken,
                     courseId: selectedCourseId,
                     title: `${topic} (${docType})`,
-                    description: generatedContent
+                    description: documentUrl
+                        ? `Document disponible ci-dessous`
+                        : generatedContent,
+                    document_url: documentUrl
                 })
             });
+
             if (res.ok) {
                 const data = await res.json();
-                alert(`Devoir créé avec succès ! Lien : ${data.url}`);
+                if (documentUrl) {
+                    alert(`✅ Devoir créé avec succès !\n\n📄 Google Doc créé et attaché\n🔗 Lien: ${data.url}\n\nLe Google Doc est accessible aux élèves avec le lien.`);
+                } else {
+                    alert(`Devoir créé avec succès ! Lien : ${data.url}`);
+                }
                 setIsClassroomModalOpen(false);
             } else {
                 alert("Erreur lors de la création du devoir.");
             }
-        } catch (e) {
-            alert("Erreur technique.");
+        } catch (e: any) {
+            console.error(e);
+            alert(`Erreur technique: ${e.message}`);
         } finally {
             setExportLoading(false);
+        }
+    };
+
+    const handleCreateGoogleForm = async () => {
+        if (!session?.googleAccessToken) {
+            alert("Veuillez vous reconnecter avec Google pour utiliser cette fonctionnalité.");
+            return;
+        }
+
+        setExportLoading(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/google-forms/create`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    token: session.googleAccessToken,
+                    title: `${topic} - Quiz`,
+                    description: `Quiz généré automatiquement sur : ${topic}`,
+                    quiz_content: generatedContent
+                })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                alert(`✅ Google Form créé avec succès!\n\n🔗 ${data.questions_count} questions ajoutées\n📝 Formulaire en mode BROUILLON\n\nLien: ${data.form_url}\n\nVous pouvez maintenant vérifier et publier le formulaire.`);
+                // Ouvrir le form dans un nouvel onglet
+                window.open(data.form_url, '_blank');
+            } else {
+                const error = await res.text();
+                alert(`Erreur lors de la création du Google Form:\n${error}`);
+            }
+        } catch (e: any) {
+            console.error(e);
+            alert(`Erreur technique: ${e.message}`);
+        } finally {
+            setExportLoading(false);
+        }
+    };
+
+    const [isRefining, setIsRefining] = useState(false);
+    const [showRefineInput, setShowRefineInput] = useState(false);
+    const [refineInstruction, setRefineInstruction] = useState("");
+
+    const handleRefine = async () => {
+        if (!refineInstruction.trim()) return;
+        setIsRefining(true);
+        try {
+            const token = (session as any)?.accessToken;
+            const res = await fetch(`${API_BASE_URL}/api/generate/refine`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    content: generatedContent,
+                    instruction: refineInstruction,
+                    document_type: docType
+                })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                setGeneratedContent(data.content);
+                setRefineInstruction("");
+                setShowRefineInput(false);
+                alert("✅ Document modifié avec succès !");
+            } else {
+                alert("Erreur lors de la modification");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Erreur de connexion");
+        } finally {
+            setIsRefining(false);
+        }
+    };
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            const token = (session as any)?.accessToken;
+            const res = await fetch(`${API_BASE_URL}/api/library/save`, {
+                method: "POST",
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    title: topic,
+                    document_type: docType,
+                    content: generatedContent,
+                    duration_hours: duration,
+                    target_block: block || null
+                })
+            });
+
+            if (res.ok) {
+                setIsSaved(true);
+                setTimeout(() => setIsSaved(false), 3000);
+                alert("✅ Document sauvegardé dans 'Mes Supports' !");
+            } else {
+                alert("❌ Erreur lors de la sauvegarde");
+            }
+        } catch (e: any) {
+            console.error(e);
+            alert(`Erreur: ${e.message}`);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -324,118 +468,191 @@ export default function GeneratePage() {
                             <h2 className="font-semibold text-slate-700">{selectedType.label}</h2>
                         </div>
                         {generatedContent && (
-                            <div className="flex gap-2">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleExport("pdf")}
-                                    disabled={!!isExporting}
-                                    className="text-red-600 border-red-100 hover:bg-red-50"
-                                >
-                                    {isExporting === "pdf" ? (
-                                        <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin mr-1" />
-                                    ) : (
-                                        <FileDown className="w-4 h-4 mr-1" />
-                                    )}
-                                    PDF
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleExport("docx")}
-                                    disabled={!!isExporting}
-                                    className="text-blue-600 border-blue-100 hover:bg-blue-50"
-                                >
-                                    {isExporting === "docx" ? (
-                                        <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-1" />
-                                    ) : (
-                                        <Download className="w-4 h-4 mr-1" />
-                                    )}
-                                    Word
-                                </Button>
+                            <div className="flex flex-col gap-3 w-full">
+                                {showRefineInput && (
+                                    <div className="flex gap-2 p-3 bg-purple-50 rounded-lg border border-purple-100 animate-in slide-in-from-top-2">
+                                        <Input
+                                            placeholder="Ex: Ajoute un exemple concret, simplifie le ton..."
+                                            value={refineInstruction}
+                                            onChange={(e) => setRefineInstruction(e.target.value)}
+                                            className="bg-white"
+                                            onKeyDown={(e) => e.key === 'Enter' && handleRefine()}
+                                        />
+                                        <Button
+                                            onClick={handleRefine}
+                                            disabled={isRefining || !refineInstruction}
+                                            className="bg-purple-600 hover:bg-purple-700 text-white shrink-0"
+                                        >
+                                            {isRefining ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
+                                            Générer
+                                        </Button>
+                                    </div>
+                                )}
 
-                                {docType === "quiz" && (
-                                    <>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => handleExport("gift")}
-                                            disabled={!!isExporting}
-                                            className="text-orange-600 border-orange-100 hover:bg-orange-50"
-                                        >
-                                            {isExporting === "gift" ? (
-                                                <div className="w-4 h-4 border-2 border-orange-600 border-t-transparent rounded-full animate-spin mr-1" />
-                                            ) : null}
-                                            Moodle (GIFT)
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => handleExport("wooclap")}
-                                            disabled={!!isExporting}
-                                            className="text-green-700 border-green-100 hover:bg-green-50"
-                                        >
-                                            {isExporting === "wooclap" ? (
-                                                <div className="w-4 h-4 border-2 border-green-700 border-t-transparent rounded-full animate-spin mr-1" />
-                                            ) : null}
-                                            Wooclap (Excel)
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => handleExport("google")}
-                                            disabled={!!isExporting}
-                                            className="text-purple-700 border-purple-100 hover:bg-purple-50"
-                                        >
-                                            {isExporting === "google" ? (
-                                                <div className="w-4 h-4 border-2 border-purple-700 border-t-transparent rounded-full animate-spin mr-1" />
-                                            ) : null}
-                                            Google Forms (CSV)
-                                        </Button>
+                                <div className="flex gap-2 flex-wrap">
+                                    <Button
+                                        variant={showRefineInput ? "secondary" : "outline"}
+                                        size="sm"
+                                        onClick={() => setShowRefineInput(!showRefineInput)}
+                                        className="text-purple-600 border-purple-100 hover:bg-purple-50 mr-auto"
+                                    >
+                                        <Sparkles className="w-4 h-4 mr-1" />
+                                        {showRefineInput ? "Masquer l'assistant" : "Modifier avec l'IA"}
+                                    </Button>
 
-                                        {/* Google Classroom Button - DISABLED due to Auth issues
-                                        {session?.googleAccessToken && (
+
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleExport("pdf")}
+                                        disabled={!!isExporting}
+                                        className="text-red-600 border-red-100 hover:bg-red-50"
+                                    >
+                                        {isExporting === "pdf" ? (
+                                            <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin mr-1" />
+                                        ) : (
+                                            <FileDown className="w-4 h-4 mr-1" />
+                                        )}
+                                        PDF
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleExport("docx")}
+                                        disabled={!!isExporting}
+                                        className="text-blue-600 border-blue-100 hover:bg-blue-50"
+                                    >
+                                        {isExporting === "docx" ? (
+                                            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-1" />
+                                        ) : (
+                                            <Download className="w-4 h-4 mr-1" />
+                                        )}
+                                        Word
+                                    </Button>
+
+                                    {/* Bouton Classroom - Disponible pour tous les types */}
+                                    {session?.googleAccessToken && (
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={fetchCourses}
+                                            disabled={exportLoading}
+                                            className="text-emerald-700 border-emerald-100 hover:bg-emerald-50"
+                                        >
+                                            {exportLoading ? (
+                                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            ) : <Share className="w-4 h-4 mr-2" />}
+                                            Classroom
+                                        </Button>
+                                    )}
+
+
+                                    {docType === "quiz" && (
+                                        <>
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                onClick={fetchCourses}
+                                                onClick={() => handleExport("gift")}
                                                 disabled={!!isExporting}
-                                                className="text-emerald-700 border-emerald-100 hover:bg-emerald-50"
+                                                className="text-orange-600 border-orange-100 hover:bg-orange-50"
                                             >
-                                                {exportLoading ? (
-                                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                                ) : <Share className="w-4 h-4 mr-2" />}
-                                                Classroom
+                                                {isExporting === "gift" ? (
+                                                    <div className="w-4 h-4 border-2 border-orange-600 border-t-transparent rounded-full animate-spin mr-1" />
+                                                ) : null}
+                                                Moodle (GIFT)
                                             </Button>
-                                        )}
-                                        */}
-
-                                        {!shareCode ? (
                                             <Button
-                                                variant="default"
+                                                variant="outline"
                                                 size="sm"
-                                                onClick={handlePublish}
-                                                disabled={isPublishing}
-                                                className="bg-indigo-600 hover:bg-indigo-700 text-white border-none gap-2"
+                                                onClick={() => handleExport("wooclap")}
+                                                disabled={!!isExporting}
+                                                className="text-green-700 border-green-100 hover:bg-green-50"
                                             >
-                                                {isPublishing ? (
-                                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                                ) : <Share2 className="w-4 h-4" />}
-                                                Publier pour les élèves
+                                                {isExporting === "wooclap" ? (
+                                                    <div className="w-4 h-4 border-2 border-green-700 border-t-transparent rounded-full animate-spin mr-1" />
+                                                ) : null}
+                                                Wooclap (Excel)
                                             </Button>
-                                        ) : (
-                                            <div className="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-md border border-indigo-100 text-sm font-medium">
-                                                <span>Code : <span className="font-bold">{shareCode}</span></span>
-                                                <ExternalLink className="w-4 h-4" />
-                                            </div>
-                                        )}
-                                    </>
-                                )}
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => handleExport("google")}
+                                                disabled={!!isExporting}
+                                                className="text-purple-700 border-purple-100 hover:bg-purple-50"
+                                            >
+                                                {isExporting === "google" ? (
+                                                    <div className="w-4 h-4 border-2 border-purple-700 border-t-transparent rounded-full animate-spin mr-1" />
+                                                ) : null}
+                                                Google Forms (CSV)
+                                            </Button>
 
-                                <Button variant="outline" size="sm" onClick={handleCopy}>
-                                    {copied ? <Check className="w-4 h-4 mr-1" /> : <Copy className="w-4 h-4 mr-1" />}
-                                    {copied ? "Copié !" : "Copier"}
-                                </Button>
+
+                                            {/* Bouton Google Form AUTO - Création automatique du quiz */}
+                                            {session?.googleAccessToken && (
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={handleCreateGoogleForm}
+                                                    disabled={exportLoading}
+                                                    className="text-indigo-700 border-indigo-100 hover:bg-indigo-50"
+                                                >
+                                                    {exportLoading ? (
+                                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                                    ) : <Sparkles className="w-4 h-4 mr-2" />}
+                                                    Google Form Auto
+                                                </Button>
+                                            )}
+
+
+                                            {!shareCode ? (
+                                                <Button
+                                                    variant="default"
+                                                    size="sm"
+                                                    onClick={handlePublish}
+                                                    disabled={isPublishing}
+                                                    className="bg-indigo-600 hover:bg-indigo-700 text-white border-none gap-2"
+                                                >
+                                                    {isPublishing ? (
+                                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                    ) : <Share2 className="w-4 h-4" />}
+                                                    Publier pour les élèves
+                                                </Button>
+                                            ) : (
+                                                <div className="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-md border border-indigo-100 text-sm font-medium">
+                                                    <span>Code : <span className="font-bold">{shareCode}</span></span>
+                                                    <ExternalLink className="w-4 h-4" />
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+
+                                    <Button variant="outline" size="sm" onClick={handleCopy}>
+                                        {copied ? <Check className="w-4 h-4 mr-1" /> : <Copy className="w-4 h-4 mr-1" />}
+                                        {copied ? "Copié !" : "Copier"}
+                                    </Button>
+
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleSave}
+                                        disabled={isSaving}
+                                        className="text-green-600 border-green-100 hover:bg-green-50"
+                                    >
+                                        {isSaving ? (
+                                            <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin mr-1" />
+                                        ) : isSaved ? (
+                                            <>
+                                                <Check className="w-4 h-4 mr-1" />
+                                                Sauvegardé !
+                                            </>
+                                        ) : (
+                                            <>
+                                                <BookmarkPlus className="w-4 h-4 mr-1" />
+                                                Sauvegarder
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
                             </div>
                         )}
                     </div>

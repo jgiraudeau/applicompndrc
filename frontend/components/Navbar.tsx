@@ -11,7 +11,8 @@ import {
     LogOut,
     GraduationCap,
     User,
-    ShieldAlert
+    ShieldAlert,
+    BookOpen
 } from "lucide-react";
 
 export function Navbar() {
@@ -64,6 +65,17 @@ export function Navbar() {
                         <span className="hidden sm:inline">Générateur</span>
                     </Button>
                 </Link>
+
+                <Link href="/library">
+                    <Button
+                        variant={isActive("/library") ? "secondary" : "ghost"}
+                        className={`gap-2 ${isActive("/library") ? "text-green-600 bg-green-50" : "text-slate-600"}`}
+                    >
+                        <BookOpen className="w-4 h-4" />
+                        <span className="hidden sm:inline">Mes Supports</span>
+                    </Button>
+                </Link>
+
                 {(session?.user as any)?.role?.toLowerCase() === 'admin' && (
                     <Link href="/admin">
                         <Button

@@ -34,4 +34,16 @@ class EmailService:
         print("Nous ne pouvons pas donner suite à votre demande pour le moment.")
         print("---------------------------------------------------------")
 
+    def send_subscription_confirmation_email(self, user: models.User):
+        """Called when user successfully pays via Stripe"""
+        print("---------------------------------------------------------")
+        print(f"📧 [MOCK EMAIL] To: {user.email}")
+        print(f"Subject: Paiement reçu ! Activez votre compte maintenant")
+        print(f"Bonjour {user.full_name},")
+        print("Nous avons bien reçu votre paiement pour l'abonnement Pro.")
+        print("Votre compte est maintenant prêt à être activé.")
+        print("Cliquez ci-dessous pour accéder immédiatement :")
+        print("👉 http://localhost:3001/dashboard")
+        print("---------------------------------------------------------")
+
 email_service = EmailService()

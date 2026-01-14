@@ -122,7 +122,7 @@ export default function LoginPage() {
                                 fill="#EA4335"
                             />
                         </svg>
-                        Continuer avec Google Classroom
+                        Continuer avec Google
                     </Button>
                 </CardContent>
                 <CardFooter className="flex justify-center">

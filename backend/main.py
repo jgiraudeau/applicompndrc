@@ -10,9 +10,12 @@ from backend.app.routers import student
 from backend.app.routers import admin
 from backend.app.routers import auth
 from backend.app.routers import classroom
-from backend.app.routers import users # Added this line
-from backend.app.routers import stripe_routes # Added this line
-from backend.app.routers import setup # Temporary admin setup endpoint
+from backend.app.routers import google_forms
+from backend.app.routers import google_docs
+from backend.app.routers import documents_library
+from backend.app.routers import users
+from backend.app.routers import stripe_routes
+from backend.app.routers import setup  # Temporary admin setup endpoint
 from backend.app.database import engine, Base
 import backend.app.models as models
 
@@ -121,8 +124,11 @@ app.include_router(dashboard.router, prefix="/api/dashboard", tags=["dashboard"]
 app.include_router(student.router, prefix="/api/student", tags=["student"])
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
-# app.include_router(admin.router, prefix="/api/admin", tags=["admin"]) # Removed duplicate
-app.include_router(users.router, prefix="/api/users", tags=["users"]) # Added this line
+app.include_router(classroom.router, prefix="/api/classroom", tags=["classroom"])  # Google Classroom integration
+app.include_router(google_forms.router, prefix="/api/google-forms", tags=["google-forms"])  # Google Forms quiz creation
+app.include_router(google_docs.router, prefix="/api/google-docs", tags=["google-docs"])  # Google Docs creation
+app.include_router(documents_library.router, prefix="/api/library", tags=["library"])  # Documents library
+app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(stripe_routes.router, prefix="/api/stripe", tags=["stripe"])
 app.include_router(setup.router, prefix="/api/setup", tags=["setup"])  # ⚠️ TEMPORARY - Disable after first admin creation
 

@@ -211,3 +211,43 @@ async def generate_document(request: GenerateRequest, db: Session = Depends(get_
     except Exception as e:
         print(f"❌ Generation error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+class RefineRequest(BaseModel):
+    content: str
+    instruction: str
+    document_type: str
+
+@router.post("/refine", response_model=GenerateResponse)
+async def refine_document(request: RefineRequest):
+    """
+    Modifies an existing document based on user instructions.
+    """
+    try:
+        system_prompt = f"""Tu es un assistant d'édition pédagogique expert pour le BTS NDRC.
+        TA MISSION : Modifier le document fourni en suivant STRICTEMENT l'instruction de l'utilisateur.
+        
+        Règles :
+        1. Conserve la stucture Markdown (titres, listes) sauf si on te demande de la changer.
+        2. Garde le ton professionnel et pédagogique.
+        3. Ne réponds QUE le nouveau contenu complet du document. Pas de "Voici le texte modifié...".
+        4. Si l'instruction est une question, réponds-y en modifiant le document pour intégrer la réponse si pertinent, ou en ajoutant une note.
+        """
+        
+        user_prompt = f"""
+        **Instruction de modification** : {request.instruction}
+        
+        **Document original à modifier** :
+        {request.content}
+        """
+
+        model = gemini_service.get_model(custom_system_instruction=system_prompt)
+        response = model.generate_content(user_prompt)
+        
+        return GenerateResponse(
+            content=response.text,
+            document_type=request.document_type
+        )
+        
+    except Exception as e:
+        print(f"❌ Refine error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

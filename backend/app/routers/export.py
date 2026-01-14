@@ -26,56 +26,136 @@ class PDFGenerator(FPDF):
         self.usable_width = self.w - self.l_margin - self.r_margin
 
     def clean_text(self, text):
-        # fpdf2 standard fonts only support latin-1
-        # Replacing common problematic chars
-        return text.replace('•', '*').replace('…', '...').replace('—', '-').encode('latin-1', 'replace').decode('latin-1')
+        # Tentative de conversion propre en latin-1 pour fpdf
+        # On remplace les caractères courants qui posent problème
+        replacements = {
+            '•': '*', '…': '...', '—': '-', '–': '-',
+            '’': "'", '‘': "'", '“': '"', '”': '"',
+            '€': 'EUR'
+        }
+        for k, v in replacements.items():
+            text = text.replace(k, v)
+        
+        try:
+            return text.encode('latin-1', 'replace').decode('latin-1')
+        except:
+            return text
 
     def add_md_content(self, md_text):
         lines = md_text.split('\n')
+        
         for line in lines:
+            # Détection de l'indentation (2 espaces ou 1 tab = 1 niveau)
+            indent_level = 0
             stripped = line.strip()
+            
             if not stripped:
-                self.ln(5)
+                self.ln(3) # Petit saut de ligne pour aérer
                 continue
-                
+            
+            # Calcul de l'indentation brute
+            leading_spaces = len(line) - len(line.lstrip(' '))
+            indent_level = leading_spaces // 2
+            
+            # Nettoyage du texte pour l'affichage
             clean_line = self.clean_text(stripped)
             
+            # Gestion des Titres
             if stripped.startswith('# '):
-                self.set_font("Helvetica", 'B', 18)
-                self.set_text_color(44, 62, 80)
-                self.ln(10)
+                self.ln(5)
+                self.set_font("Helvetica", 'B', 16)
+                self.set_text_color(44, 62, 80) # Bleu foncé
                 self.multi_cell(self.usable_width, 10, clean_line[2:], align='C')
-                self.ln(5)
-                # Bottom border
-                curr_y = self.get_y()
+                
+                # Ligne de séparation sous le titre
+                y = self.get_y()
                 self.set_draw_color(52, 152, 219)
-                self.line(self.l_margin, curr_y, self.w - self.r_margin, curr_y)
+                self.set_line_width(0.5)
+                self.line(self.l_margin, y, self.w - self.r_margin, y)
                 self.ln(5)
+                
             elif stripped.startswith('## '):
-                self.set_font("Helvetica", 'B', 15)
-                self.set_text_color(41, 128, 185)
                 self.ln(5)
+                self.set_font("Helvetica", 'B', 14)
+                self.set_text_color(41, 128, 185) # Bleu moyen
                 self.multi_cell(self.usable_width, 8, clean_line[3:])
                 self.ln(2)
+                
             elif stripped.startswith('### '):
-                self.set_font("Helvetica", 'B', 13)
-                self.set_text_color(52, 73, 94)
                 self.ln(3)
+                self.set_font("Helvetica", 'B', 12)
+                self.set_text_color(52, 73, 94) # Gris bleu
                 self.multi_cell(self.usable_width, 7, clean_line[4:])
+                
+            # Gestion des Listes (Bullet points)
             elif stripped.startswith('- ') or stripped.startswith('* '):
                 self.set_font("Helvetica", '', 11)
                 self.set_text_color(0, 0, 0)
-                self.set_x(self.l_margin + 5)
-                self.multi_cell(self.usable_width - 5, 6, f"* {clean_line[2:]}")
+                
+                # Retrait basé sur l'indentation
+                indent_margin = 8 * (indent_level + 1)
+                self.set_x(self.l_margin + indent_margin)
+                
+                # Puce personnalisée selon le niveau
+                bullet = "•" if indent_level == 0 else "-"
+                content = clean_line[2:]
+                
+                # Détection gras simple (**text**) -> on enlève les étoiles pour l'affichage (fpdf basic ne supporte pas le rich text facile)
+                # Amélioration: si toute la ligne est grasse (ex: **Question 1**)
+                if content.startswith('**') and content.endswith('**'):
+                    self.set_font("Helvetica", 'B', 11)
+                    content = content.strip('*')
+                
+                # Affichage de la puce et du texte
+                # Astuce pour aligner la puce et le texte : on écrit la puce, puis le texte décalé
+                current_y = self.get_y()
+                current_x = self.get_x()
+                self.cell(5, 6, bullet) 
+                
+                self.set_xy(current_x + 5, current_y)
+                self.multi_cell(self.usable_width - indent_margin - 5, 6, content)
+            
+            # Gestion des Listes Numérotées (1. )
             elif re.match(r'^\d+\. ', stripped):
-                self.set_font("Helvetica", '', 11)
+                self.set_font("Helvetica", 'B', 11) # Numéros en gras
                 self.set_text_color(0, 0, 0)
-                self.set_x(self.l_margin + 5)
-                self.multi_cell(self.usable_width - 5, 6, clean_line)
+                
+                indent_margin = 8 * indent_level
+                self.set_x(self.l_margin + indent_margin)
+                
+                # Séparation numéro / texte
+                match = re.match(r'^(\d+\.)\s+(.*)', clean_line)
+                if match:
+                    number = match.group(1)
+                    content = match.group(2)
+                    
+                    if content.startswith('**') and content.endswith('**'):
+                         content = content.strip('*')
+                    
+                    # Affiche le numéro
+                    current_y = self.get_y()
+                    current_x = self.get_x()
+                    self.cell(10, 6, number)
+                    
+                    # Affiche le texte en normal (ou gras si détecté)
+                    self.set_xy(current_x + 10, current_y)
+                    self.set_font("Helvetica", '', 11)
+                    self.multi_cell(self.usable_width - indent_margin - 10, 6, content)
+                else:
+                    self.multi_cell(self.usable_width, 6, clean_line)
+
+            # Texte normal (Paragraphes)
             else:
                 self.set_font("Helvetica", '', 11)
-                self.set_text_color(0, 0, 0)
-                self.multi_cell(self.usable_width, 6, clean_line)
+                
+                # Gestion du gras pour les questions de quiz (souvent **Question 1**) qui ne sont pas des listes
+                if stripped.startswith('**') and stripped.endswith('**'):
+                    self.set_font("Helvetica", 'B', 11)
+                    clean_line = clean_line.strip('*')
+                    
+                self.set_text_color(50, 50, 50)
+                self.set_x(self.l_margin + (indent_level * 5))
+                self.multi_cell(self.usable_width - (indent_level * 5), 6, clean_line)
 
 def md_to_pdf(md_text):
     pdf = PDFGenerator()
@@ -86,7 +166,7 @@ def md_to_pdf(md_text):
 def md_to_docx(md_text):
     doc = Document()
     
-    # Standard margins (1 inch) are default, but let's ensure they are clean
+    # Configuration des marges
     sections = doc.sections
     for section in sections:
         section.top_margin = docx.shared.Inches(1)
@@ -95,24 +175,86 @@ def md_to_docx(md_text):
         section.right_margin = docx.shared.Inches(1)
     
     lines = md_text.split('\n')
+    
     for line in lines:
         stripped = line.strip()
+        
+        # Calcul de l'indentation
+        leading_spaces = len(line) - len(line.lstrip(' '))
+        indent_level = leading_spaces // 2
+        
         if not stripped:
             continue
             
+        p = None
+        
+        # Titres
         if stripped.startswith('# '):
-            doc.add_heading(stripped[2:], level=0)
+            p = doc.add_heading(stripped[2:], level=0)
         elif stripped.startswith('## '):
-            doc.add_heading(stripped[3:], level=1)
+            p = doc.add_heading(stripped[3:], level=1)
         elif stripped.startswith('### '):
-            doc.add_heading(stripped[4:], level=2)
+            p = doc.add_heading(stripped[4:], level=2)
+            
+        # Listes (Bullet points)
         elif stripped.startswith('- ') or stripped.startswith('* '):
-            doc.add_paragraph(stripped[2:], style='List Bullet')
+            clean_content = stripped[2:]
+            # Utilisation du style de liste approprié selon le niveau (max 3 niveaux)
+            list_style = 'List Bullet'
+            if indent_level == 1: list_style = 'List Bullet 2'
+            if indent_level >= 2: list_style = 'List Bullet 3'
+            
+            try:
+                p = doc.add_paragraph(style=list_style)
+            except:
+                p = doc.add_paragraph(style='List Bullet') # Fallback
+                p.paragraph_format.left_indent = docx.shared.Inches(0.25 * (indent_level + 1))
+            
+            # Gestion basique du gras (**text**)
+            parts = re.split(r'(\*\*.*?\*\*)', clean_content)
+            for part in parts:
+                if part.startswith('**') and part.endswith('**'):
+                    run = p.add_run(part[2:-2])
+                    run.bold = True
+                else:
+                    p.add_run(part)
+                    
+        # Listes Numérotées
         elif re.match(r'^\d+\. ', stripped):
-            space_idx = stripped.find(' ')
-            doc.add_paragraph(stripped[space_idx+1:], style='List Number')
+            match = re.search(r'^\d+\.\s+(.*)', stripped)
+            clean_content = match.group(1) if match else stripped
+            
+            try:
+                p = doc.add_paragraph(style='List Number')
+            except:
+                p = doc.add_paragraph(style='List Number') # Fallback
+
+            if indent_level > 0:
+                p.paragraph_format.left_indent = docx.shared.Inches(0.25 * (indent_level + 1))
+            
+            # Gestion basique du gras
+            parts = re.split(r'(\*\*.*?\*\*)', clean_content)
+            for part in parts:
+                if part.startswith('**') and part.endswith('**'):
+                    run = p.add_run(part[2:-2])
+                    run.bold = True
+                else:
+                    p.add_run(part)
+        
+        # Texte normal
         else:
-            doc.add_paragraph(stripped)
+            p = doc.add_paragraph()
+            if indent_level > 0:
+                p.paragraph_format.left_indent = docx.shared.Inches(0.25 * indent_level)
+                
+            # Gestion basique du gras
+            parts = re.split(r'(\*\*.*?\*\*)', stripped)
+            for part in parts:
+                if part.startswith('**') and part.endswith('**'):
+                    run = p.add_run(part[2:-2])
+                    run.bold = True
+                else:
+                    p.add_run(part)
             
     result = io.BytesIO()
     doc.save(result)

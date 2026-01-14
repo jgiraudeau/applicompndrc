@@ -1,19 +1,31 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { CheckCircle, Loader2, Sparkles, Store } from "lucide-react";
+import { CheckCircle, Loader2, Sparkles, Store, Mail } from "lucide-react";
 import { API_BASE_URL } from "@/lib/api";
 
-export default function OnboardingPage() {
+function OnboardingContent() {
     const { data: session, status } = useSession();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [isLoading, setIsLoading] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
     const [step, setStep] = useState<"selection" | "confirmation">("selection");
+    const [isPaymentSuccess, setIsPaymentSuccess] = useState(false);
+
+    useEffect(() => {
+        if (searchParams.get("success") === "true") {
+            setIsPaymentSuccess(true);
+            setStep("confirmation");
+        } else if (searchParams.get("canceled") === "true") {
+            alert("Paiement annulé. Vous pouvez réessayer quand vous voulez.");
+        }
+    }, [searchParams]);
+
 
     useEffect(() => {
         if (status === "loading") return;
@@ -42,6 +54,26 @@ export default function OnboardingPage() {
         const token = (session as any)?.accessToken || (session as any)?.user?.accessToken;
 
         try {
+            // MODE BÊTA : On bypass Stripe pour l'instant
+            // On traite l'abonnement comme une activation normale
+            const planToSave = selectedPlan === 'subscription' ? 'beta_pro' : selectedPlan;
+
+            const res = await fetch(`${API_BASE_URL}/api/users/me/plan`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ plan: planToSave })
+            });
+
+            if (res.ok) {
+                setStep("confirmation");
+            } else {
+                alert("Une erreur est survenue. Veuillez réessayer.");
+            }
+
+            /* CODE STRIPE DÉSACTIVÉ POUR LA BÊTA
             if (selectedPlan === 'subscription') {
                 // 1. Call Backend to create Stripe Session
                 const res = await fetch(`${API_BASE_URL}/api/stripe/create-checkout-session`, {
@@ -86,6 +118,8 @@ export default function OnboardingPage() {
                     alert("Une erreur est survenue. Veuillez réessayer.");
                 }
             }
+            */
+
         } catch (error) {
             console.error(error);
             alert("Erreur de connexion.");
@@ -105,14 +139,18 @@ export default function OnboardingPage() {
                     <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
                         <CheckCircle className="w-8 h-8" />
                     </div>
+                    {/* Message standard pour la Bêta */}
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900 mb-2">Demande envoyée !</h1>
+                        <h1 className="text-2xl font-bold text-slate-900 mb-2">Bienvenue dans la Bêta ! 🚀</h1>
                         <p className="text-slate-500">
-                            Merci de votre inscription. Un administrateur va examiner votre demande et valider votre compte sous peu.
+                            Votre accès a été validé. Profitez de toutes les fonctionnalités gratuitement pendant cette période de test.
                         </p>
-                        <div className="mt-4 p-4 bg-slate-50 rounded-lg text-sm text-slate-600">
-                            Vous recevrez un email de confirmation dès l'activation de votre accès.
+                        <div className="mt-4 p-4 bg-slate-50 rounded-lg text-sm text-slate-600 mb-4">
+                            N'hésitez pas à nous faire vos retours.
                         </div>
+                        <Button onClick={() => router.push("/dashboard")} className="w-full">
+                            Accéder au Dashboard
+                        </Button>
                     </div>
                 </Card>
             </div>
@@ -125,7 +163,7 @@ export default function OnboardingPage() {
                 <div className="text-center mb-12">
                     <h1 className="text-4xl font-bold text-slate-900 mb-4">Bienvenue sur Professeur Virtuel</h1>
                     <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                        Pour finaliser votre inscription, veuillez choisir la formule qui vous convient.
+                        Accès Bêta ouvert : Testez la plateforme gratuitement.
                     </p>
                 </div>
 
@@ -143,11 +181,11 @@ export default function OnboardingPage() {
                                 <Store className="w-6 h-6" />
                             </div>
                             <div>
-                                <h3 className="text-xl font-bold text-slate-900">Essai Gratuit</h3>
-                                <p className="text-slate-500">Pour découvrir la plateforme</p>
+                                <h3 className="text-xl font-bold text-slate-900">Découverte</h3>
+                                <p className="text-slate-500">Pour explorer les fonctionnalités</p>
                             </div>
                             <div className="text-3xl font-bold text-slate-900">
-                                0€ <span className="text-base font-normal text-slate-500">/ 14 jours</span>
+                                Gratuit
                             </div>
                             <ul className="space-y-3 pt-4">
                                 <li className="flex items-center text-slate-600">
@@ -166,7 +204,7 @@ export default function OnboardingPage() {
                         </div>
                     </div>
 
-                    {/* Pro Plan */}
+                    {/* Pro Plan (Bêta) */}
                     <div
                         className={`relative p-8 rounded-2xl border-2 transition-all cursor-pointer bg-white ${selectedPlan === 'subscription'
                             ? 'border-purple-500 shadow-xl scale-105 z-10 ring-4 ring-purple-50'
@@ -175,35 +213,35 @@ export default function OnboardingPage() {
                         onClick={() => handleSelectPlan('subscription')}
                     >
                         <div className="absolute top-0 right-0 bg-purple-500 text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl">
-                            POPULAIRE
+                            RECOMMANDÉ
                         </div>
                         <div className="space-y-4">
                             <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center">
                                 <Sparkles className="w-6 h-6" />
                             </div>
                             <div>
-                                <h3 className="text-xl font-bold text-slate-900">Abonnement Pro</h3>
-                                <p className="text-slate-500">Pour les enseignants engagés</p>
+                                <h3 className="text-xl font-bold text-slate-900">Accès Bêta Testeur</h3>
+                                <p className="text-slate-500">Accès complet à tous les outils</p>
                             </div>
                             <div className="text-3xl font-bold text-slate-900">
-                                9,99€ <span className="text-base font-normal text-slate-500">/ mois</span>
+                                Gratuit <span className="text-base font-normal text-slate-500">(Bêta fermée)</span>
                             </div>
                             <ul className="space-y-3 pt-4">
                                 <li className="flex items-center text-slate-600">
                                     <CheckCircle className="w-5 h-5 text-purple-500 mr-3" />
-                                    Accès illimité à tous les outils
+                                    Tout illimité (Docs, Quiz, IA)
                                 </li>
                                 <li className="flex items-center text-slate-600">
                                     <CheckCircle className="w-5 h-5 text-purple-500 mr-3" />
-                                    Exports Word & PDF Pro
+                                    Exports PDF, Word & Classroom
                                 </li>
                                 <li className="flex items-center text-slate-600">
                                     <CheckCircle className="w-5 h-5 text-purple-500 mr-3" />
-                                    Intégration Google Classroom
+                                    Bibliothèque de supports
                                 </li>
                                 <li className="flex items-center text-slate-600">
                                     <CheckCircle className="w-5 h-5 text-purple-500 mr-3" />
-                                    Support prioritaire
+                                    Assistant IA Éditeur
                                 </li>
                             </ul>
                         </div>
@@ -218,7 +256,7 @@ export default function OnboardingPage() {
                         onClick={handleSubmit}
                     >
                         {isLoading ? <Loader2 className="animate-spin mr-2" /> : null}
-                        {selectedPlan ? "Confirmer mon choix" : "Sélectionnez une offre"}
+                        {selectedPlan ? "Accéder gratuitement" : "Sélectionnez une offre"}
                     </Button>
                     <p className="text-center text-xs text-slate-400 mt-4">
                         Aucun paiement requis pour l'instant. Votre demande sera soumise à validation.
@@ -226,5 +264,13 @@ export default function OnboardingPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function OnboardingPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Chargement...</div>}>
+            <OnboardingContent />
+        </Suspense>
     );
 }

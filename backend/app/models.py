@@ -103,3 +103,21 @@ class PublishedQuiz(Base):
     title = Column(String)
     content = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+# Modèle pour stocker les supports générés
+class GeneratedDocument(Base):
+    __tablename__ = "generated_documents"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    title = Column(String, nullable=False)  # Sujet du document
+    document_type = Column(String, nullable=False)  # dossier_prof, dossier_eleve, quiz, etc.
+    content = Column(Text, nullable=False)  # Contenu markdown
+    duration_hours = Column(Float, nullable=True)  # Durée (optionnel)
+    target_block = Column(String, nullable=True)  # Bloc ciblé (optionnel)
+    google_doc_url = Column(String, nullable=True)  # URL du Google Doc si créé
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relation vers l'utilisateur
+    user = relationship("User")

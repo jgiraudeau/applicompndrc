@@ -238,8 +238,7 @@ export default function Home() {
                       <p>{msg.content}</p>
                     )}
                   </Card>
-                  {/* Classroom Export - DISABLED
-                   {msg.role === "bot" && session?.googleAccessToken && (
+                  {msg.role === "bot" && session?.googleAccessToken && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -253,7 +252,6 @@ export default function Home() {
                       Envoyer vers Classroom
                     </Button>
                   )}
-                  */}
                 </div>
               </div>
             ))}

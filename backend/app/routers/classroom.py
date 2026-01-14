@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Body
 from pydantic import BaseModel
+from typing import List, Optional
 import logging
 import requests
 
@@ -17,7 +18,8 @@ class CourseWorkCreate(BaseModel):
     courseId: str
     title: str
     description: str = ""
-    materials: list = [] 
+    materials: list = []
+    document_url: Optional[str] = None  # URL du Google Doc à attacher
 
 @router.post("/courses")
 async def list_courses(data: GoogleToken = Body(...)):
@@ -68,6 +70,12 @@ async def create_assignment(data: CourseWorkCreate = Body(...)):
             'state': 'DRAFT',
             'submissionModificationMode': 'MODIFIABLE_UNTIL_TURNED_IN',
         }
+        
+        
+        # Si un Google Doc est fourni, ajouter son lien dans la description
+        if data.document_url:
+            base_desc = data.description if data.description else ""
+            body['description'] = f"{base_desc}\n\n📄 Document à consulter :\n{data.document_url}"
         
         response = requests.post(url, headers=headers, json=body)
         
