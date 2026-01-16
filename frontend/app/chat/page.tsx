@@ -16,6 +16,11 @@ import { useTrack } from "@/context/TrackContext";
 
 // ... (other imports)
 
+interface Message {
+  role: "user" | "bot";
+  content: string;
+}
+
 export default function Home() {
   const { currentTrack, getLabel } = useTrack();
   /* State Restoration */
@@ -150,9 +155,40 @@ export default function Home() {
   // ...
 
   const handleSend = async () => {
-    // ...
+    if (!input.trim() && !selectedFile) return;
+
+    // Build message content
+    let msgContent = input;
+    const userMsg: Message = { role: "user", content: msgContent };
+
+    // Optimistic update
+    const newHistory = [...messages, userMsg];
+    setMessages(newHistory);
+
+    setInput("");
+    const fileToUpload = selectedFile;
+    setSelectedFile(null);
+    setIsLoading(true);
+
     try {
-      // ...
+      let activeId = currentFileId; // Start with existing ID
+
+      // 1. Upload new file if exists (replaces previous context)
+      if (fileToUpload) {
+        const formData = new FormData();
+        formData.append("file", fileToUpload);
+
+        const uploadRes = await fetch(`${API_BASE_URL}/api/documents/upload`, {
+          method: "POST",
+          body: formData
+        });
+
+        if (!uploadRes.ok) throw new Error("Échec de l'upload");
+        const uploadData = await uploadRes.json();
+        activeId = uploadData.gemini_file_name;
+        setCurrentFileId(activeId);
+        setCurrentFileName(fileToUpload.name);
+      }
 
       // 2. Send Message with HISTORY and PERSISTENT FILE ID
       const response = await fetch(`${API_BASE_URL}/api/chat`, {
@@ -166,9 +202,20 @@ export default function Home() {
         }),
       });
 
-      // ...
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Erreur ${response.status}: ${errorText || response.statusText}`);
+      }
+
+      const data = await response.json();
+      const botMsg: Message = { role: "bot", content: data.response };
+      setMessages((prev) => [...prev, botMsg]);
     } catch (error: any) {
-      // ...
+      console.error(error);
+      const errorMsg: Message = { role: "bot", content: `❌ Désolé, je rencontre un problème technique : ${error.message}` };
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
