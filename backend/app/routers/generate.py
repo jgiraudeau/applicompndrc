@@ -140,6 +140,7 @@ class GenerateRequest(BaseModel):
     duration_hours: Optional[int] = 4
     target_block: Optional[str] = None
     document_type: Literal["dossier_prof", "dossier_eleve", "fiche_deroulement", "evaluation", "quiz", "planning_annuel"] = "dossier_prof"
+    category: Optional[str] = "bts_ndrc"
 
 class GenerateResponse(BaseModel):
     content: str
@@ -161,11 +162,12 @@ async def generate_document(request: GenerateRequest, db: Session = Depends(get_
 
 **Thème** : {request.topic}
 **Durée souhaitée** : {request.duration_hours} heures
+**Filière / Contexte** : {request.category}
 """
         if request.target_block:
             user_prompt += f"**Bloc ciblé** : {request.target_block}\n"
 
-        user_prompt += "\nUtilise le référentiel BTS NDRC et les synthèses de cours disponibles."
+        user_prompt += "\nUtilise le référentiel officiel et les synthèses de cours disponibles en contexte."
 
         model = gemini_service.get_model(custom_system_instruction=system_prompt)
         
@@ -173,9 +175,19 @@ async def generate_document(request: GenerateRequest, db: Session = Depends(get_
         
         # Lazy import to avoid startup delays
         from backend.app.services.knowledge_service import knowledge_base
-        kb_files = knowledge_base.get_all_file_ids()
         
-        for file_id in kb_files[:3]:
+        # FILTER BY CATEGORY
+        # Default to 'bts_ndrc' if none provided for backward compatibility
+        target_category = request.category if request.category else 'bts_ndrc'
+        
+        # Retrieve ONLY files from the selected track
+        kb_files = knowledge_base.get_file_ids_by_category(target_category)
+        
+        # If no files found for category, fallback to general or warn
+        if not kb_files:
+            print(f"⚠️ No files found for category: {target_category}")
+        
+        for file_id in kb_files[:10]: # Increased context limit as we are more targeted
             try:
                 file_obj = genai.get_file(file_id)
                 content_parts.append(file_obj)

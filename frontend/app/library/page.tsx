@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
 import { API_BASE_URL } from "@/lib/api";
-import { FileText, Users, ListChecks, ClipboardCheck, HelpCircle, Calendar, Trash2, ExternalLink, Download } from "lucide-react";
+import { FileText, Users, ListChecks, ClipboardCheck, HelpCircle, Calendar, Trash2, ExternalLink, Download, Share, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 const DOCUMENT_ICONS: any = {
@@ -84,6 +84,105 @@ export default function MyDocumentsPage() {
         }
     };
 
+    const [courses, setCourses] = useState<any[]>([]);
+    const [isClassroomModalOpen, setIsClassroomModalOpen] = useState(false);
+    const [contentToExport, setContentToExport] = useState<string>("");
+    const [selectedCourseId, setSelectedCourseId] = useState<string>("");
+    const [exportLoading, setExportLoading] = useState(false);
+
+    const fetchCourses = async () => {
+        if (!(session as any)?.googleAccessToken) {
+            alert("Veuillez vous reconnecter avec Google pour utiliser cette fonctionnalité.");
+            return;
+        }
+        try {
+            setExportLoading(true);
+            const res = await fetch(`${API_BASE_URL}/api/classroom/courses`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token: (session as any).googleAccessToken })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setCourses(data);
+                if (data.length > 0) setSelectedCourseId(data[0].id);
+                setIsClassroomModalOpen(true);
+            } else {
+                alert("Impossible de récupérer vos cours Google Classroom.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Erreur technique.");
+        } finally {
+            setExportLoading(false);
+        }
+    };
+
+    const handleExportToClassroom = async () => {
+        if (!selectedCourseId) return;
+        setExportLoading(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/classroom/coursework`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    token: (session as any).googleAccessToken,
+                    courseId: selectedCourseId,
+                    title: selectedDoc?.title || "Document exporté",
+                    description: selectedDoc?.content || ""
+                })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                alert(`Devoir créé avec succès ! Lien : ${data.url}`);
+                setIsClassroomModalOpen(false);
+            } else {
+                alert("Erreur lors de la création du devoir.");
+            }
+        } catch (e) {
+            alert("Erreur technique.");
+        } finally {
+            setExportLoading(false);
+        }
+    };
+
+    const handleExport = async (format: "pdf" | "docx") => {
+        if (!selectedDoc) return;
+
+        try {
+            const token = (session as any)?.accessToken;
+            // Use existing export endpoints
+            const res = await fetch(`${API_BASE_URL}/api/export/${format}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    content: selectedDoc.content,
+                    filename: selectedDoc.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()
+                })
+            });
+
+            if (res.ok) {
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `${selectedDoc.title}.${format}`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } else {
+                alert("Erreur lors de l'export");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Erreur technique");
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex flex-col h-screen bg-slate-50">
@@ -157,6 +256,36 @@ export default function MyDocumentsPage() {
                                     </p>
                                 </div>
                                 <div className="flex gap-2">
+                                    {(session as any)?.googleAccessToken && (
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="text-green-600 border-green-200 hover:bg-green-50"
+                                            onClick={() => fetchCourses()}
+                                        >
+                                            <Share className="w-4 h-4 mr-1" />
+                                            Classroom
+                                        </Button>
+                                    )}
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="text-red-600 border-red-200 hover:bg-red-50"
+                                        onClick={() => handleExport('pdf')}
+                                    >
+                                        <FileText className="w-4 h-4 mr-1" />
+                                        PDF
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                                        onClick={() => handleExport('docx')}
+                                    >
+                                        <FileText className="w-4 h-4 mr-1" />
+                                        Word
+                                    </Button>
+
                                     {selectedDoc.google_doc_url && (
                                         <Button
                                             variant="outline"
@@ -164,7 +293,7 @@ export default function MyDocumentsPage() {
                                             onClick={() => window.open(selectedDoc.google_doc_url, '_blank')}
                                         >
                                             <ExternalLink className="w-4 h-4 mr-1" />
-                                            Ouvrir Google Doc
+                                            Google Doc
                                         </Button>
                                     )}
                                     <Button
@@ -198,6 +327,43 @@ export default function MyDocumentsPage() {
                     )}
                 </div>
             </div>
+
+            {/* Modal Google Classroom */}
+            {isClassroomModalOpen && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                    <Card className="w-full max-w-md bg-white">
+                        <div className="p-6">
+                            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                                <span className="text-green-600">Google Classroom</span>
+                                Exporter le contenu
+                            </h2>
+                            <p className="text-sm text-gray-500 mb-4">
+                                Sélectionnez le cours dans lequel créer un devoir brouillon.
+                            </p>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-xs font-semibold uppercase text-gray-400 block mb-1">Cours</label>
+                                    <select
+                                        className="w-full border rounded p-2 text-sm"
+                                        value={selectedCourseId}
+                                        onChange={(e) => setSelectedCourseId(e.target.value)}
+                                    >
+                                        {courses.map(c => (
+                                            <option key={c.id} value={c.id}>{c.name} {c.section ? `(${c.section})` : ''}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="flex justify-end gap-2 pt-2">
+                                    <Button variant="ghost" onClick={() => setIsClassroomModalOpen(false)}>Annuler</Button>
+                                    <Button onClick={handleExportToClassroom} disabled={exportLoading}>
+                                        {exportLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : "Créer le devoir"}
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </Card>
+                </div>
+            )}
         </div>
     );
 }

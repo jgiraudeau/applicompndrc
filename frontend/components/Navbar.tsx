@@ -15,9 +15,12 @@ import {
     BookOpen
 } from "lucide-react";
 
+import { useTrack, AVAILABLE_TRACKS } from "@/context/TrackContext";
+
 export function Navbar() {
     const { data: session } = useSession();
     const pathname = usePathname();
+    const { currentTrack, setTrack, getLabel } = useTrack();
 
     const isActive = (path: string) => pathname === path;
 
@@ -30,7 +33,7 @@ export function Navbar() {
                 </div>
                 <div className="hidden md:block">
                     <h1 className="font-bold text-xl text-slate-800">Professeur Virtuel</h1>
-                    <p className="text-xs text-slate-500">BTS NDRC • Assistant Pédagogique IA</p>
+                    <p className="text-xs text-slate-500">{getLabel(currentTrack)} • Assistant Pédagogique IA</p>
                 </div>
             </Link>
 
@@ -93,6 +96,19 @@ export function Navbar() {
             <div className="flex items-center gap-2 border-l pl-4 ml-2">
                 {session?.user?.name && (
                     <div className="hidden lg:flex items-center gap-2 mr-2">
+                        {/* Track Selector */}
+                        <div className="mr-2">
+                            <select
+                                value={currentTrack}
+                                onChange={(e) => setTrack(e.target.value)}
+                                className="text-xs border-none bg-slate-100 rounded-md px-2 py-1 font-medium text-slate-700 focus:ring-0 cursor-pointer hover:bg-slate-200 transition-colors"
+                            >
+                                {AVAILABLE_TRACKS.map(t => (
+                                    <option key={t.id} value={t.id}>{t.label}</option>
+                                ))}
+                            </select>
+                        </div>
+
                         <div className="bg-slate-100 p-1.5 rounded-full">
                             <User className="w-4 h-4 text-slate-500" />
                         </div>

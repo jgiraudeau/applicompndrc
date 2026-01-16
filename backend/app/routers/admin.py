@@ -8,6 +8,57 @@ from ..database import get_db
 
 router = APIRouter()
 
+from ..services.knowledge_service import knowledge_base
+
+@router.post("/scan")
+def scan_knowledge_base(
+    current_user: models.User = Depends(auth.get_current_admin_user)
+):
+    """
+    Scans the /knowledge directory and uploads files to Gemini for RAG.
+    """
+    try:
+        files = knowledge_base.scan_and_load()
+        return {"success": True, "files_loaded": len(files), "details": files}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/rag-debug")
+def debug_rag_status(
+    current_user: models.User = Depends(auth.get_current_admin_user)
+):
+    """
+    Returns the list of files currently tracked by the Knowledge Base service
+    and attempts to verify them against Gemini API.
+    """
+    try:
+        # 1. Local tracking
+        local_files = knowledge_base.file_index
+        
+        # 2. Gemini API check (listing first 100 to avoid latency)
+        import google.generativeai as genai
+        remote_files = []
+        try:
+             for f in genai.list_files(page_size=100):
+                 remote_files.append({
+                     "name": f.name,
+                     "display_name": f.display_name,
+                     "mime_type": f.mime_type,
+                     "state": f.state.name,
+                     "uri": f.uri
+                 })
+        except Exception as api_e:
+            remote_files = [{"error": f"Failed to fetch from Gemini: {str(api_e)}"}]
+
+        return {
+            "local_index_count": len(local_files),
+            "local_index": local_files,
+            "remote_file_count": len(remote_files) if "error" not in remote_files[0] else 0,
+            "remote_files": remote_files
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 class UserAdminView(BaseModel):
     id: str
     email: str

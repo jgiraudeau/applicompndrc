@@ -97,7 +97,7 @@ class PDFGenerator(FPDF):
                 self.set_x(self.l_margin + indent_margin)
                 
                 # Puce personnalisée selon le niveau
-                bullet = "•" if indent_level == 0 else "-"
+                bullet = "*" if indent_level == 0 else "-"
                 content = clean_line[2:]
                 
                 # Détection gras simple (**text**) -> on enlève les étoiles pour l'affichage (fpdf basic ne supporte pas le rich text facile)

@@ -98,8 +98,18 @@ async def lifespan(app: FastAPI):
 
     # Startup: Knowledge base scan is now MANUAL to avoid Railway startup timeouts
     # Use POST /api/admin/scan to trigger the scan after deployment
+    # Startup: Knowledge base scan
+    # Use POST /api/admin/scan to trigger the scan manually if needed
     print("🚀 Application starting up... (Version 0.2.2)")
-    print("ℹ️ Knowledge base scan is DISABLED at startup. Use POST /api/admin/scan to load files.")
+    
+    # Auto-scan logic
+    try:
+        from backend.app.services.knowledge_service import knowledge_base
+        print("🔄 Auto-scanning knowledge base...")
+        knowledge_base.scan_and_load()
+    except Exception as e:
+        print(f"⚠️ Auto-scan failed: {e}")
+
     yield
     # Shutdown
     print("👋 Application shutting down...")

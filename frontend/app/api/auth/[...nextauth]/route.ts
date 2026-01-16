@@ -136,28 +136,26 @@ const authOptions: AuthOptions = {
             if (token.accessToken) {
                 try {
                     // Always fetch user profile to sync role/status changes from backend
-                    // if (!token.role) { // REMOVED: Force sync
                     const apiUrl = getApiUrl();
+                    // Avoid fetch loop if too frequent, but for now we force sync
                     const meRes = await fetch(`${apiUrl}/api/auth/me`, {
-                        headers: { Authorization: `Bearer ${token.accessToken}` }
+                        headers: { Authorization: `Bearer ${token.accessToken}` },
+                        cache: 'no-store' // Critical: prevent caching old role
                     });
 
                     if (meRes.ok) {
                         const userProfile = await meRes.json();
-                        console.log("DEBUG: Backend /me response:", userProfile); // LOG ADDED
+                        console.log("DEBUG: Backend /me response role:", userProfile.role);
                         token.role = userProfile.role;
-                        token.id = userProfile.id; // Store backend ID
+                        token.id = userProfile.id;
                         token.email = userProfile.email;
                         token.status = userProfile.status;
                         token.plan_selection = userProfile.plan_selection;
+                    } else {
+                        console.error("DEBUG: Failed to fetch /me:", meRes.status);
                     }
                 } catch (e) {
                     console.error("Error fetching user profile in JWT callback", e);
-                    // Keep existing role if backend fails (Resilience)
-                    if (token.role) {
-                        console.log("DEBUG: Backend unreachable, keeping existing role:", token.role);
-                        return token;
-                    }
                 }
             }
 

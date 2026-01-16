@@ -78,14 +78,14 @@ class GeminiService:
             system_instruction=full_system_instruction
         )
 
-    def upload_file_to_gemini(self, file_path: str, mime_type: str = None):
+    def upload_file_to_gemini(self, file_path: str, mime_type: str = None, display_name: str = None):
         """Uploads a file to Gemini and waits for processing."""
         try:
             print(f"👉 Uploading {file_path} to Gemini...")
             if mime_type:
-                uploaded_file = genai.upload_file(file_path, mime_type=mime_type)
+                uploaded_file = genai.upload_file(file_path, mime_type=mime_type, display_name=display_name)
             else:
-                uploaded_file = genai.upload_file(file_path)
+                uploaded_file = genai.upload_file(file_path, display_name=display_name)
             
             print(f"   File ID: {uploaded_file.name}")
             
@@ -114,31 +114,58 @@ class GeminiService:
         except Exception as e:
             return f"Error: {e}"
 
-    def chat_with_history(self, message: str, history: list = [], file_uri: str = None):
-        """Chat with conversation history and optional file context."""
+    def chat_with_history(self, message: str, history: list = [], file_uri: str = None, knowledge_files: list = [], context_label: str = "bts_ndrc"):
+        """Chat with conversation history, optional uploaded file, and background knowledge base."""
         try:
-            model = self.get_model()
+            # Customize system instruction based on track
+            track_name = context_label.upper().replace("_", " ")
+            custom_instruction = f"Tu es un professeur expert en {track_name}. Base tes réponses sur les documents fournis s'ils sont pertinents."
+            
+            model = self.get_model(custom_system_instruction=custom_instruction)
             
             chat_history = []
             
-            # 1. Add File Context (as a separate turn or system-like context)
-            if file_uri:
-                print(f"👉 Including file context: {file_uri}")
-                try:
-                    file_obj = genai.get_file(file_uri)
-                    # We inject the file as the first user message
+            # 1. Add Knowledge Base Files (Background Context)
+            # We limit to 5 files to avoid token overload
+            if knowledge_files:
+                parts = ["Voici les documents de référence le contexte (cours, référentiels) :"]
+                added_count = 0
+                for k_file_id in knowledge_files[:5]:
+                    try:
+                        f_obj = genai.get_file(k_file_id)
+                        parts.append(f_obj)
+                        added_count += 1
+                    except:
+                        pass
+                
+                if added_count > 0:
                     chat_history.append({
                         "role": "user",
-                        "parts": [file_obj, "Voici le document de référence pour notre conversation."]
+                        "parts": parts
                     })
                     chat_history.append({
                         "role": "model",
-                        "parts": ["Bien reçu. Je utiliserai ce document pour répondre à vos questions."]
+                        "parts": ["Bien reçu. J'ai pris connaissance des documents de référence."]
+                    })
+
+            # 2. Add Specific Uploaded File (User's active file)
+            if file_uri:
+                print(f"👉 Including user file context: {file_uri}")
+                try:
+                    file_obj = genai.get_file(file_uri)
+                    # We inject the file as the first user message (or next)
+                    chat_history.append({
+                        "role": "user",
+                        "parts": [file_obj, "Voici un document spécifique que je veux analyser."]
+                    })
+                    chat_history.append({
+                        "role": "model",
+                        "parts": ["Bien reçu. J'analyse ce document spécifique."]
                     })
                 except Exception as e:
                     print(f"⚠️ Could not retrieve file {file_uri}: {e}")
             
-            # 2. Add Conversation History
+            # 3. Add Conversation History
             for msg in history:
                 role = "user" if msg['role'] == "user" else "model"
                 chat_history.append({
@@ -146,10 +173,10 @@ class GeminiService:
                     "parts": [msg['content']]
                 })
 
-            # 3. Start Chat Session
+            # 4. Start Chat Session
             chat = model.start_chat(history=chat_history)
             
-            # 4. Send new message
+            # 5. Send new message
             response = chat.send_message(message)
             return response.text
         except Exception as e:

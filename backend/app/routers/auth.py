@@ -130,8 +130,8 @@ def google_login(token_data: GoogleToken, db: Session = Depends(get_db)):
         # Fetch Client ID from Env
         client_id = os.getenv("GOOGLE_CLIENT_ID")
         if not client_id:
-            # Fallback for local debugging if .env is missing, but prefer Env.
-            client_id = "217122577762-f6glm4d9hod0vc2jlee2th8nhmaeinlf.apps.googleusercontent.com"
+            print("❌ GOOGLE_CLIENT_ID is missing in backend environment!")
+            raise HTTPException(status_code=500, detail="Server Configuration Error: Missing Google Client ID")
 
         # Validate Google Token
         idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), client_id) 

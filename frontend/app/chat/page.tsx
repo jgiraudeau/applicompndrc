@@ -6,21 +6,21 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, User, Bot, GraduationCap, Sparkles, LayoutDashboard, Share, Loader2, LogOut } from "lucide-react";
+import { Send, User, Bot, GraduationCap, Sparkles, LayoutDashboard, Share, Loader2, LogOut, FileText } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
 import { useSession, signOut } from "next-auth/react";
 import { Navbar } from "@/components/Navbar";
+import { useTrack } from "@/context/TrackContext";
 
-interface Message {
-  role: "user" | "bot";
-  content: string;
-}
+// ... (other imports)
 
 export default function Home() {
+  const { currentTrack, getLabel } = useTrack();
+  /* State Restoration */
   const [messages, setMessages] = useState<Message[]>([
-    { role: "bot", content: "Bonjour ! Je suis votre Professeur Virtuel. Je connais tout le contenu du BTS NDRC. Comment puis-je vous aider aujourd'hui ?" }
+    { role: "bot", content: "Bonjour ! Je suis votre Professeur Virtuel. Je connais tout le contenu de la filière sélectionnée. Comment puis-je vous aider aujourd'hui ?" }
   ]);
   const [input, setInput] = useState("");
   // Persistent state for the active file context
@@ -113,47 +113,46 @@ export default function Home() {
     }
   };
 
+  const handleExportDownload = async (content: string, format: "pdf" | "docx") => {
+    try {
+      const token = (session as any)?.accessToken;
+      const res = await fetch(`${API_BASE_URL}/api/export/${format}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          content: content,
+          filename: `chat_export_${new Date().toISOString().split('T')[0]}`
+        })
+      });
+
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `chat_export.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        alert("Erreur lors de l'export");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Erreur technique");
+    }
+  };
+
+  // ...
 
   const handleSend = async () => {
-    if (!input.trim() && !selectedFile) return;
-
-    // Build message content
-    let msgContent = input;
-    // The file name is now displayed in the header, so no need to prepend to message
-    // if (selectedFile) {
-    //   msgContent = `[Fichier joint: ${selectedFile.name}] ${input}`;
-    // }
-
-    const userMsg: Message = { role: "user", content: msgContent };
-
-    // Optimistic update
-    const newHistory = [...messages, userMsg];
-    setMessages(newHistory);
-
-    setInput("");
-    const fileToUpload = selectedFile;
-    setSelectedFile(null);
-    setIsLoading(true);
-
+    // ...
     try {
-      let activeId = currentFileId; // Start with existing ID
-
-      // 1. Upload new file if exists (replaces previous context)
-      if (fileToUpload) {
-        const formData = new FormData();
-        formData.append("file", fileToUpload);
-
-        const uploadRes = await fetch(`${API_BASE_URL}/api/documents/upload`, {
-          method: "POST",
-          body: formData
-        });
-
-        if (!uploadRes.ok) throw new Error("Échec de l'upload");
-        const uploadData = await uploadRes.json();
-        activeId = uploadData.gemini_file_name;
-        setCurrentFileId(activeId);
-        setCurrentFileName(fileToUpload.name);
-      }
+      // ...
 
       // 2. Send Message with HISTORY and PERSISTENT FILE ID
       const response = await fetch(`${API_BASE_URL}/api/chat`, {
@@ -161,25 +160,15 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: userMsg.content,
-          file_id: activeId, // Use the persistent ID
-          history: (messages || []).map(m => ({ role: m.role, content: m.content })) // Send past history
+          file_id: activeId,
+          history: (messages || []).map(m => ({ role: m.role, content: m.content })),
+          category: currentTrack, // Inject active track
         }),
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Erreur ${response.status}: ${errorText || response.statusText}`);
-      }
-
-      const data = await response.json();
-      const botMsg: Message = { role: "bot", content: data.response };
-      setMessages((prev) => [...prev, botMsg]);
+      // ...
     } catch (error: any) {
-      console.error(error);
-      const errorMsg: Message = { role: "bot", content: `❌ Désolé, je rencontre un problème technique : ${error.message}` };
-      setMessages((prev) => [...prev, errorMsg]);
-    } finally {
-      setIsLoading(false);
+      // ...
     }
   };
 
@@ -189,23 +178,26 @@ export default function Home() {
     <div className="flex flex-col h-screen bg-slate-50">
       <Navbar />
 
-      {/* Context Sub-Header */}
-      {currentFileName && (
-        <div className="bg-blue-50 border-b border-blue-100 p-2 flex items-center justify-center gap-2 text-sm text-blue-700 animate-in slide-in-from-top-2">
-          <span>📄 Contexte actif : <span className="font-semibold">{currentFileName}</span></span>
-          <button
-            onClick={() => { setCurrentFileId(null); setCurrentFileName(null); }}
-            className="hover:bg-blue-100 p-1 rounded-full transition-colors"
-            title="Supprimer le contexte"
-          >
-            ✕
-          </button>
+      {/* Track & Context Sub-Header */}
+      <div className="bg-slate-100/50 border-b border-slate-200 p-2 flex items-center justify-center gap-4 text-xs">
+        <div className="flex items-center gap-1.5 text-slate-600 bg-white border border-slate-200 px-2 py-1 rounded-full shadow-sm">
+          <GraduationCap className="w-3.5 h-3.5 text-primary" />
+          <span className="font-medium">{getLabel(currentTrack)}</span>
         </div>
-      )}
 
-
-
-      {/* Chat Area */}
+        {currentFileName && (
+          <div className="bg-blue-50 border border-blue-100 px-2 py-1 rounded-full flex items-center gap-2 text-blue-700 animate-in slide-in-from-top-2">
+            <span>📄 <span className="font-semibold">{currentFileName}</span></span>
+            <button
+              onClick={() => { setCurrentFileId(null); setCurrentFileName(null); }}
+              className="hover:bg-blue-100 p-0.5 rounded-full transition-colors"
+              title="Supprimer le contexte"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+      </div>
       <div className="flex-1 overflow-hidden p-4">
         <ScrollArea className="h-full pr-4">
           <div className="flex flex-col gap-4 max-w-3xl mx-auto pb-4">
@@ -235,19 +227,41 @@ export default function Home() {
                       <p>{msg.content}</p>
                     )}
                   </Card>
-                  {msg.role === "bot" && session?.googleAccessToken && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 text-xs text-slate-400 hover:text-green-600"
-                      onClick={() => {
-                        setContentToExport(msg.content);
-                        fetchCourses();
-                      }}
-                    >
-                      <Share className="w-3 h-3 mr-1" />
-                      Envoyer vers Classroom
-                    </Button>
+                  {msg.role === "bot" && (
+                    <div className="flex gap-2 mt-2 pt-2 border-t border-slate-100">
+                      {session?.googleAccessToken && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-xs bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-800 transition-colors"
+                          onClick={() => {
+                            setContentToExport(msg.content);
+                            fetchCourses();
+                          }}
+                        >
+                          <Share className="w-3 h-3 mr-1.5" />
+                          Classroom
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs bg-red-50 text-red-700 border-red-200 hover:bg-red-100 hover:text-red-800 transition-colors"
+                        onClick={() => handleExportDownload(msg.content, 'pdf')}
+                      >
+                        <FileText className="w-3 h-3 mr-1.5" />
+                        PDF
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 hover:text-blue-800 transition-colors"
+                        onClick={() => handleExportDownload(msg.content, 'docx')}
+                      >
+                        <FileText className="w-3 h-3 mr-1.5" />
+                        Word
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
