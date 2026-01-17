@@ -5,7 +5,7 @@ import google.generativeai as genai
 from backend.app.services.gemini_service import gemini_service
 
 # Knowledge base root
-KNOWLEDGE_DIR = Path(__file__).resolve().parent.parent.parent.parent / 'knowledge'
+KNOWLEDGE_DIR = Path(__file__).resolve().parent.parent.parent / 'knowledge'
 
 class KnowledgeBase:
     def __init__(self):
