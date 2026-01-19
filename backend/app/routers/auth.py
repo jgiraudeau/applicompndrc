@@ -34,7 +34,22 @@ class UserResponse(BaseModel):
     full_name: str
     organization_name: str
     role: str
+    plan_selection: Optional[str] = "trial"
+    stripe_customer_id: Optional[str] = None
 
+# ...
+
+@router.get("/me", response_model=UserResponse)
+def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
+    return {
+        "id": current_user.id,
+        "email": current_user.email,
+        "full_name": current_user.full_name,
+        "organization_name": current_user.organization.name if current_user.organization else "Sans organisation",
+        "role": current_user.role,
+        "plan_selection": current_user.plan_selection,
+        "stripe_customer_id": current_user.stripe_customer_id
+    }
 @router.post("/register", response_model=Token)
 def register(user_data: UserCreate, db: Session = Depends(get_db)):
     # 1. Check if user exists
@@ -109,15 +124,7 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     access_token = auth.create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.get("/me", response_model=UserResponse)
-def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
-    return {
-        "id": current_user.id,
-        "email": current_user.email,
-        "full_name": current_user.full_name,
-        "organization_name": current_user.organization.name,
-        "role": current_user.role
-    }
+
 
 class GoogleToken(BaseModel):
     token: str

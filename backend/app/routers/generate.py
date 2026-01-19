@@ -146,13 +146,22 @@ class GenerateResponse(BaseModel):
     document_type: str
     log_id: Optional[int] = None
 
+from backend.app.auth import get_current_user
+from backend.app.models import User
+from backend.app.services.usage_service import check_and_increment_usage
+
+# ...
+
 @router.post("/course", response_model=GenerateResponse)
-async def generate_document(request: GenerateRequest, db: Session = Depends(get_db)):
+async def generate_document(request: GenerateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """
     Generates a specific type of pedagogical document.
     """
     if not request.topic:
         raise HTTPException(status_code=400, detail="Topic is required")
+    
+    # Check Quota before generating expensive AI content
+    check_and_increment_usage(db, current_user, 'generate_course')
     
     try:
         system_prompt = PROMPTS.get(request.document_type, PROMPTS["dossier_prof"])
@@ -192,7 +201,8 @@ async def generate_document(request: GenerateRequest, db: Session = Depends(get_
                 document_type=request.document_type,
                 topic=request.topic,
                 duration_hours=request.duration_hours,
-                target_block=request.target_block
+                target_block=request.target_block,
+                user_id=current_user.id
             )
             db.add(new_log)
             db.commit()

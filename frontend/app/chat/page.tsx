@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, User, Bot, GraduationCap, Sparkles, LayoutDashboard, Share, Loader2, LogOut } from "lucide-react";
+import { Send, User, Bot, GraduationCap, Sparkles, LayoutDashboard, Share, Loader2, LogOut, FileText } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
@@ -51,6 +51,24 @@ export default function Home() {
   };
 
   const { data: session }: any = useSession();
+
+  useEffect(() => {
+    if (session?.user) {
+      const user = session.user as any;
+      console.log("🔒 CHECKING ACCESS (Chat):", {
+        email: user.email,
+        plan: user.plan_selection,
+        stripeId: user.stripeCustomerId
+      });
+
+      // GATEKEEPER: Redirect to payment if Pro checked but not paid
+      if (user.plan_selection === 'subscription' && !user.stripeCustomerId) {
+        console.log("🔒 Paiement requis. Redirection vers Onboarding.");
+        window.location.href = "/onboarding";
+        return;
+      }
+    }
+  }, [session]);
   const [courses, setCourses] = useState<any[]>([]);
   const [isClassroomModalOpen, setIsClassroomModalOpen] = useState(false);
   const [contentToExport, setContentToExport] = useState<string>("");
@@ -113,6 +131,59 @@ export default function Home() {
     }
   };
 
+  const handleExportDownload = async (content: string, format: string) => {
+    try {
+      const token = (session as any)?.accessToken;
+      // Adjust endpoint logic: use /api/export/quiz/... for quiz types if needed, 
+      // but here we might rely on the generic /api/export/{format} if valid, 
+      // OR better, mirroring logic from generate page:
+      let endpoint = `${API_BASE_URL}/api/export/${format}`;
+      if (format.includes('quiz/') || format === 'gift') {
+        // If the format passed is 'quiz/gift', endpoint becomes .../api/export/quiz/gift
+        // If just 'gift', we might need to adjust. Assuming format passed is full path suffix.
+        // Actually, let's keep it simple as implemented: endpoint is .../api/export/{format}
+        // The format passed from button is 'quiz/gift', so endpoint: .../api/export/quiz/gift. Correct.
+      }
+
+      const res = await fetch(`${API_BASE_URL}/api/export/${format}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          content: content,
+          filename: `export_profvirtuel_${Date.now()}`
+        })
+      });
+
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+
+        // Determiner l'extension selon le format
+        let ext = format === 'pdf' ? 'pdf' : 'docx';
+        if (format.includes('gift')) ext = 'txt';
+        if (format.includes('wooclap')) ext = 'xlsx';
+        if (format.includes('google')) ext = 'csv';
+
+        a.download = `profvirtuel_${format.replace('/', '_')}_${Date.now()}.${ext}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        alert("Erreur lors de l'export");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Erreur technique");
+    }
+  };
+
+  // ...
 
   const handleSend = async () => {
     if (!input.trim() && !selectedFile) return;
@@ -156,9 +227,14 @@ export default function Home() {
       }
 
       // 2. Send Message with HISTORY and PERSISTENT FILE ID
+      const token = (session as any)?.accessToken || (session as any)?.user?.accessToken;
+
       const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({
           message: userMsg.content,
           file_id: activeId, // Use the persistent ID
@@ -238,22 +314,49 @@ export default function Home() {
                       <p>{msg.content}</p>
                     )}
                   </Card>
-                  {/* Classroom Export - DISABLED
-                   {msg.role === "bot" && session?.googleAccessToken && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 text-xs text-slate-400 hover:text-green-600"
-                      onClick={() => {
-                        setContentToExport(msg.content);
-                        fetchCourses();
-                      }}
-                    >
-                      <Share className="w-3 h-3 mr-1" />
-                      Envoyer vers Classroom
-                    </Button>
+                  {msg.role === "bot" && (
+                    <div className="flex gap-2 mt-2 pt-2 border-t border-slate-100">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-800 transition-colors"
+                        onClick={() => {
+                          setContentToExport(msg.content);
+                          fetchCourses();
+                        }}
+                      >
+                        <Share className="w-3 h-3 mr-1.5" />
+                        Classroom
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs bg-red-50 text-red-700 border-red-200 hover:bg-red-100 hover:text-red-800 transition-colors"
+                        onClick={() => handleExportDownload(msg.content, 'pdf')}
+                      >
+                        <FileText className="w-3 h-3 mr-1.5" />
+                        PDF
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100 hover:text-orange-800 transition-colors"
+                        onClick={() => handleExportDownload(msg.content, 'quiz/gift')}
+                      >
+                        <FileText className="w-3 h-3 mr-1.5" />
+                        Moodle
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 hover:text-blue-800 transition-colors"
+                        onClick={() => handleExportDownload(msg.content, 'docx')}
+                      >
+                        <FileText className="w-3 h-3 mr-1.5" />
+                        Word
+                      </Button>
+                    </div>
                   )}
-                  */}
                 </div>
               </div>
             ))}

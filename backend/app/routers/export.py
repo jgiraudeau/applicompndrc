@@ -10,6 +10,10 @@ import pandas as pd
 from backend.app.services.gemini_service import gemini_service
 import json
 
+from backend.app.auth import get_current_user
+from backend.app.models import User
+from fastapi import Depends
+
 router = APIRouter()
 
 class ExportRequest(BaseModel):
@@ -119,7 +123,7 @@ def md_to_docx(md_text):
     return result.getvalue()
 
 @router.post("/pdf")
-async def export_pdf(request: ExportRequest):
+async def export_pdf(request: ExportRequest, current_user: User = Depends(get_current_user)):
     try:
         pdf_bytes = md_to_pdf(request.content)
         return Response(
@@ -135,7 +139,7 @@ async def export_pdf(request: ExportRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/docx")
-async def export_docx(request: ExportRequest):
+async def export_docx(request: ExportRequest, current_user: User = Depends(get_current_user)):
     try:
         docx_bytes = md_to_docx(request.content)
         return Response(
@@ -153,7 +157,7 @@ async def export_docx(request: ExportRequest):
 # --- Specialized Quiz Exports ---
 
 @router.post("/quiz/gift")
-async def export_gift(request: ExportRequest):
+async def export_gift(request: ExportRequest, current_user: User = Depends(get_current_user)):
     """
     Transforms a Markdown quiz into Moodle GIFT format using Gemini.
     """
@@ -192,7 +196,7 @@ async def export_gift(request: ExportRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/quiz/wooclap")
-async def export_wooclap(request: ExportRequest):
+async def export_wooclap(request: ExportRequest, current_user: User = Depends(get_current_user)):
     """
     Transforms a Markdown quiz into an Excel file for Wooclap using the specific template.
     """
@@ -249,7 +253,7 @@ async def export_wooclap(request: ExportRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/quiz/google")
-async def export_google(request: ExportRequest):
+async def export_google(request: ExportRequest, current_user: User = Depends(get_current_user)):
     """
     Transforms a Markdown quiz into a CSV for Google Forms imports.
     """

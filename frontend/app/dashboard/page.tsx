@@ -15,7 +15,8 @@ import {
     Clock,
     Tag,
     Share2,
-    ExternalLink
+    ExternalLink,
+    Sparkles // Added Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
@@ -34,12 +35,22 @@ interface PublishedQuiz {
     date: string;
 }
 
+interface Quota {
+    plan: string;
+    generation_count: number;
+    max_generations: number;
+    chat_count: number;
+    max_chat: number;
+    trial_days_remaining: number;
+}
+
 interface Stats {
     total_generated: number;
     by_type: Record<string, number>;
     by_block: Record<string, number>;
     recent: Activity[];
     published: PublishedQuiz[];
+    quota: Quota;
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -58,18 +69,46 @@ export default function DashboardPage() {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        setMounted(true);
-        fetch(`${API_BASE_URL}/api/dashboard/stats`)
-            .then(res => res.json())
-            .then(data => {
-                setStats(data);
-                setIsLoading(false);
-            })
-            .catch(err => {
-                console.error("Error fetching stats:", err);
-                setIsLoading(false);
+        if (session?.user) {
+            const user = session.user as any;
+            console.log("🔒 CHECKING ACCESS:", {
+                email: user.email,
+                plan: user.plan_selection,
+                stripeId: user.stripeCustomerId
             });
-    }, []);
+
+            // GATEKEEPER: Redirect to payment if Pro checked but not paid
+            if (user.plan_selection === 'subscription' && !user.stripeCustomerId) {
+                console.log("🔒 Paiement requis. Redirection vers Onboarding.");
+                window.location.href = "/onboarding";
+                return;
+            }
+
+            // Fetch stats WITH TOKEN
+            const token = (session as any).accessToken || user.accessToken;
+            setMounted(true);
+
+            if (token) {
+                fetch(`${API_BASE_URL}/api/dashboard/stats`, {
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                })
+                    .then(res => {
+                        if (res.status === 401) throw new Error("Unauthorized");
+                        return res.json();
+                    })
+                    .then(data => {
+                        setStats(data);
+                        setIsLoading(false);
+                    })
+                    .catch(err => {
+                        console.error("Error fetching stats:", err);
+                        setIsLoading(false);
+                    });
+            }
+        }
+    }, [session]);
 
     if (!mounted) return null;
 
@@ -81,12 +120,70 @@ export default function DashboardPage() {
         );
     }
 
+    // Safety check BEFORE rendering content
+    if (!stats) return null;
+
     return (
         <div className="flex flex-col h-screen bg-slate-50">
             <Navbar />
 
             <main className="flex-1 overflow-y-auto p-6">
                 <div className="max-w-6xl mx-auto space-y-6">
+                    {/* Subscription & Quota Section */}
+                    {stats?.quota && (
+                        <Card className="p-6 bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-lg relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                <Sparkles className="w-32 h-32" />
+                            </div>
+                            <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                                <div>
+                                    <h2 className="text-2xl font-bold flex items-center gap-2">
+                                        {stats.quota.plan === 'subscription' ? 'Abonnement Pro' : 'Essai Gratuit'}
+                                        {stats.quota.plan === 'subscription' && <span className="bg-purple-500 text-xs px-2 py-1 rounded-full">ACTIF</span>}
+                                    </h2>
+                                    <p className="text-slate-300 mt-1">
+                                        {stats.quota.plan === 'subscription'
+                                            ? "Vous profitez de toutes les fonctionnalités en illimité."
+                                            : `Il vous reste ${stats.quota.trial_days_remaining} jours d'essai.`
+                                        }
+                                    </p>
+                                </div>
+
+                                {stats.quota.plan !== 'subscription' && (
+                                    <div className="flex flex-col gap-4 min-w-[250px]">
+                                        <div>
+                                            <div className="flex justify-between text-xs mb-1">
+                                                <span>Générations de cours</span>
+                                                <span className="font-bold">{stats.quota.generation_count} / {stats.quota.max_generations}</span>
+                                            </div>
+                                            <div className="w-full bg-slate-700 rounded-full h-2">
+                                                <div
+                                                    className={`h-2 rounded-full ${stats.quota.generation_count >= stats.quota.max_generations ? 'bg-red-500' : 'bg-blue-400'}`}
+                                                    style={{ width: `${Math.min(100, (stats.quota.generation_count / stats.quota.max_generations) * 100)}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="flex justify-between text-xs mb-1">
+                                                <span>Messages Chat IA</span>
+                                                <span className="font-bold">{stats.quota.chat_count} / {stats.quota.max_chat}</span>
+                                            </div>
+                                            <div className="w-full bg-slate-700 rounded-full h-2">
+                                                <div
+                                                    className={`h-2 rounded-full ${stats.quota.chat_count >= stats.quota.max_chat ? 'bg-red-500' : 'bg-green-400'}`}
+                                                    style={{ width: `${Math.min(100, (stats.quota.chat_count / stats.quota.max_chat) * 100)}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                        <Button size="sm" variant="secondary" onClick={() => window.location.href = "/onboarding"} className="w-full mt-2">
+                                            Passer en Pro & Illimité
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                        </Card>
+                    )}
+
                     {/* Top Stats */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <Card className="p-6 flex items-center gap-4 bg-white">

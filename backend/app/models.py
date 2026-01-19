@@ -51,6 +51,11 @@ class User(Base):
     is_active = Column(Boolean, default=True) # Technical active state (can be banned even if approved)
     last_login = Column(DateTime, nullable=True)
     
+    # Usage Tracking (Free Tier Limits)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    generation_count = Column(Integer, default=0)
+    chat_message_count = Column(Integer, default=0)
+    
     organization_id = Column(String, ForeignKey("organizations.id"))
     organization = relationship("Organization", back_populates="users")
     
@@ -92,6 +97,7 @@ class ActivityLog(Base):
     target_block = Column(String, nullable=True)
     is_published = Column(DateTime, nullable=True)
     share_code = Column(String, unique=True, index=True, nullable=True)
+    user_id = Column(String, index=True, nullable=True) # Linked to User
     
     # Ideally, we should link this to User/Org too, but keeping it loose for now
 

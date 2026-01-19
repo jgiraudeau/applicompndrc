@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,9 +11,39 @@ import { API_BASE_URL } from "@/lib/api";
 export default function OnboardingPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [isLoading, setIsLoading] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
     const [step, setStep] = useState<"selection" | "confirmation">("selection");
+    const [isPaymentSuccess, setIsPaymentSuccess] = useState(false);
+
+    useEffect(() => {
+        const success = searchParams.get("success");
+        const sessionId = searchParams.get("session_id");
+
+        if (success === "true" && sessionId) {
+            setIsPaymentSuccess(true);
+            setStep("confirmation");
+            setIsLoading(true);
+
+            // Auto-verify payment for local dev / instant activation
+            fetch(`${API_BASE_URL}/api/stripe/verify-session/${sessionId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "active") {
+                        // Success! Hard reload to refresh session cookies/token
+                        window.location.href = "/dashboard";
+                    } else {
+                        console.warn("Session not active yet:", data);
+                    }
+                })
+                .catch(err => console.error("Verification error:", err))
+                .finally(() => setIsLoading(false));
+
+        } else if (searchParams.get("canceled") === "true") {
+            alert("Paiement annulé. Vous pouvez réessayer quand vous voulez.");
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         if (status === "loading") return;
@@ -26,9 +56,6 @@ export default function OnboardingPage() {
         if ((session?.user as any)?.status === "active") {
             router.push("/dashboard");
         }
-
-        // If user has already selected a plan but is pending, maybe show confirmation directly?
-        // For simplicity, let them re-select if they want, or we can check plan in session
     }, [status, session, router]);
 
     const handleSelectPlan = async (plan: string) => {
@@ -42,6 +69,7 @@ export default function OnboardingPage() {
         const token = (session as any)?.accessToken || (session as any)?.user?.accessToken;
 
         try {
+            // REACTIVATION STRIPE
             if (selectedPlan === 'subscription') {
                 // 1. Call Backend to create Stripe Session
                 const res = await fetch(`${API_BASE_URL}/api/stripe/create-checkout-session`, {
@@ -51,7 +79,7 @@ export default function OnboardingPage() {
                         "Authorization": `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        priceId: "price_1Igx4HL...", // TODO: Replace with Real Stripe Price ID later or pass fake for test
+                        priceId: "price_1SqVQJ5LihSpmhb70kS0KsWi",
                         planType: "subscription",
                         email: session?.user?.email,
                         userId: (session?.user as any)?.id
@@ -86,6 +114,7 @@ export default function OnboardingPage() {
                     alert("Une erreur est survenue. Veuillez réessayer.");
                 }
             }
+
         } catch (error) {
             console.error(error);
             alert("Erreur de connexion.");
@@ -123,9 +152,9 @@ export default function OnboardingPage() {
         <div className="min-h-screen bg-slate-50 py-12 px-4">
             <div className="max-w-5xl mx-auto">
                 <div className="text-center mb-12">
-                    <h1 className="text-4xl font-bold text-slate-900 mb-4">Bienvenue sur Professeur Virtuel</h1>
+                    <h1 className="text-4xl font-bold text-slate-900 mb-4">Choisissez votre formule</h1>
                     <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                        Pour finaliser votre inscription, veuillez choisir la formule qui vous convient.
+                        Commencez gratuitement ou passez à la vitesse supérieure.
                     </p>
                 </div>
 
@@ -144,23 +173,23 @@ export default function OnboardingPage() {
                             </div>
                             <div>
                                 <h3 className="text-xl font-bold text-slate-900">Essai Gratuit</h3>
-                                <p className="text-slate-500">Pour découvrir la plateforme</p>
+                                <p className="text-slate-500">Pour tester sans engagement</p>
                             </div>
                             <div className="text-3xl font-bold text-slate-900">
-                                0€ <span className="text-base font-normal text-slate-500">/ 14 jours</span>
+                                0€ <span className="text-base font-normal text-slate-500">pendant 15 jours</span>
                             </div>
                             <ul className="space-y-3 pt-4">
                                 <li className="flex items-center text-slate-600">
                                     <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                                    Accès au générateur de cours
+                                    Accès complet aux outils
                                 </li>
                                 <li className="flex items-center text-slate-600">
-                                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                                    Export PDF basique
+                                    <CheckCircle className="w-5 h-5 text-orange-500 mr-3" />
+                                    Limite : 5 générations de cours
                                 </li>
                                 <li className="flex items-center text-slate-600">
-                                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                                    Support par email
+                                    <CheckCircle className="w-5 h-5 text-orange-500 mr-3" />
+                                    Limite : 15 messages IA
                                 </li>
                             </ul>
                         </div>
@@ -182,8 +211,8 @@ export default function OnboardingPage() {
                                 <Sparkles className="w-6 h-6" />
                             </div>
                             <div>
-                                <h3 className="text-xl font-bold text-slate-900">Abonnement Pro</h3>
-                                <p className="text-slate-500">Pour les enseignants engagés</p>
+                                <h3 className="text-xl font-bold text-slate-900">Professeur Pro</h3>
+                                <p className="text-slate-500">Libérez tout votre potentiel</p>
                             </div>
                             <div className="text-3xl font-bold text-slate-900">
                                 9,99€ <span className="text-base font-normal text-slate-500">/ mois</span>
@@ -191,15 +220,15 @@ export default function OnboardingPage() {
                             <ul className="space-y-3 pt-4">
                                 <li className="flex items-center text-slate-600">
                                     <CheckCircle className="w-5 h-5 text-purple-500 mr-3" />
-                                    Accès illimité à tous les outils
+                                    <strong>Générations Illimitées</strong>
                                 </li>
                                 <li className="flex items-center text-slate-600">
                                     <CheckCircle className="w-5 h-5 text-purple-500 mr-3" />
-                                    Exports Word & PDF Pro
+                                    <strong>Chat IA Illimité</strong>
                                 </li>
                                 <li className="flex items-center text-slate-600">
                                     <CheckCircle className="w-5 h-5 text-purple-500 mr-3" />
-                                    Intégration Google Classroom
+                                    Exports Word, PDF & Classroom
                                 </li>
                                 <li className="flex items-center text-slate-600">
                                     <CheckCircle className="w-5 h-5 text-purple-500 mr-3" />
@@ -218,10 +247,10 @@ export default function OnboardingPage() {
                         onClick={handleSubmit}
                     >
                         {isLoading ? <Loader2 className="animate-spin mr-2" /> : null}
-                        {selectedPlan ? "Confirmer mon choix" : "Sélectionnez une offre"}
+                        {selectedPlan === 'subscription' ? "S'abonner maintenant" : "Commencer l'essai gratuit"}
                     </Button>
                     <p className="text-center text-xs text-slate-400 mt-4">
-                        Aucun paiement requis pour l'instant. Votre demande sera soumise à validation.
+                        Paiement sécurisé par Stripe. Annulable à tout moment.
                     </p>
                 </div>
             </div>

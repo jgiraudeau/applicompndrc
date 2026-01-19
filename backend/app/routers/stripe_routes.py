@@ -91,3 +91,27 @@ async def webhook_received(request: Request, stripe_signature: str = Header(None
                 db.commit()
 
     return {"status": "success"}
+
+@router.get("/verify-session/{session_id}")
+async def verify_session(session_id: str, db: Session = Depends(get_db)):
+    try:
+        session = stripe.checkout.Session.retrieve(session_id)
+        
+        if session.payment_status == 'paid':
+            user_id = session.metadata.get('user_id')
+            customer_id = session.customer
+            
+            if user_id:
+                user = db.query(models.User).filter(models.User.id == user_id).first()
+                if user:
+                    print(f"Manual Verified Payment for user {user.email}. Activating subscription.")
+                    user.plan_selection = "subscription"
+                    user.stripe_customer_id = customer_id
+                    user.status = "active"
+                    db.commit()
+                    return {"status": "active", "plan": "subscription"}
+        
+        return {"status": "pending"}
+    except Exception as e:
+        print(f"Error verifying session: {e}")
+        raise HTTPException(status_code=400, detail="Invalid Session ID")

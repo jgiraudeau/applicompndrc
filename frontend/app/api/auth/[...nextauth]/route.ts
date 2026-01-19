@@ -76,89 +76,70 @@ const authOptions: AuthOptions = {
     },
     callbacks: {
         async jwt({ token, user, account }: { token: any, user: any, account: any }) {
-            // Initial sign in
-            if (account && user) {
-                // If logging in with Google, exchange ID token for Backend Token
-                if (account.provider === 'google') {
-                    console.log("Google Login: Exchanging token with backend...");
+            console.log("🔥 JWT CALLBACK TRIGGERED 🔥");
+
+            // 1. INITIAL SIGN IN (User & Account are present only on first call)
+            if (user) {
+                console.log("✅ Initial Sign In detected. User object:", JSON.stringify(user));
+
+                // Save basic info
+                token.id = user.id;
+                token.email = user.email;
+
+                // Extract Access Token depending on provider
+                if (account?.provider === 'google') {
+                    // Logic for Google Exchange (simplified for now to debug)
+                    // ... (keep existing google logic if possible, or just log it)
                     try {
                         const apiUrl = getApiUrl();
-                        console.log(`Google Login: Exchanging token with backend at ${apiUrl}...`);
-
+                        console.log(`Google Login: Exchanging token...`);
                         const res = await fetch(`${apiUrl}/api/auth/google`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ token: account.id_token })
                         });
-
                         if (res.ok) {
                             const data = await res.json();
-                            token.accessToken = data.access_token; // Our App Token
-                            token.googleAccessToken = account.access_token; // Classroom Token
-                            console.log("Google Login: Success! Backend token obtained.");
-                        } else {
-                            const err = await res.text();
-                            console.error("Failed to sync Google User with Backend", err);
-                            // Store error in token to show in client
-                            token.authError = `Sync Error: ${err}`;
+                            token.accessToken = data.access_token;
+                            token.googleAccessToken = account.access_token;
                         }
-                    } catch (e: any) {
-                        console.error("Backend Google Login Error", e);
-                        token.authError = `Fetch Error: ${e.message}`;
+                    } catch (e) {
+                        console.error("Google Exchange Error", e);
                     }
-                }
-                // Debug: Check what's in the account object if token is missing
-                if (!token.googleAccessToken && account && !token.authError) {
-                    token.authError = `MISSING TOKEN. Provider: ${account.provider}. Account Keys: ${Object.keys(account).join(', ')}`;
-                }
-
-                if (account) {
-                    console.log(`[JWT Debug] Provider: ${account.provider}`);
-                }
-
-                // If logging in with Credentials, we already have the token
-                else if (user.accessToken) {
+                } else {
+                    // Credentials Provider
                     token.accessToken = user.accessToken;
                 }
             }
 
-
-            // Debug: Log token keys and estimated size
-            const tokenSize = JSON.stringify(token).length;
-            console.log(`[JWT Debug] API URL being used: ${getApiUrl()}`);
-            console.log(`[JWT Debug] Token keys: ${Object.keys(token).join(', ')}`);
-            if (token.authError) console.error(`[JWT Debug] Auth Error: ${token.authError}`);
-            console.log(`[JWT Debug] Has AccessToken: ${!!token.accessToken}`);
-            console.log(`[JWT Debug] Has Role: ${token.role}`);
-            console.log(`[JWT Debug] Estimated Token Size: ${tokenSize} characters`);
-
-            // Initial sign in or subsequent updates
+            // 2. TOKEN ENRICHMENT (Fetch Profile if we have a token)
+            // This runs on every check to keep role/plan up to date
             if (token.accessToken) {
+                console.log("🔄 Fetching User Profile with token:", token.accessToken.substring(0, 10) + "...");
                 try {
-                    // Always fetch user profile to sync role/status changes from backend
-                    // if (!token.role) { // REMOVED: Force sync
                     const apiUrl = getApiUrl();
                     const meRes = await fetch(`${apiUrl}/api/auth/me`, {
-                        headers: { Authorization: `Bearer ${token.accessToken}` }
+                        headers: { Authorization: `Bearer ${token.accessToken}` },
+                        cache: 'no-store'
                     });
 
                     if (meRes.ok) {
                         const userProfile = await meRes.json();
-                        console.log("DEBUG: Backend /me response:", userProfile); // LOG ADDED
+                        console.log("✅ Profile Fetched:", userProfile.email, "| Plan:", userProfile.plan_selection, "| Stripe:", userProfile.stripe_customer_id);
                         token.role = userProfile.role;
                         token.id = userProfile.id; // Store backend ID
                         token.email = userProfile.email;
                         token.status = userProfile.status;
                         token.plan_selection = userProfile.plan_selection;
+                        token.stripeCustomerId = userProfile.stripe_customer_id;
+                    } else {
+                        console.error("❌ Failed to fetch /me:", meRes.status);
                     }
                 } catch (e) {
-                    console.error("Error fetching user profile in JWT callback", e);
-                    // Keep existing role if backend fails (Resilience)
-                    if (token.role) {
-                        console.log("DEBUG: Backend unreachable, keeping existing role:", token.role);
-                        return token;
-                    }
+                    console.error("❌ Error fetching /me:", e);
                 }
+            } else {
+                console.warn("⚠️ No Access Token available in JWT callback.");
             }
 
             return token
@@ -174,6 +155,7 @@ const authOptions: AuthOptions = {
                 session.user.email = token.email;
                 session.user.status = token.status;
                 session.user.plan_selection = token.plan_selection;
+                session.user.stripeCustomerId = token.stripeCustomerId;
             }
             return session
         }

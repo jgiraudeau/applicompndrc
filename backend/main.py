@@ -87,6 +87,35 @@ async def lifespan(app: FastAPI):
                 print("⚠️ Column 'stripe_customer_id' missing. Adding it...")
                 conn.execute(text("ALTER TABLE users ADD COLUMN stripe_customer_id VARCHAR"))
                 conn.commit()
+
+            # Migration for Usage Tracking
+            try:
+                conn.execute(text("SELECT generation_count FROM users LIMIT 1"))
+            except Exception:
+                print("⚠️ Column 'generation_count' missing. Adding it...")
+                conn.execute(text("ALTER TABLE users ADD COLUMN generation_count INTEGER DEFAULT 0"))
+                conn.commit()
+
+            try:
+                conn.execute(text("SELECT chat_message_count FROM users LIMIT 1"))
+            except Exception:
+                print("⚠️ Column 'chat_message_count' missing. Adding it...")
+                conn.execute(text("ALTER TABLE users ADD COLUMN chat_message_count INTEGER DEFAULT 0"))
+                conn.commit()
+
+            try:
+                conn.execute(text("SELECT created_at FROM users LIMIT 1"))
+            except Exception:
+                print("⚠️ Column 'created_at' missing. Adding it...")
+                conn.execute(text("ALTER TABLE users ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP"))
+                conn.commit()
+
+            try:
+                conn.execute(text("SELECT user_id FROM activity_logs LIMIT 1"))
+            except Exception:
+                print("⚠️ Column 'user_id' missing in activity_logs. Adding it...")
+                conn.execute(text("ALTER TABLE activity_logs ADD COLUMN user_id VARCHAR"))
+                conn.commit()
                 
         print("✅ Schema migration checks complete.")
         
@@ -104,10 +133,18 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Professeur Virtuel API", version="0.2.0", lifespan=lifespan)
 
 # Configure CORS (allow frontend to connect)
+origins = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://localhost:3002",
+    "https://applicompndrc.vercel.app",
+    "https://applicompndrc-git-main-giraudeaus-projects.vercel.app"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,  # Set to False to allow wildcard origins in production
+    allow_origins=origins, # Explicit origins are better than "*" when credentials involved
+    allow_credentials=True, # We need cookies/auth headers!
     allow_methods=["*"],
     allow_headers=["*"],
 )
