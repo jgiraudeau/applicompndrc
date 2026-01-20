@@ -124,7 +124,7 @@ export default function DocumentsPage() {
             // Here `session` might not have it if we refreshed?
             // NextAuth session should have it.
 
-            const googleToken = (session as any).googleAccessToken;
+            const googleToken = (session as any)?.googleAccessToken;
             if (!googleToken) {
                 alert("Vous devez être connecté avec Google pour utiliser cette fonction.");
                 return;
@@ -172,7 +172,7 @@ export default function DocumentsPage() {
             const res = await fetch(`${API_BASE_URL}/api/classroom/courses`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token: session.googleAccessToken })
+                body: JSON.stringify({ token: (session as any)?.googleAccessToken })
             });
             if (res.ok) {
                 const data = await res.json();
@@ -198,7 +198,7 @@ export default function DocumentsPage() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    token: session.googleAccessToken,
+                    token: (session as any)?.googleAccessToken,
                     courseId: selectedCourseId,
                     title: selectedDoc.title,
                     description: selectedDoc.content
