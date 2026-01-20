@@ -221,7 +221,10 @@ export default function GeneratePage() {
             const res = await fetch(`${API_BASE_URL}/api/classroom/courses`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token: session.googleAccessToken })
+                body: JSON.stringify({
+                    token: session.googleAccessToken,
+                    refresh_token: (session as any).googleRefreshToken
+                })
             });
             if (res.ok) {
                 const data = await res.json();
@@ -230,7 +233,11 @@ export default function GeneratePage() {
                 setIsClassroomModalOpen(true);
             } else {
                 const err = await res.text();
-                alert(`Impossible de récupérer vos cours : ${err}`);
+                if (err.includes("credentials") || err.includes("refresh")) {
+                    alert("❌ Session Google expirée. Veuillez vous déconnecter et vous reconnecter.");
+                } else {
+                    alert(`Impossible de récupérer vos cours : ${err}`);
+                }
             }
         } catch (e: any) {
             console.error(e);
@@ -249,6 +256,7 @@ export default function GeneratePage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     token: session.googleAccessToken,
+                    refresh_token: (session as any).googleRefreshToken,
                     courseId: selectedCourseId,
                     title: `${topic} (${docType})`,
                     description: generatedContent
@@ -259,7 +267,12 @@ export default function GeneratePage() {
                 alert(`Devoir créé avec succès ! Lien : ${data.url}`);
                 setIsClassroomModalOpen(false);
             } else {
-                alert("Erreur lors de la création du devoir.");
+                const err = await res.text();
+                if (err.includes("credentials") || err.includes("refresh")) {
+                    alert("❌ Session Google expirée. Veuillez vous déconnecter et vous reconnecter.");
+                } else {
+                    alert("Erreur lors de la création du devoir.");
+                }
             }
         } catch (e) {
             alert("Erreur technique.");
