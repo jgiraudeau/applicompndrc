@@ -14,18 +14,8 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Trash2, Ban, CheckCircle, Search, ShieldAlert, XCircle, CheckCheck } from "lucide-react";
+import { Loader2, Trash2, Ban, CheckCircle, Search, ShieldAlert, XCircle, CheckCheck, RefreshCw } from "lucide-react";
 import { API_BASE_URL } from "@/lib/api";
-
-// Helper to get token (since useSession implementation might vary in your setup, 
-// ensuring we get it from session object)
-async function getAuthToken() {
-    // In client component, we rely on session
-    // This is a placeholder as actual implementation depends on NextAuth callback setup
-    // But based on previous edits, we know session prop has accessToken if configured.
-    // However, simpler is to rely on session.
-    return null; // Will use session directly in fetch
-}
 
 interface User {
     id: string;
@@ -61,16 +51,7 @@ export default function AdminPage() {
     const fetchUsers = async () => {
         setIsLoading(true);
         try {
-            // We use the session token if available in the session object
-            // If NextAuth is configured to pass accessToken to client
             const token = (session as any)?.accessToken || (session as any)?.user?.accessToken;
-
-            // Fallback: If no token in session, maybe we rely on cookie (automatic)
-            // But NextAuth usually needs explicit header if backend is separate.
-            // Let's assume the previous working header logic was correct.
-            // Actually, previously it was using `getAuthToken` which was undefined in my previous context.
-            // Let's try to get it from `session`.
-
             const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -85,6 +66,34 @@ export default function AdminPage() {
             }
         } catch (error) {
             console.error("Error fetching users:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleScan = async () => {
+        if (!confirm("Voulez-vous lancer la synchronisation de la base de connaissances avec l'IA ?\nCela permettra de mettre à jour les documents de référence.")) return;
+
+        setIsLoading(true);
+        const token = (session as any)?.accessToken || (session as any)?.user?.accessToken;
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/scan`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                alert(`✅ Synchronisation réussie !\n${data.files_count} fichiers chargés.`);
+            } else {
+                const err = await response.text();
+                alert(`Erreur: ${err}`);
+            }
+        } catch (error) {
+            console.error("Scan error:", error);
+            alert("Erreur de connexion au serveur.");
         } finally {
             setIsLoading(false);
         }
@@ -142,7 +151,12 @@ export default function AdminPage() {
     const pendingUsers = filteredUsers.filter((u) => u.status === 'pending');
 
     if (status === "loading" || isLoading) {
-        return <div className="min-h-screen flex items-center justify-center text-slate-500">Chargement de la console...</div>;
+        return <div className="min-h-screen flex items-center justify-center text-slate-500">
+            <div className="flex flex-col items-center gap-2">
+                <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+                <p>Chargement...</p>
+            </div>
+        </div>;
     }
 
     if ((session?.user as any)?.role?.toLowerCase() !== 'admin') {
@@ -168,6 +182,15 @@ export default function AdminPage() {
                         <h1 className="text-3xl font-bold text-slate-800">Console d'Administration</h1>
                         <p className="text-slate-500">Gestion des utilisateurs, validation des inscriptions et conformité RGPD.</p>
                     </div>
+                    <Button
+                        onClick={handleScan}
+                        variant="outline"
+                        className="border-purple-200 text-purple-700 hover:bg-purple-50"
+                        disabled={isLoading}
+                    >
+                        <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                        Synchroniser IA
+                    </Button>
                 </div>
 
                 {/* Tabs */}

@@ -89,7 +89,7 @@ def update_user_status(
         if new_status_str == "active" and old_status != "active":
             user.is_active = True
             try:
-                from app.services.email_service import email_service
+                from backend.app.services.email_service import email_service
                 email_service.send_approval_email(user)
             except Exception as e:
                 print(f"Warning: Email sending failed: {e}")
@@ -98,7 +98,7 @@ def update_user_status(
         if new_status_str == "rejected":
             user.is_active = False
             try:
-                from app.services.email_service import email_service
+                from backend.app.services.email_service import email_service
                 email_service.send_rejection_email(user)
             except Exception as e:
                 print(f"Warning: Email sending failed: {e}")
@@ -127,3 +127,22 @@ def delete_user(
     db.commit()
     
     return {"message": "User deleted successfully"}
+
+@router.post("/scan")
+def scan_knowledge_base(
+    current_user: models.User = Depends(auth.get_current_admin_user)
+):
+    """
+    Manually triggers the scanning of the 'knowledge' directory
+    and uploads new files to Gemini.
+    """
+    try:
+        from backend.app.services.knowledge_service import knowledge_base
+        files = knowledge_base.scan_and_load()
+        return {
+            "message": "Synchronisation terminée avec succès", 
+            "files_count": len(files) if files else 0
+        }
+    except Exception as e:
+        print(f"Error during scan: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur lors du scan: {str(e)}")

@@ -35,6 +35,7 @@ async def create_checkout_session(data: dict):
 
     try:
         checkout_session = stripe.checkout.Session.create(
+            api_key=os.getenv("STRIPE_SECRET_KEY"),  # Ensure key is passed explicitly
             line_items=[
                 {
                     # Use inline price data for easier testing without pre-creating products

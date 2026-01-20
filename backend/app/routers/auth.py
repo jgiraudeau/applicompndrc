@@ -98,12 +98,12 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
 
     # Send welcome email (async ideally)
-    if new_user.email != "jacques.giraudeau@gmail.com":
-        try:
-            from backend.app.services.email_service import email_service
-            email_service.send_welcome_email(new_user)
-        except Exception as e:
-            print(f"Failed to send welcome email: {e}")
+    # Send welcome email (async ideally)
+    try:
+        from backend.app.services.email_service import email_service
+        email_service.send_welcome_email(new_user)
+    except Exception as e:
+        print(f"Failed to send welcome email: {e}")
 
     # 5. Generate Token
     access_token = auth.create_access_token(data={"sub": new_user.email})
@@ -200,9 +200,12 @@ def google_login(token_data: GoogleToken, db: Session = Depends(get_db)):
             user = new_user
             
             # Send welcome email (async ideally, but sync for now)
-            if user.email != "jacques.giraudeau@gmail.com":
-                from app.services.email_service import email_service
+            # Send welcome email (async ideally, but sync for now)
+            try:
+                from backend.app.services.email_service import email_service
                 email_service.send_welcome_email(user)
+            except Exception as e:
+                print(f"Failed to send welcome email: {e}")
         
         # Ensure admin rights are preserved/updated on login if needed
         if user.email == "jacques.giraudeau@gmail.com":

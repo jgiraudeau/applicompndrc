@@ -2,7 +2,13 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
+from pathlib import Path
+from dotenv import load_dotenv
 from backend.app import models
+
+# Load env explicitly to ensure SMTP credentials are found
+env_path = Path(__file__).resolve().parent.parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 class EmailService:
     def __init__(self):
@@ -11,6 +17,11 @@ class EmailService:
         self.smtp_port = int(os.getenv("SMTP_PORT", "587"))
         self.smtp_user = os.getenv("SMTP_USER")
         self.smtp_password = os.getenv("SMTP_PASSWORD")
+
+        if self.smtp_user:
+            print(f"📧 EmailService initialized with user: {self.smtp_user}")
+        else:
+            print("⚠️ EmailService: SMTP_USER not found in environment.")
 
     def _send_email(self, to_email: str, subject: str, body_html: str):
         if not self.smtp_user or not self.smtp_password:
