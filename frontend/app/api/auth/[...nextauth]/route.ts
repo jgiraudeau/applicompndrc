@@ -88,8 +88,7 @@ const authOptions: AuthOptions = {
 
                 // Extract Access Token depending on provider
                 if (account?.provider === 'google') {
-                    // Logic for Google Exchange (simplified for now to debug)
-                    // ... (keep existing google logic if possible, or just log it)
+                    // Logic for Google Exchange
                     try {
                         const apiUrl = getApiUrl();
                         console.log(`Google Login: Exchanging token...`);
@@ -102,6 +101,11 @@ const authOptions: AuthOptions = {
                             const data = await res.json();
                             token.accessToken = data.access_token;
                             token.googleAccessToken = account.access_token;
+                            // Capture Refresh Token (only present on first consent or if forced)
+                            if (account.refresh_token) {
+                                console.log("✅ Refresh Token captured!");
+                                token.googleRefreshToken = account.refresh_token;
+                            }
                         }
                     } catch (e) {
                         console.error("Google Exchange Error", e);
@@ -115,6 +119,7 @@ const authOptions: AuthOptions = {
             // 2. TOKEN ENRICHMENT (Fetch Profile if we have a token)
             // This runs on every check to keep role/plan up to date
             if (token.accessToken) {
+                // ... (No change to this block, assuming it's fine)
                 console.log("🔄 Fetching User Profile with token:", token.accessToken.substring(0, 10) + "...");
                 try {
                     const apiUrl = getApiUrl();
@@ -125,7 +130,6 @@ const authOptions: AuthOptions = {
 
                     if (meRes.ok) {
                         const userProfile = await meRes.json();
-                        console.log("✅ Profile Fetched:", userProfile.email, "| Plan:", userProfile.plan_selection, "| Stripe:", userProfile.stripe_customer_id);
                         token.role = userProfile.role;
                         token.id = userProfile.id; // Store backend ID
                         token.email = userProfile.email;
@@ -133,13 +137,12 @@ const authOptions: AuthOptions = {
                         token.plan_selection = userProfile.plan_selection;
                         token.stripeCustomerId = userProfile.stripe_customer_id;
                     } else {
+                        // On 401, maybe we should invalidate? For now just log.
                         console.error("❌ Failed to fetch /me:", meRes.status);
                     }
                 } catch (e) {
                     console.error("❌ Error fetching /me:", e);
                 }
-            } else {
-                console.warn("⚠️ No Access Token available in JWT callback.");
             }
 
             return token
@@ -147,6 +150,7 @@ const authOptions: AuthOptions = {
         async session({ session, token }: { session: any, token: any }) {
             session.accessToken = token.accessToken;
             session.googleAccessToken = token.googleAccessToken;
+            session.googleRefreshToken = token.googleRefreshToken; // Added
             session.authError = token.authError;
             // Pass user details to session
             if (session.user) {

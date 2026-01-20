@@ -10,8 +10,11 @@ import re
 
 router = APIRouter()
 
+import os
+
 class GoogleFormRequest(BaseModel):
     token: str # Google Access Token
+    refresh_token: Optional[str] = None # Refresh Token for renewal
     title: str
     content: str # Markdown content
 
@@ -48,7 +51,20 @@ async def create_google_form_endpoint(request: GoogleFormRequest):
         questions_data = json.loads(cleaned_json)
         
         # 2. Init Google Forms API
-        creds = google.oauth2.credentials.Credentials(request.token)
+        # We need Client credentials for refreshing
+        client_id = os.getenv("GOOGLE_CLIENT_ID")
+        client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+        token_uri = "https://oauth2.googleapis.com/token"
+
+        creds = google.oauth2.credentials.Credentials(
+            request.token,
+            refresh_token=request.refresh_token,
+            token_uri=token_uri,
+            client_id=client_id,
+            client_secret=client_secret
+        )
+        
+        # Build service (this will auto-refresh if token is expired and refresh_token is present)
         form_service = build('forms', 'v1', credentials=creds)
         
         # 3. Create the Form

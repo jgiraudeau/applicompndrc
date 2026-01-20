@@ -183,6 +183,7 @@ export default function GeneratePage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     token: session.googleAccessToken,
+                    refresh_token: (session as any).googleRefreshToken, // Pass refresh token
                     title: `${topic} - Quiz`,
                     content: generatedContent
                 })
@@ -195,8 +196,13 @@ export default function GeneratePage() {
                 }
             } else {
                 const err = await response.text();
+                // If error contains "refresh", prompt user to relogin
+                if (err.includes("refresh") || err.includes("credentials")) {
+                    alert("❌ Session Google expirée. Veuillez vous déconnecter et vous reconnecter à l'application.");
+                } else {
+                    alert("❌ Erreur lors de la création : " + err);
+                }
                 console.error("API Error:", err);
-                alert("❌ Erreur lors de la création : " + err);
             }
         } catch (e: any) {
             console.error(e);
