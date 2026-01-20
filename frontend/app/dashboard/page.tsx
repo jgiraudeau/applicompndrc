@@ -62,25 +62,34 @@ const TYPE_LABELS: Record<string, string> = {
     "planning_annuel": "Planning Annuel"
 };
 
+const DEFAULT_STATS: Stats = {
+    total_generated: 0,
+    by_type: {},
+    by_block: {},
+    recent: [],
+    published: [],
+    quota: {
+        plan: "trial",
+        generation_count: 0,
+        max_generations: 5,
+        chat_count: 0,
+        max_chat: 15,
+        trial_days_remaining: 0
+    }
+};
+
 export default function DashboardPage() {
-    const { data: session } = useSession();
-    const [stats, setStats] = useState<Stats | null>(null);
+    const { data: session }: any = useSession();
+    const [stats, setStats] = useState<Stats>(DEFAULT_STATS); // Initialize with default
     const [isLoading, setIsLoading] = useState(true);
     const [mounted, setMounted] = useState(false);
-    const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
     useEffect(() => {
         if (session?.user) {
             const user = session.user as any;
-            console.log("🔒 CHECKING ACCESS:", {
-                email: user.email,
-                plan: user.plan_selection,
-                stripeId: user.stripeCustomerId
-            });
 
             // GATEKEEPER: Redirect to payment if Pro checked but not paid
             if (user.plan_selection === 'subscription' && !user.stripeCustomerId) {
-                console.log("🔒 Paiement requis. Redirection vers Onboarding.");
                 window.location.href = "/onboarding";
                 return;
             }
@@ -101,51 +110,23 @@ export default function DashboardPage() {
                     })
                     .then(data => {
                         setStats(data);
-                        setIsLoading(false);
                     })
                     .catch(err => {
                         console.error("Error fetching stats:", err);
-                        // Fallback to empty stats to show UI
-                        setStats({
-                            total_generated: 0,
-                            by_type: {},
-                            by_block: {},
-                            recent: [],
-                            published: [],
-                            quota: {
-                                plan: "trial",
-                                generation_count: 0,
-                                max_generations: 5,
-                                chat_count: 0,
-                                max_chat: 15,
-                                trial_days_remaining: 0
-                            }
-                        });
+                        // Keep default stats
+                    })
+                    .finally(() => {
                         setIsLoading(false);
                     });
             } else {
                 console.warn("No token found, stopping loader.");
-                setStats({
-                    total_generated: 0,
-                    by_type: {},
-                    by_block: {},
-                    recent: [],
-                    published: [],
-                    quota: {
-                        plan: "trial",
-                        generation_count: 0,
-                        max_generations: 5,
-                        chat_count: 0,
-                        max_chat: 15,
-                        trial_days_remaining: 0
-                    }
-                });
                 setIsLoading(false);
             }
+        } else if (session === null) {
+            // Not authenticated, stop loader (page will likely redirect via middleware or showing empty)
+            setIsLoading(false);
         }
     }, [session]);
-
-    // ...
 
     // Loading state
     if (isLoading) {
@@ -161,20 +142,6 @@ export default function DashboardPage() {
             </div>
         );
     }
-
-    // Safety check BEFORE rendering content
-    if (!stats) return (
-        <div className="p-8 text-center text-slate-500 flex flex-col items-center gap-4">
-            <p className="text-xl font-bold text-red-500">Impossible de charger les statistiques.</p>
-            <p className="bg-slate-100 p-4 rounded font-mono text-sm border border-slate-200">
-                {errorMsg || "Aucune donnée reçue"}
-                <br />
-                <span className="text-xs text-slate-400 mt-2 block">API: {API_BASE_URL}</span>
-            </p>
-            <Button onClick={() => window.location.reload()}>Réessayer</Button>
-            <Button variant="outline" onClick={() => window.location.href = "/login"}>Se reconnecter</Button>
-        </div>
-    );
 
     return (
         <div className="flex flex-col h-screen bg-slate-50">
