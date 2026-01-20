@@ -103,18 +103,44 @@ async def create_google_form_endpoint(request: GoogleFormRequest):
         for index, q in enumerate(questions_data):
             # Prepare options with grading if correct_solution found
             options_List = []
-            correct_answer_value = q.get('correct_solution')
+            valid_option_values = set()
+            clean_correct = str(q.get('correct_solution')).strip() if q.get('correct_solution') else None
             
             for opt_text in q.get('options', []):
-                if opt_text: # Ensure text is not empty
-                    option_obj = {"value": str(opt_text)}
+                clean_opt = str(opt_text).strip()
+                if clean_opt: # Ensure text is not empty
+                    option_obj = {"value": clean_opt}
                     options_List.append(option_obj)
+                    valid_option_values.add(clean_opt)
             
             # FAILSAFE: Google API requires at least 1 option
             if not options_List:
                 print(f"⚠️ Warning: Question '{q.get('title')}' has no options. Adding placeholder.")
                 options_List.append({"value": "Vrai"})
                 options_List.append({"value": "Faux"})
+                valid_option_values.add("Vrai")
+                valid_option_values.add("Faux")
+
+            # Validation: Ensure Correct Answer is in Options
+            final_correct_value = None
+            if clean_correct:
+                if clean_correct in valid_option_values:
+                    final_correct_value = clean_correct
+                else:
+                    # Fallback 1: Case-insensitive check
+                    found_match = None
+                    for val in valid_option_values:
+                        if val.lower() == clean_correct.lower():
+                            found_match = val
+                            break
+                    
+                    if found_match:
+                        final_correct_value = found_match
+                    else:
+                        # Fallback 2: Append missing correct answer
+                        print(f"⚠️ Fixing: Correct answer '{clean_correct}' missing from options. Appending it.")
+                        options_List.append({"value": clean_correct})
+                        final_correct_value = clean_correct
 
             # Construct Question Item
             question_item = {
@@ -124,12 +150,12 @@ async def create_google_form_endpoint(request: GoogleFormRequest):
                         "questionItem": {
                             "question": {
                                 "required": True,
-                                "grading": {
+                            "grading": {
                                     "pointValue": 1,
                                     "correctAnswers": {
-                                        "answers": [{"value": correct_answer_value}]
+                                        "answers": [{"value": final_correct_value}]
                                     }
-                                } if correct_answer_value else None,
+                                } if final_correct_value else None,
                                 "choiceQuestion": {
                                     "type": "RADIO",
                                     "options": options_List,
