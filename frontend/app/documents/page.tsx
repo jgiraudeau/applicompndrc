@@ -79,7 +79,7 @@ export default function DocumentsPage() {
                 },
                 body: JSON.stringify({
                     content: selectedDoc.content,
-                    filename: selectedDoc.title
+                    filename: selectedDoc.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()
                 })
             });
 
