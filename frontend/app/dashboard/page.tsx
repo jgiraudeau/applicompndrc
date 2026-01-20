@@ -124,6 +124,8 @@ export default function DashboardPage() {
             <p className="text-xl font-bold text-red-500">Impossible de charger les statistiques.</p>
             <p className="bg-slate-100 p-4 rounded font-mono text-sm border border-slate-200">
                 {errorMsg || "Aucune donnée reçue"}
+                <br />
+                <span className="text-xs text-slate-400 mt-2 block">API: {API_BASE_URL}</span>
             </p>
             <Button onClick={() => window.location.reload()}>Réessayer</Button>
             <Button variant="outline" onClick={() => window.location.href = "/login"}>Se reconnecter</Button>
