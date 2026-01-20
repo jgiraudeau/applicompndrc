@@ -147,6 +147,21 @@ export default function DashboardPage() {
 
     // ...
 
+    // Loading state
+    if (isLoading) {
+        return (
+            <div className="flex flex-col h-screen bg-slate-50">
+                <Navbar />
+                <div className="flex-1 flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                        <p className="text-slate-400 text-sm">Chargement du tableau de bord...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     // Safety check BEFORE rendering content
     if (!stats) return (
         <div className="p-8 text-center text-slate-500 flex flex-col items-center gap-4">
