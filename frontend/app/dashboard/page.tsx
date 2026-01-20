@@ -67,6 +67,7 @@ export default function DashboardPage() {
     const [stats, setStats] = useState<Stats | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [mounted, setMounted] = useState(false);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
     useEffect(() => {
         if (session?.user) {
@@ -104,27 +105,30 @@ export default function DashboardPage() {
                     })
                     .catch(err => {
                         console.error("Error fetching stats:", err);
+                        setErrorMsg(err.message || "Erreur inconnue");
                         setIsLoading(false);
                     });
             } else {
                 console.warn("No token found, stopping loader.");
+                setErrorMsg("Token d'authentification manquant (Session invalide)");
                 setIsLoading(false);
             }
         }
     }, [session]);
 
-    if (!mounted) return null;
-
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center h-screen bg-slate-50">
-                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            </div>
-        );
-    }
+    // ...
 
     // Safety check BEFORE rendering content
-    if (!stats) return <div className="p-8 text-center text-slate-500">Impossible de charger les statistiques. (Erreur ou Token manquant)</div>;
+    if (!stats) return (
+        <div className="p-8 text-center text-slate-500 flex flex-col items-center gap-4">
+            <p className="text-xl font-bold text-red-500">Impossible de charger les statistiques.</p>
+            <p className="bg-slate-100 p-4 rounded font-mono text-sm border border-slate-200">
+                {errorMsg || "Aucune donnée reçue"}
+            </p>
+            <Button onClick={() => window.location.reload()}>Réessayer</Button>
+            <Button variant="outline" onClick={() => window.location.href = "/login"}>Se reconnecter</Button>
+        </div>
+    );
 
     return (
         <div className="flex flex-col h-screen bg-slate-50">
