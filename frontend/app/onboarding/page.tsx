@@ -71,6 +71,7 @@ function OnboardingContent() {
         try {
             // REACTIVATION STRIPE
             if (selectedPlan === 'subscription') {
+                console.log("Stripe: token used", token ? "Yes" : "No");
                 // 1. Call Backend to create Stripe Session
                 const res = await fetch(`${API_BASE_URL}/api/stripe/create-checkout-session`, {
                     method: "POST",
@@ -88,15 +89,19 @@ function OnboardingContent() {
 
                 if (res.ok) {
                     const { url } = await res.json();
+                    console.log("Stripe Redirect URL:", url);
                     if (url) {
-                        window.location.href = url; // Redirect to Stripe
+                        // Use assign for clearer intent
+                        window.location.assign(url);
                     } else {
                         alert("Erreur: Pas d'URL de paiement reçue du serveur.");
+                        setIsLoading(false);
                     }
                 } else {
                     const errText = await res.text();
                     console.error("Stripe Session Error:", errText);
                     alert(`Erreur lors de l'initialisation du paiement: ${errText}`);
+                    setIsLoading(false);
                 }
 
             } else {
