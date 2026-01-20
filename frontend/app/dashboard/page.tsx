@@ -106,6 +106,9 @@ export default function DashboardPage() {
                         console.error("Error fetching stats:", err);
                         setIsLoading(false);
                     });
+            } else {
+                console.warn("No token found, stopping loader.");
+                setIsLoading(false);
             }
         }
     }, [session]);
@@ -121,7 +124,7 @@ export default function DashboardPage() {
     }
 
     // Safety check BEFORE rendering content
-    if (!stats) return null;
+    if (!stats) return <div className="p-8 text-center text-slate-500">Impossible de charger les statistiques. (Erreur ou Token manquant)</div>;
 
     return (
         <div className="flex flex-col h-screen bg-slate-50">
