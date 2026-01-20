@@ -7,14 +7,22 @@ from ..database import get_db
 from sqlalchemy.orm import Session
 from fastapi import Depends
 
+from pathlib import Path
+from dotenv import load_dotenv
+
 router = APIRouter()
+
+# Load env explicitly to ensure STRIPE_SECRET_KEY is found
+env_path = Path(__file__).resolve().parent.parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 # Initialize Stripe with your Secret Key
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 endpoint_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
 
 # Frontend URL for success/cancel redirects
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3001")
+# Ensure no trailing slash for clean concatenation
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3001").rstrip("/")
 
 @router.post("/create-checkout-session")
 async def create_checkout_session(data: dict):
