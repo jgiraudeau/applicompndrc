@@ -91,10 +91,12 @@ function OnboardingContent() {
                     if (url) {
                         window.location.href = url; // Redirect to Stripe
                     } else {
-                        alert("Erreur: Pas d'URL de paiement.");
+                        alert("Erreur: Pas d'URL de paiement reçue du serveur.");
                     }
                 } else {
-                    alert("Erreur lors de l'initialisation du paiement.");
+                    const errText = await res.text();
+                    console.error("Stripe Session Error:", errText);
+                    alert(`Erreur lors de l'initialisation du paiement: ${errText}`);
                 }
 
             } else {
