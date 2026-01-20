@@ -42,12 +42,20 @@ async def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db), cur
     target_category = request.category if request.category else 'bts_ndrc'
     kb_files = knowledge_base.get_file_ids_by_category(target_category)
     
+    # Normalize track for regulatory grounding
+    normalized_track = "NDRC"
+    if target_category.upper() in ["NDRC", "MCO", "GPME", "CEJM"]:
+        normalized_track = target_category.upper()
+    elif "ndrc" in target_category.lower():
+        normalized_track = "NDRC"
+
     # We pass the category to help grounding instructions
     answer = gemini_service.chat_with_history(
         request.message, 
         history=request.history, 
         file_uri=request.file_id,
         knowledge_files=kb_files,
-        context_label=target_category
+        context_label=target_category,
+        track=normalized_track
     )
     return ChatResponse(response=answer)

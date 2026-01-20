@@ -53,8 +53,7 @@ async def get_stats(db: Session = Depends(get_db), current_user: User = Depends(
         elapsed = datetime.utcnow() - current_user.created_at
         trial_days_remaining = max(0, TRIAL_DAYS - elapsed.days)
     else:
-        # Legacy user without created_at or error -> Assume trial started now or expired? 
-        # Let's handle it gracefully: if missing, maybe they are old users so trial is over.
+        # Fallback if created_at is missing: Give full trial or 0. Let's give 0 to correspond to "unknown".
         trial_days_remaining = 0
 
     return {

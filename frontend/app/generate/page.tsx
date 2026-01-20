@@ -21,6 +21,46 @@ const DOCUMENT_TYPES = [
     { id: "planning_annuel", label: "Planning Annuel", icon: Calendar, color: "text-emerald-600 bg-emerald-50 border-emerald-200" },
 ];
 
+const TRACKS_DATA: Record<string, { label: string; blocks: { id: string; label: string }[] }> = {
+    NDRC: {
+        label: "BTS NDRC",
+        blocks: [
+            { id: "Bloc 1", label: "Bloc 1 - Relation client et négociation-vente" },
+            { id: "Bloc 2", label: "Bloc 2 - Relation client à distance et digitalisation" },
+            { id: "Bloc 3", label: "Bloc 3 - Relation client et animation de réseaux" }
+        ]
+    },
+    MCO: {
+        label: "BTS MCO",
+        blocks: [
+            { id: "Bloc 1", label: "Bloc 1 - Développer la relation client et vente conseil" },
+            { id: "Bloc 2", label: "Bloc 2 - Animer et dynamiser l'offre commerciale" },
+            { id: "Bloc 3", label: "Bloc 3 - Assurer la gestion opérationnelle" },
+            { id: "Bloc 4", label: "Bloc 4 - Manager l'équipe commerciale" }
+        ]
+    },
+    GPME: {
+        label: "BTS GPME",
+        blocks: [
+            { id: "Bloc 1", label: "Bloc 1 - Gérer la relation avec les clients et fournisseurs" },
+            { id: "Bloc 2", label: "Bloc 2 - Participer à la gestion des risques" },
+            { id: "Bloc 3", label: "Bloc 3 - Gérer le personnel et contribuer à la GRH" },
+            { id: "Bloc 4", label: "Bloc 4 - Soutenir le fonctionnement et le développement" }
+        ]
+    },
+    CEJM: {
+        label: "CEJM (Tronc commun)",
+        blocks: [
+            { id: "Thème 1", label: "Thème 1 : L'intégration de l'entreprise dans son environnement" },
+            { id: "Thème 2", label: "Thème 2 : La régulation de l'activité économique" },
+            { id: "Thème 3", label: "Thème 3 : L'organisation de l'activité de l'entreprise" },
+            { id: "Thème 4", label: "Thème 4 : L'impact du numérique sur la vie de l'entreprise" },
+            { id: "Thème 5", label: "Thème 5 : Les mutations du travail" },
+            { id: "Thème 6", label: "Thème 6 : Les choix stratégiques de l'entreprise" }
+        ]
+    }
+};
+
 export default function GeneratePage() {
     const [topic, setTopic] = useState("");
     const [duration, setDuration] = useState(4);
@@ -49,6 +89,7 @@ export default function GeneratePage() {
     const [isSaving, setIsSaving] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
     const [currentTrack, setCurrentTrack] = useState("NDRC"); // Default track
+
     useEffect(() => {
         setMounted(true);
     }, []);
@@ -243,6 +284,7 @@ export default function GeneratePage() {
                     duration_hours: duration,
                     target_block: block || null,
                     document_type: docType,
+                    category: currentTrack,
                 }),
             });
 
@@ -348,35 +390,48 @@ export default function GeneratePage() {
     return (
         <div className="flex flex-col h-screen bg-slate-50">
             <Navbar />
-            {/* Debug Bar - Simplified */}
-            <div className="bg-slate-100 text-[10px] text-slate-400 p-1 text-center">
-                STATUS: {isLoading ? "Generating..." : "Idle"} | API: {API_BASE_URL}
-            </div>
+            {/* Debug Bar Removed */}
 
             {/* Main Content */}
             <div className="flex-1 overflow-hidden flex">
                 {/* Left Panel - Form */}
                 <div className="w-1/3 border-r bg-white p-6 flex flex-col gap-4 overflow-y-auto">
-                    {/* Category Selector */}
+
+                    {/* Track Selector */}
                     <div>
-                        <label className="text-sm font-medium text-slate-700 mb-2 block">Matière / Bloc</label>
-                        <div className="flex bg-slate-100 p-1 rounded-lg">
-                            <button
-                                onClick={() => setCurrentTrack("NDRC")}
-                                className={`flex-1 py-1.5 px-3 text-sm font-medium rounded-md transition-all ${currentTrack === "NDRC" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
-                            >
-                                Blocs NDRC Spécialités
-                            </button>
-                            <button
-                                onClick={() => setCurrentTrack("CEJM")}
-                                className={`flex-1 py-1.5 px-3 text-sm font-medium rounded-md transition-all ${currentTrack === "CEJM" ? "bg-white text-pink-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
-                            >
-                                Bloc CEJM
-                            </button>
-                        </div>
+                        <label className="text-sm font-medium text-slate-700 mb-2 block">Filière / Matière</label>
+                        <select
+                            className="w-full border rounded-md p-2 text-sm font-medium bg-slate-50 border-slate-200 focus:ring-2 focus:ring-primary/20"
+                            value={currentTrack}
+                            onChange={(e) => {
+                                setCurrentTrack(e.target.value);
+                                setBlock(""); // Reset block when track changes
+                            }}
+                        >
+                            {Object.entries(TRACKS_DATA).map(([key, data]) => (
+                                <option key={key} value={key}>{data.label}</option>
+                            ))}
+                        </select>
                     </div>
 
-                    <hr className="my-1" />
+                    {/* Dynamic Block Selector */}
+                    <div>
+                        <label className="text-sm font-medium text-slate-700 mb-1 block">
+                            {currentTrack === "CEJM" ? "Thème ciblé (optionnel)" : "Bloc de compétences (optionnel)"}
+                        </label>
+                        <select
+                            className="w-full border rounded-md p-2 text-sm text-slate-600"
+                            value={block}
+                            onChange={(e) => setBlock(e.target.value)}
+                        >
+                            <option value="">-- {currentTrack === "CEJM" ? "Tous les thèmes" : "Tous les blocs"} --</option>
+                            {TRACKS_DATA[currentTrack]?.blocks.map((b) => (
+                                <option key={b.id} value={b.id}>{b.label}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <hr className="my-1 border-slate-100" />
 
                     {/* Document Type Selector */}
                     <div>
@@ -425,22 +480,6 @@ export default function GeneratePage() {
                             onChange={(e) => setDuration(parseInt(e.target.value) || 0)}
                         />
                     </div>
-
-                    {currentTrack === "NDRC" && (
-                        <div>
-                            <label className="text-sm font-medium text-slate-700 mb-1 block">Bloc ciblé (optionnel)</label>
-                            <select
-                                className="w-full border rounded-md p-2 text-sm"
-                                value={block}
-                                onChange={(e) => setBlock(e.target.value)}
-                            >
-                                <option value="">-- Tous les blocs --</option>
-                                <option value="Bloc 1">Bloc 1 - Relation client et négociation-vente</option>
-                                <option value="Bloc 2">Bloc 2 - Relation client à distance et digitalisation</option>
-                                <option value="Bloc 3">Bloc 3 - Relation client et animation de réseaux</option>
-                            </select>
-                        </div>
-                    )}
 
                     <Button
                         onClick={handleGenerate}

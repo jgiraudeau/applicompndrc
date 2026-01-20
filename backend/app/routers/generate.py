@@ -4,15 +4,15 @@ from typing import Optional, Literal
 from sqlalchemy.orm import Session
 from backend.app.database import get_db
 from backend.app.models import ActivityLog
-from backend.app.services.gemini_service import gemini_service, REGULATORY_GROUNDING
+from backend.app.services.gemini_service import gemini_service
 # Lazy import: knowledge_base will be imported inside functions to avoid startup delays
 import google.generativeai as genai
 
 router = APIRouter()
 
-# Specialized prompts for each document type
-PROMPTS = {
-    "dossier_prof": REGULATORY_GROUNDING + """Tu es un expert en création de cours pour le BTS NDRC.
+# Specialized prompt templates for each document type
+PROMPT_TEMPLATES = {
+    "dossier_prof": """Tu es un expert en création de cours pour le BTS {track}.
 Génère un DOSSIER PROFESSEUR complet avec la structure suivante :
 
 # Dossier Professeur : [Titre]
@@ -35,7 +35,7 @@ Distingue bien :
 - Liens avec les épreuves (CCF/Ponctuel).
 """,
 
-    "dossier_eleve": REGULATORY_GROUNDING + """Tu es un expert en création de supports pédagogiques pour le BTS NDRC.
+    "dossier_eleve": """Tu es un expert en création de supports pédagogiques pour le BTS {track}.
 Génère un DOSSIER ÉLÈVE clair, structuré et incitant à l'action :
 
 # Dossier Élève : [Titre]
@@ -54,7 +54,7 @@ Chaque question doit solliciter une compétence du référentiel.
 [Zone pour que l'élève récapitule les notions clés apprises]
 """,
 
-    "fiche_deroulement": REGULATORY_GROUNDING + """Tu es un expert en ingénierie pédagogique pour le BTS NDRC.
+    "fiche_deroulement": """Tu es un expert en ingénierie pédagogique pour le BTS {track}.
 Génère une FICHE DE DÉROULEMENT DE COURS détaillée :
 
 # Fiche de Déroulement : [Titre]
@@ -62,7 +62,7 @@ Génère une FICHE DE DÉROULEMENT DE COURS détaillée :
 ## Informations Pratiques
 | Élément | Détail |
 |---------|--------|
-| Classe | BTS NDRC 1ère/2ème année |
+| Classe | BTS {track} 1ère/2ème année |
 | Durée totale | X heures |
 | Salle | Salle informatique / Classe |
 | Matériel | ... |
@@ -92,13 +92,13 @@ Génère une FICHE DE DÉROULEMENT DE COURS détaillée :
 - [ ] ...
 """,
 
-    "evaluation": REGULATORY_GROUNDING + """Tu es un expert en évaluation pour le BTS NDRC.
+    "evaluation": """Tu es un expert en évaluation pour le BTS {track}.
 Génère une ÉVALUATION COMPLÈTE avec :
 
 # Évaluation : [Titre]
 
 ## Mise en situation d'examen
-[Un scénario réaliste conforme aux épreuves E4, E5 ou E6]
+[Un scénario réaliste conforme aux épreuves E4, E5 ou E6 (adaptées au BTS {track})]
 
 ## Travail à réaliser
 [Questions précises avec barème de points]
@@ -107,7 +107,7 @@ Génère une ÉVALUATION COMPLÈTE avec :
 [Réponses attendues détaillées avec critères d'évaluation officiels]
 """,
 
-    "quiz": REGULATORY_GROUNDING + """Tu es un expert en évaluation formative pour le BTS NDRC.
+    "quiz": """Tu es un expert en évaluation formative pour le BTS {track}.
 Génère un QUIZ / QCM complet et pédagogique :
 
 # Quiz de Révision : [Titre du Thème]
@@ -119,7 +119,7 @@ Génère 5 à 10 questions (QCM ou questions ouvertes courtes).
 **IMPORTANT** : Pour chaque question, fournis la réponse correcte ET une explication détaillée du "Pourquoi" basée sur le référentiel.
 """,
 
-    "planning_annuel": REGULATORY_GROUNDING + """Tu es un expert en ingénierie de formation pour le BTS NDRC.
+    "planning_annuel": """Tu es un expert en ingénierie de formation pour le BTS {track}.
 Génère une PROGRESSION ANNUELLE détaillée et structurée :
 
 # Progression Annuelle : [Nom de la Matière/Bloc]
@@ -140,6 +140,7 @@ class GenerateRequest(BaseModel):
     duration_hours: Optional[int] = 4
     target_block: Optional[str] = None
     document_type: Literal["dossier_prof", "dossier_eleve", "fiche_deroulement", "evaluation", "quiz", "planning_annuel"] = "dossier_prof"
+    category: Optional[str] = "NDRC"
 
 class GenerateResponse(BaseModel):
     content: str
@@ -150,12 +151,10 @@ from backend.app.auth import get_current_user
 from backend.app.models import User
 from backend.app.services.usage_service import check_and_increment_usage
 
-# ...
-
 @router.post("/course", response_model=GenerateResponse)
 async def generate_document(request: GenerateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """
-    Generates a specific type of pedagogical document.
+    Generates a specific type of pedagogical document based on the selected BTS track.
     """
     if not request.topic:
         raise HTTPException(status_code=400, detail="Topic is required")
@@ -164,7 +163,13 @@ async def generate_document(request: GenerateRequest, db: Session = Depends(get_
     check_and_increment_usage(db, current_user, 'generate_course')
     
     try:
-        system_prompt = PROMPTS.get(request.document_type, PROMPTS["dossier_prof"])
+        # Determine track, default to NDRC
+        track = request.category or "NDRC"
+        
+        # Get template and format it
+        template = PROMPT_TEMPLATES.get(request.document_type, PROMPT_TEMPLATES["dossier_prof"])
+        # Format replacing {track} with the actual track name
+        system_prompt = template.format(track=track)
         
         user_prompt = f"""Génère le document demandé sur le thème suivant :
 
@@ -174,9 +179,10 @@ async def generate_document(request: GenerateRequest, db: Session = Depends(get_
         if request.target_block:
             user_prompt += f"**Bloc ciblé** : {request.target_block}\n"
 
-        user_prompt += "\nUtilise le référentiel BTS NDRC et les synthèses de cours disponibles."
+        user_prompt += f"\nUtilise le référentiel BTS {track} et les synthèses de cours disponibles."
 
-        model = gemini_service.get_model(custom_system_instruction=system_prompt)
+        # Pass track to get_model to ensure correct regulatory grounding
+        model = gemini_service.get_model(custom_system_instruction=system_prompt, track=track)
         
         content_parts = []
         
@@ -204,6 +210,7 @@ async def generate_document(request: GenerateRequest, db: Session = Depends(get_
                 target_block=request.target_block,
                 user_id=current_user.id
             )
+            # Add category/track to activity log? Model doesn't support it yet, so skip or use 'topic'
             db.add(new_log)
             db.commit()
             db.refresh(new_log)

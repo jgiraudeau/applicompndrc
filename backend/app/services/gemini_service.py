@@ -10,7 +10,8 @@ load_dotenv(dotenv_path=env_path)
 print(f"DEBUG: Loading .env from {env_path}")
 API_KEY = os.getenv("GOOGLE_API_KEY")
 
-REGULATORY_GROUNDING = """
+REGULATORY_GROUNDINGS = {
+    "NDRC": """
 RÈGLES OFFICIELLES BTS NDRC (Source : Circulaire 2024) - À APPLIQUER STRICTEMENT :
 - E4 (Relation client et négociation-vente) : Peut être en CCF ou Ponctuel Oral.
 - E5 A (Relation client à distance et digitalisation) : Épreuve exclusivement PONCTUELLE ÉCRITE (3h). Ne peut JAMAIS être au format CCF.
@@ -20,7 +21,35 @@ RÈGLES OFFICIELLES BTS NDRC (Source : Circulaire 2024) - À APPLIQUER STRICTEME
 - Bloc 2 (Animation Réseaux / Digitalisation) : Soumis à des règles de non-CCF pour certaines parties.
 
 CONSIGNE : Ne jamais inventer de modalités d'examen. Si une demande de l'utilisateur contredit ces règles (ex: demander un CCF pour l'E5), refuse poliment en citant le règlement.
+""",
+    "MCO": """
+RÈGLES OFFICIELLES BTS MCO (Management Commercial Opérationnel) - À APPLIQUER STRICTEMENT :
+- E41 (Développement de la relation client et vente conseil) : Épreuve orale ou CCF.
+- E42 (Animation et dynamisation de l'offre commerciale) : Épreuve orale ou CCF.
+- E5 (Gestion opérationnelle) : Épreuve écrite (Etude de cas).
+- E6 (Management de l'équipe commerciale) : Épreuve orale ou CCF.
+- CEJM : Épreuve écrite ponctuelle.
+
+CONSIGNE : Respecte scrupuleusement le référentiel du BTS MCO. Ne jamais inventer de modalités contraires au règlement officiel.
+""",
+    "GPME": """
+RÈGLES OFFICIELLES BTS GPME (Gestion de la PME) - À APPLIQUER STRICTEMENT :
+- E4 (Gérer la relation avec les clients et les fournisseurs de la PME) : Oral / CCF.
+- E5 (Participer à la gestion des risques de la PME) : Écrit.
+- E6 (Gérer le personnel et contribuer à la GRH) : Oral / CCF.
+- Atelier de Professionnalisation : Cadre spécifique.
+
+CONSIGNE : Respecte le référentiel officiel du BTS GPME pour toutes les productions.
+""",
+    "CEJM": """
+RÈGLES OFFICIELLES CEJM (Culture Économique, Juridique et Managériale) :
+- Épreuve E3 commune à plusieurs BTS tertiaires.
+- Format : Épreuve écrite ponctuelle de 4 heures.
+- Objectifs : Analyser une situation d'entreprise sous les angles économique, juridique et managérial.
+
+CONSIGNE : Toutes les études de cas ou questions doivent croiser les trois dimensions (Éco, Droit, Management).
 """
+}
 
 class GeminiService:
     def __init__(self):
@@ -67,9 +96,12 @@ class GeminiService:
             # Re-raise to be caught by the property
             raise e
 
-    def get_model(self, custom_system_instruction: str = ""):
+    def get_model(self, custom_system_instruction: str = "", track: str = "NDRC"):
         """Returns a GenerativeModel with regulatory grounding and custom instructions."""
-        full_system_instruction = REGULATORY_GROUNDING
+        # Get specific grounding or fallback to generic/NDRC
+        grounding = REGULATORY_GROUNDINGS.get(track, REGULATORY_GROUNDINGS["NDRC"])
+        
+        full_system_instruction = grounding
         if custom_system_instruction:
             full_system_instruction += "\n" + custom_system_instruction
         
@@ -114,7 +146,7 @@ class GeminiService:
         except Exception as e:
             return f"Error: {e}"
 
-    def chat_with_history(self, message: str, history: list = [], file_uri: str = None, knowledge_files: list = [], context_label: str = ""):
+    def chat_with_history(self, message: str, history: list = [], file_uri: str = None, knowledge_files: list = [], context_label: str = "", track: str = "NDRC"):
         """Chat with conversation history, optional specific file, and knowledge base files."""
         try:
             # Add context instruction if label provided
@@ -122,7 +154,7 @@ class GeminiService:
             if context_label:
                 system_instruction = f"\nContexte spécifique : Tu es un expert du domaine '{context_label}'. Utilise les documents fournis pour répondre avec précision."
             
-            model = self.get_model(custom_system_instruction=system_instruction)
+            model = self.get_model(custom_system_instruction=system_instruction, track=track)
             
             chat_history = []
             
