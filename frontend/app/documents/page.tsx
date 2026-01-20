@@ -83,7 +83,10 @@ export default function DocumentsPage() {
                 })
             });
 
-            if (!res.ok) throw new Error("Export failed");
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(errText || "Export failed");
+            }
 
             const contentType = res.headers.get("Content-Type");
             if (contentType && contentType.includes("application/json")) {
@@ -103,9 +106,9 @@ export default function DocumentsPage() {
                 a.click();
             }
 
-        } catch (e) {
+        } catch (e: any) {
             console.error(e);
-            alert("Erreur lors de l'export.");
+            alert(`Erreur lors de l'export: ${e.message}`);
         } finally {
             setIsExporting(null);
         }
