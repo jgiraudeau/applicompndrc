@@ -78,7 +78,8 @@ export default function DocumentsPage() {
                     "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    markdown: selectedDoc.content
+                    content: selectedDoc.content,
+                    filename: selectedDoc.title
                 })
             });
 
