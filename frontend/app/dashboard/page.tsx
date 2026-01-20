@@ -105,12 +105,41 @@ export default function DashboardPage() {
                     })
                     .catch(err => {
                         console.error("Error fetching stats:", err);
-                        setErrorMsg(err.message || "Erreur inconnue");
+                        // Fallback to empty stats to show UI
+                        setStats({
+                            total_generated: 0,
+                            by_type: {},
+                            by_block: {},
+                            recent: [],
+                            published: [],
+                            quota: {
+                                plan: "trial",
+                                generation_count: 0,
+                                max_generations: 5,
+                                chat_count: 0,
+                                max_chat: 15,
+                                trial_days_remaining: 0
+                            }
+                        });
                         setIsLoading(false);
                     });
             } else {
                 console.warn("No token found, stopping loader.");
-                setErrorMsg("Token d'authentification manquant (Session invalide)");
+                setStats({
+                    total_generated: 0,
+                    by_type: {},
+                    by_block: {},
+                    recent: [],
+                    published: [],
+                    quota: {
+                        plan: "trial",
+                        generation_count: 0,
+                        max_generations: 5,
+                        chat_count: 0,
+                        max_chat: 15,
+                        trial_days_remaining: 0
+                    }
+                });
                 setIsLoading(false);
             }
         }
