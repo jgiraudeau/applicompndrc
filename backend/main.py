@@ -16,6 +16,7 @@ from backend.app.routers import google_integration # New Google Integration
 from backend.app.routers import setup # Temporary admin setup endpoint
 from backend.app.database import engine, Base
 import backend.app.models as models
+import os
 
 # Lifespan event to load knowledge base on startup
 @asynccontextmanager
@@ -138,6 +139,7 @@ origins = [
     "http://localhost:3000",
     "http://localhost:3001",
     "http://localhost:3002",
+    os.getenv("FRONTEND_URL", "https://applicompndrc.vercel.app"),
     "https://applicompndrc.vercel.app",
     "https://applicompndrc-git-main-giraudeaus-projects.vercel.app"
 ]
