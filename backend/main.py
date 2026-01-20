@@ -28,96 +28,58 @@ async def lifespan(app: FastAPI):
         models.Base.metadata.create_all(bind=engine)
         print("✅ Database tables checked/created.")
         
-        # Simple Migration: Add missing columns if they don't exist (SQLite/Postgres compatible-ish)
-        from sqlalchemy import text
-        with engine.connect() as conn:
-            try:
-                # Check if is_active exists
-                conn.execute(text("SELECT is_active FROM users LIMIT 1"))
-            except Exception:
-                print("⚠️ Column 'is_active' missing. Adding it...")
-                conn.execute(text("ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT 1"))
-                conn.commit()
-
-            try:
-                # Check if last_login exists
-                conn.execute(text("SELECT last_login FROM users LIMIT 1"))
-            except Exception:
-                print("⚠️ Column 'last_login' missing. Adding it...")
-                conn.execute(text("ALTER TABLE users ADD COLUMN last_login DATETIME"))
-                conn.commit()
-
-            try:
-                # Check if status exists
-                conn.execute(text("SELECT status FROM users LIMIT 1"))
-            except Exception:
-                print("⚠️ Column 'status' missing. Adding it...")
-                conn.execute(text("ALTER TABLE users ADD COLUMN status VARCHAR DEFAULT 'pending'"))
-                conn.commit()
+        # Robust Migration using Inspector to avoid transaction errors
+        from sqlalchemy import inspect, text
+        
+        inspector = inspect(engine)
+        existing_tables = inspector.get_table_names()
+        
+        if "users" in existing_tables:
+            columns = [col["name"] for col in inspector.get_columns("users")]
             
-            # Fix uppercase Statuses (should be lowercase)
-            try:
-                conn.execute(text("UPDATE users SET status='pending' WHERE status='PENDING'"))
-                conn.execute(text("UPDATE users SET status='active' WHERE status='ACTIVE'"))
-                conn.execute(text("UPDATE users SET status='rejected' WHERE status='REJECTED'"))
-                conn.commit()
-            except Exception:
-                pass
+            with engine.connect() as conn:
+                # helper to add column safely
+                def add_column_if_missing(col_name, col_type_sql):
+                    if col_name not in columns:
+                        print(f"⚠️ Column '{col_name}' missing. Adding it...")
+                        try:
+                            conn.execute(text(f"ALTER TABLE users ADD COLUMN {col_name} {col_type_sql}"))
+                            conn.commit()
+                        except Exception as e:
+                            print(f"Failed to add {col_name}: {e}")
+                            conn.rollback()
+
+                add_column_if_missing("is_active", "BOOLEAN DEFAULT true")
+                add_column_if_missing("last_login", "TIMESTAMP")
+                add_column_if_missing("status", "VARCHAR DEFAULT 'pending'")
+                add_column_if_missing("plan_selection", "VARCHAR DEFAULT 'trial'")
+                add_column_if_missing("stripe_customer_id", "VARCHAR")
+                add_column_if_missing("generation_count", "INTEGER DEFAULT 0")
+                add_column_if_missing("chat_message_count", "INTEGER DEFAULT 0")
+                add_column_if_missing("created_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
                 
-            # Fix uppercase Roles (should be lowercase)
-            try:
-                conn.execute(text("UPDATE users SET role='admin' WHERE role='ADMIN'"))
-                conn.execute(text("UPDATE users SET role='teacher' WHERE role='TEACHER'"))
-                conn.execute(text("UPDATE users SET role='student' WHERE role='STUDENT'"))
-                conn.execute(text("UPDATE users SET role='school_admin' WHERE role='SCHOOL_ADMIN'"))
-                conn.commit()
-            except Exception:
-                pass
+                # Fix Uppercase values (Data cleanup)
+                try:
+                    conn.execute(text("UPDATE users SET status='pending' WHERE status='PENDING'"))
+                    conn.execute(text("UPDATE users SET status='active' WHERE status='ACTIVE'"))
+                    conn.execute(text("UPDATE users SET status='rejected' WHERE status='REJECTED'"))
+                    conn.execute(text("UPDATE users SET role='admin' WHERE role='ADMIN'"))
+                    conn.execute(text("UPDATE users SET role='teacher' WHERE role='TEACHER'"))
+                    conn.execute(text("UPDATE users SET role='student' WHERE role='STUDENT'"))
+                    conn.commit()
+                except Exception:
+                    conn.rollback()
 
-            try:
-                # Check if plan_selection exists
-                conn.execute(text("SELECT plan_selection FROM users LIMIT 1"))
-            except Exception:
-                print("⚠️ Column 'plan_selection' missing. Adding it...")
-                conn.execute(text("ALTER TABLE users ADD COLUMN plan_selection VARCHAR DEFAULT 'trial'"))
-                conn.commit()
-
-            try:
-                # Check if stripe_customer_id exists
-                conn.execute(text("SELECT stripe_customer_id FROM users LIMIT 1"))
-            except Exception:
-                print("⚠️ Column 'stripe_customer_id' missing. Adding it...")
-                conn.execute(text("ALTER TABLE users ADD COLUMN stripe_customer_id VARCHAR"))
-                conn.commit()
-
-            # Migration for Usage Tracking
-            try:
-                conn.execute(text("SELECT generation_count FROM users LIMIT 1"))
-            except Exception:
-                print("⚠️ Column 'generation_count' missing. Adding it...")
-                conn.execute(text("ALTER TABLE users ADD COLUMN generation_count INTEGER DEFAULT 0"))
-                conn.commit()
-
-            try:
-                conn.execute(text("SELECT chat_message_count FROM users LIMIT 1"))
-            except Exception:
-                print("⚠️ Column 'chat_message_count' missing. Adding it...")
-                conn.execute(text("ALTER TABLE users ADD COLUMN chat_message_count INTEGER DEFAULT 0"))
-                conn.commit()
-
-            try:
-                conn.execute(text("SELECT created_at FROM users LIMIT 1"))
-            except Exception:
-                print("⚠️ Column 'created_at' missing. Adding it...")
-                conn.execute(text("ALTER TABLE users ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP"))
-                conn.commit()
-
-            try:
-                conn.execute(text("SELECT user_id FROM activity_logs LIMIT 1"))
-            except Exception:
-                print("⚠️ Column 'user_id' missing in activity_logs. Adding it...")
-                conn.execute(text("ALTER TABLE activity_logs ADD COLUMN user_id VARCHAR"))
-                conn.commit()
+        if "activity_logs" in existing_tables:
+            alog_columns = [col["name"] for col in inspector.get_columns("activity_logs")]
+            with engine.connect() as conn:
+                if "user_id" not in alog_columns:
+                     print("⚠️ Column 'user_id' missing in activity_logs. Adding it...")
+                     try:
+                        conn.execute(text("ALTER TABLE activity_logs ADD COLUMN user_id VARCHAR"))
+                        conn.commit()
+                     except:
+                        conn.rollback()
                 
         print("✅ Schema migration checks complete.")
         
