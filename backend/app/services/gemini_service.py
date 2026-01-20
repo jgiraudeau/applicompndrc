@@ -114,26 +114,58 @@ class GeminiService:
         except Exception as e:
             return f"Error: {e}"
 
-    def chat_with_history(self, message: str, history: list = [], file_uri: str = None):
-        """Chat with conversation history and optional file context."""
+    def chat_with_history(self, message: str, history: list = [], file_uri: str = None, knowledge_files: list = [], context_label: str = ""):
+        """Chat with conversation history, optional specific file, and knowledge base files."""
         try:
-            model = self.get_model()
+            # Add context instruction if label provided
+            system_instruction = ""
+            if context_label:
+                system_instruction = f"\nContexte spécifique : Tu es un expert du domaine '{context_label}'. Utilise les documents fournis pour répondre avec précision."
+            
+            model = self.get_model(custom_system_instruction=system_instruction)
             
             chat_history = []
             
-            # 1. Add File Context (as a separate turn or system-like context)
+            # 0. Add Knowledge Base Files (Context)
+            if knowledge_files:
+                print(f"📚 Including {len(knowledge_files)} knowledge files in context.")
+                kb_parts = ["Voici des documents de référence (Knowledge Base) :"]
+                valid_files = False
+                for kf_name in knowledge_files:
+                    try:
+                        # Convert name to file object reference if possible, or assume it's valid
+                        # The API usually takes the file object or the URI/Name directly?
+                        # Using get_file to accept it as content part.
+                        kf_obj = genai.get_file(kf_name)
+                        kb_parts.append(kf_obj)
+                        valid_files = True
+                    except Exception as e:
+                        print(f"⚠️ Could not load knowledge file {kf_name}: {e}")
+                
+                if valid_files:
+                    kb_parts.append("Utilise ces connaissances pour répondre aux questions futures.")
+                    chat_history.append({
+                        "role": "user",
+                        "parts": kb_parts
+                    })
+                    chat_history.append({
+                        "role": "model",
+                        "parts": ["Bien compris. J'ai pris connaissance de la base documentaire."]
+                    })
+
+            # 1. Add Specific File Context (User Uploaded)
             if file_uri:
                 print(f"👉 Including file context: {file_uri}")
                 try:
                     file_obj = genai.get_file(file_uri)
-                    # We inject the file as the first user message
+                    # We inject the file as a user message
                     chat_history.append({
                         "role": "user",
-                        "parts": [file_obj, "Voici le document de référence pour notre conversation."]
+                        "parts": [file_obj, "Voici un document spécifique que je fournis."]
                     })
                     chat_history.append({
                         "role": "model",
-                        "parts": ["Bien reçu. Je utiliserai ce document pour répondre à vos questions."]
+                        "parts": ["Bien reçu. J'analyserai ce document."]
                     })
                 except Exception as e:
                     print(f"⚠️ Could not retrieve file {file_uri}: {e}")
@@ -141,10 +173,13 @@ class GeminiService:
             # 2. Add Conversation History
             for msg in history:
                 role = "user" if msg['role'] == "user" else "model"
-                chat_history.append({
-                    "role": role,
-                    "parts": [msg['content']]
-                })
+                # Ensure parts is valid
+                content = msg.get('content', '')
+                if content:
+                    chat_history.append({
+                        "role": role,
+                        "parts": [content]
+                    })
 
             # 3. Start Chat Session
             chat = model.start_chat(history=chat_history)
@@ -154,7 +189,7 @@ class GeminiService:
             return response.text
         except Exception as e:
             print(f"❌ Gemini Error: {e}")
-            return f"Désolé, une erreur est survenue : {e}"
+            return f"Désolé, une erreur est survenue avec l'IA : {e}"
 
 # Singleton instance
 gemini_service = GeminiService()

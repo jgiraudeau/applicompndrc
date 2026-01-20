@@ -11,7 +11,8 @@ import {
     LogOut,
     GraduationCap,
     User,
-    ShieldAlert
+    ShieldAlert,
+    FolderOpen
 } from "lucide-react";
 
 export function Navbar() {
@@ -28,7 +29,7 @@ export function Navbar() {
                     <GraduationCap className="w-6 h-6 text-primary" />
                 </div>
                 <div className="hidden md:block">
-                    <h1 className="font-bold text-xl text-slate-800">Professeur Virtuel</h1>
+                    <h1 className="font-bold text-xl text-slate-800">Votre Assistant Professeur</h1>
                     <p className="text-xs text-slate-500">BTS NDRC • Assistant Pédagogique IA</p>
                 </div>
             </Link>
@@ -62,6 +63,16 @@ export function Navbar() {
                     >
                         <Sparkles className="w-4 h-4" />
                         <span className="hidden sm:inline">Générateur</span>
+                    </Button>
+                </Link>
+
+                <Link href="/documents">
+                    <Button
+                        variant={isActive("/documents") ? "secondary" : "ghost"}
+                        className={`gap-2 ${isActive("/documents") ? "text-indigo-600 bg-indigo-50" : "text-slate-600"}`}
+                    >
+                        <FolderOpen className="w-4 h-4" />
+                        <span className="hidden sm:inline">Mes Sauvegardes</span>
                     </Button>
                 </Link>
                 {(session?.user as any)?.role?.toLowerCase() === 'admin' && (
@@ -98,7 +109,7 @@ export function Navbar() {
                     size="icon"
                     className="text-red-400 hover:text-red-600 hover:bg-red-50"
                     onClick={() => signOut({ callbackUrl: "/login" })}
-                    title="Se déconnecter"
+                    title="Se déconnecter du compte"
                 >
                     <LogOut className="w-5 h-5" />
                 </Button>

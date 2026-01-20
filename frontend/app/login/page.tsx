@@ -53,7 +53,7 @@ export default function LoginPage() {
                 <CardHeader>
                     <CardTitle className="text-2xl text-center">Connexion</CardTitle>
                     <CardDescription className="text-center">
-                        Connectez-vous à votre espace Professeur Virtuel
+                        Connectez-vous à Votre Assistant Professeur
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -122,7 +122,7 @@ export default function LoginPage() {
                                 fill="#EA4335"
                             />
                         </svg>
-                        Continuer avec Google Classroom
+                        Continuer avec Google
                     </Button>
                 </CardContent>
                 <CardFooter className="flex justify-center">

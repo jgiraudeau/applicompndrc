@@ -62,7 +62,7 @@ export default function RegisterPage() {
                 <CardHeader>
                     <CardTitle className="text-2xl text-center">Inscription Établissement</CardTitle>
                     <CardDescription className="text-center">
-                        Créez votre espace Professeur Virtuel
+                        Créez votre compte Assistant Professeur
                     </CardDescription>
                 </CardHeader>
                 <CardContent>

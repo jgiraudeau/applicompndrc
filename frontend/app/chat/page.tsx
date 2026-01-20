@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, User, Bot, GraduationCap, Sparkles, LayoutDashboard, Share, Loader2, LogOut, FileText } from "lucide-react";
+import { Send, User, Bot, GraduationCap, Sparkles, LayoutDashboard, Share, Loader2, LogOut, FileText, Save } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
@@ -20,7 +20,7 @@ interface Message {
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([
-    { role: "bot", content: "Bonjour ! Je suis votre Professeur Virtuel. Je connais tout le contenu du BTS NDRC. Comment puis-je vous aider aujourd'hui ?" }
+    { role: "bot", content: "Bonjour ! Je suis Votre Assistant Professeur. Je connais tout le contenu du BTS NDRC. Comment puis-je vous aider aujourd'hui ?" }
   ]);
   const [input, setInput] = useState("");
   // Persistent state for the active file context
@@ -113,7 +113,7 @@ export default function Home() {
         body: JSON.stringify({
           token: session.googleAccessToken,
           courseId: selectedCourseId,
-          title: "Exercice généré par Professeur Virtuel",
+          title: "Exercice généré par Votre Assistant Professeur",
           description: contentToExport
         })
       });
@@ -184,6 +184,34 @@ export default function Home() {
   };
 
   // ...
+
+  const handleSaveMessage = async (content: string) => {
+    try {
+      const token = (session as any)?.accessToken;
+      if (!token) {
+        alert("Vous devez être connecté.");
+        return;
+      }
+      const title = "Chat: " + (content.split('\n')[0] || "").substring(0, 40) + "...";
+      const res = await fetch(`${API_BASE_URL}/api/documents/save`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: title,
+          content: content,
+          document_type: "chat_export"
+        })
+      });
+      if (res.ok) alert("Message sauvegardé !");
+      else alert("Erreur lors de la sauvegarde.");
+    } catch (e) {
+      console.error(e);
+      alert("Erreur technique.");
+    }
+  };
 
   const handleSend = async () => {
     if (!input.trim() && !selectedFile) return;
@@ -315,7 +343,16 @@ export default function Home() {
                     )}
                   </Card>
                   {msg.role === "bot" && (
-                    <div className="flex gap-2 mt-2 pt-2 border-t border-slate-100">
+                    <div className="flex gap-2 mt-2 pt-2 border-t border-slate-100 flex-wrap">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+                        onClick={() => handleSaveMessage(msg.content)}
+                      >
+                        <Save className="w-3 h-3 mr-1.5" />
+                        Sauvegarder
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"

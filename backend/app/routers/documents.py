@@ -1,11 +1,91 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from sqlalchemy.orm import Session
 from backend.app.services.gemini_service import gemini_service
+from backend.app.database import get_db
+from backend.app.auth import get_current_active_user
+from backend.app.models import User, SavedDocument
+from pydantic import BaseModel
+from typing import List
 import shutil
 import os
 import tempfile
 import docx
 
 router = APIRouter()
+
+# --- Schemas ---
+class SaveDocRequest(BaseModel):
+    title: str
+    content: str
+    document_type: str
+
+class SavedDocResponse(BaseModel):
+    id: str
+    title: str
+    content: str
+    document_type: str
+    created_at: str
+
+    class Config:
+        from_attributes = True
+
+# --- Endpoints ---
+
+@router.post("/save")
+async def save_document_endpoint(
+    doc: SaveDocRequest, 
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    try:
+        new_doc = SavedDocument(
+            user_id=current_user.id,
+            title=doc.title,
+            content=doc.content,
+            document_type=doc.document_type
+        )
+        db.add(new_doc)
+        db.commit()
+        db.refresh(new_doc)
+        return {"status": "success", "id": new_doc.id}
+    except Exception as e:
+        print(f"Save error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/list")
+async def list_documents(
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    # Returns lightweight list (without full content if needed, but for now full is fine)
+    # To optimize: db.query(SavedDocument.id, SavedDocument.title...)
+    docs = db.query(SavedDocument).filter(SavedDocument.user_id == current_user.id).order_by(SavedDocument.created_at.desc()).all()
+    # Normalize created_at to string
+    return docs
+
+@router.get("/{doc_id}")
+async def get_document(
+    doc_id: str,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    doc = db.query(SavedDocument).filter(SavedDocument.id == doc_id, SavedDocument.user_id == current_user.id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    return doc
+
+@router.delete("/{doc_id}")
+async def delete_document(
+    doc_id: str,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    doc = db.query(SavedDocument).filter(SavedDocument.id == doc_id, SavedDocument.user_id == current_user.id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    db.delete(doc)
+    db.commit()
+    return {"status": "deleted"}
 
 @router.post("/upload")
 async def upload_document(file: UploadFile = File(...)):

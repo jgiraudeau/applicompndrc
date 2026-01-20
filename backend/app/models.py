@@ -42,7 +42,6 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     full_name = Column(String)
-    full_name = Column(String)
     # Using String for flexibility, validation handled by Pydantic/App logic
     role = Column(String, default="teacher") 
     status = Column(String, default="pending")
@@ -60,6 +59,7 @@ class User(Base):
     organization = relationship("Organization", back_populates="users")
     
     chat_sessions = relationship("ChatSession", back_populates="user")
+    saved_documents = relationship("SavedDocument", back_populates="user")
 
 # Chat History Models
 class ChatSession(Base):
@@ -109,3 +109,16 @@ class PublishedQuiz(Base):
     title = Column(String)
     content = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class SavedDocument(Base):
+    __tablename__ = "saved_documents"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String, ForeignKey("users.id"), index=True)
+    title = Column(String)
+    content = Column(Text)
+    document_type = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = relationship("User", back_populates="saved_documents")

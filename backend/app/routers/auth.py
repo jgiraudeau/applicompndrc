@@ -97,6 +97,14 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
+    # Send welcome email (async ideally)
+    if new_user.email != "jacques.giraudeau@gmail.com":
+        try:
+            from backend.app.services.email_service import email_service
+            email_service.send_welcome_email(new_user)
+        except Exception as e:
+            print(f"Failed to send welcome email: {e}")
+
     # 5. Generate Token
     access_token = auth.create_access_token(data={"sub": new_user.email})
     return {"access_token": access_token, "token_type": "bearer"}

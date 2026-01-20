@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { GraduationCap, Sparkles, ArrowLeft, Copy, Check, FileText, Users, ListChecks, ClipboardCheck, Download, FileDown, HelpCircle, Calendar, Share2, ExternalLink, Share, Loader2, LogOut } from "lucide-react";
+import { GraduationCap, Sparkles, ArrowLeft, Copy, Check, FileText, Users, ListChecks, ClipboardCheck, Download, FileDown, HelpCircle, Calendar, Share2, ExternalLink, Share, Loader2, LogOut, Save } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
@@ -88,17 +88,81 @@ export default function GeneratePage() {
     const handleSave = async () => {
         if (!generatedContent || !topic) return;
         setIsSaving(true);
-        // Simulate save or call real endpoint
-        setTimeout(() => {
+        try {
+            const token = (session as any)?.accessToken;
+            if (!token) {
+                alert("Vous devez être connecté pour sauvegarder.");
+                return;
+            }
+
+            const response = await fetch(`${API_BASE_URL}/api/documents/save`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    title: `${topic} (${selectedType.label})`,
+                    content: generatedContent,
+                    document_type: docType
+                })
+            });
+
+            if (response.ok) {
+                setIsSaved(true);
+                // Reset "saved" status after 3 seconds
+                setTimeout(() => setIsSaved(false), 3000);
+            } else {
+                const err = await response.text();
+                console.error(err);
+                alert("Erreur lors de la sauvegarde.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Erreur technique lors de la sauvegarde.");
+        } finally {
             setIsSaving(false);
-            setIsSaved(true);
-            setTimeout(() => setIsSaved(false), 3000);
-        }, 1000);
+        }
     };
 
-    const handleCreateGoogleForm = async () => {
-        // Placeholder for the button usage
-        alert("Fonctionnalité Auto-Form à venir !");
+    const handleCreateAutoForm = async () => {
+        if (!generatedContent) return;
+        if (!session?.googleAccessToken) {
+            alert("⚠️ Vous devez être connecté avec Google pour créer automatiquement un formulaire.\n(Déconnectez-vous et reconnectez-vous avec Google si nécessaire).");
+            return;
+        }
+
+        if (!confirm("Cela va créer un nouveau formulaire dans votre Google Drive. Continuer ?")) return;
+
+        setIsExporting("auto_form");
+        try {
+            const endpoint = `${API_BASE_URL}/api/google/forms/create`;
+            const response = await fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    token: session.googleAccessToken,
+                    title: `${topic} - Quiz`,
+                    content: generatedContent
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (confirm("✅ Formulaire créé avec succès !\nVoulez-vous l'ouvrir pour voir les questions ?")) {
+                    window.open(data.edit_url, "_blank");
+                }
+            } else {
+                const err = await response.text();
+                console.error("API Error:", err);
+                alert("❌ Erreur lors de la création : " + err);
+            }
+        } catch (e: any) {
+            console.error(e);
+            alert("❌ Erreur technique : " + e.message);
+        } finally {
+            setIsExporting(null);
+        }
     };
     const fetchCourses = async () => {
         if (!session?.googleAccessToken) {
@@ -293,6 +357,27 @@ export default function GeneratePage() {
             <div className="flex-1 overflow-hidden flex">
                 {/* Left Panel - Form */}
                 <div className="w-1/3 border-r bg-white p-6 flex flex-col gap-4 overflow-y-auto">
+                    {/* Category Selector */}
+                    <div>
+                        <label className="text-sm font-medium text-slate-700 mb-2 block">Matière / Bloc</label>
+                        <div className="flex bg-slate-100 p-1 rounded-lg">
+                            <button
+                                onClick={() => setCurrentTrack("NDRC")}
+                                className={`flex-1 py-1.5 px-3 text-sm font-medium rounded-md transition-all ${currentTrack === "NDRC" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                            >
+                                Blocs NDRC Spécialités
+                            </button>
+                            <button
+                                onClick={() => setCurrentTrack("CEJM")}
+                                className={`flex-1 py-1.5 px-3 text-sm font-medium rounded-md transition-all ${currentTrack === "CEJM" ? "bg-white text-pink-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                            >
+                                Bloc CEJM
+                            </button>
+                        </div>
+                    </div>
+
+                    <hr className="my-1" />
+
                     {/* Document Type Selector */}
                     <div>
                         <label className="text-sm font-medium text-slate-700 mb-2 block">Type de document</label>
@@ -341,19 +426,21 @@ export default function GeneratePage() {
                         />
                     </div>
 
-                    <div>
-                        <label className="text-sm font-medium text-slate-700 mb-1 block">Bloc ciblé (optionnel)</label>
-                        <select
-                            className="w-full border rounded-md p-2 text-sm"
-                            value={block}
-                            onChange={(e) => setBlock(e.target.value)}
-                        >
-                            <option value="">-- Tous les blocs --</option>
-                            <option value="Bloc 1">Bloc 1 - Relation client et négociation-vente</option>
-                            <option value="Bloc 2">Bloc 2 - Relation client à distance et digitalisation</option>
-                            <option value="Bloc 3">Bloc 3 - Relation client et animation de réseaux</option>
-                        </select>
-                    </div>
+                    {currentTrack === "NDRC" && (
+                        <div>
+                            <label className="text-sm font-medium text-slate-700 mb-1 block">Bloc ciblé (optionnel)</label>
+                            <select
+                                className="w-full border rounded-md p-2 text-sm"
+                                value={block}
+                                onChange={(e) => setBlock(e.target.value)}
+                            >
+                                <option value="">-- Tous les blocs --</option>
+                                <option value="Bloc 1">Bloc 1 - Relation client et négociation-vente</option>
+                                <option value="Bloc 2">Bloc 2 - Relation client à distance et digitalisation</option>
+                                <option value="Bloc 3">Bloc 3 - Relation client et animation de réseaux</option>
+                            </select>
+                        </div>
+                    )}
 
                     <Button
                         onClick={handleGenerate}
@@ -420,6 +507,23 @@ export default function GeneratePage() {
                                     Word
                                 </Button>
 
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleSave}
+                                    disabled={isSaving || isSaved}
+                                    className="text-slate-600 border-slate-200 hover:bg-slate-50"
+                                >
+                                    {isSaving ? (
+                                        <div className="w-4 h-4 border-2 border-slate-600 border-t-transparent rounded-full animate-spin mr-1" />
+                                    ) : isSaved ? (
+                                        <Check className="w-4 h-4 mr-1 text-green-600" />
+                                    ) : (
+                                        <Save className="w-4 h-4 mr-1" />
+                                    )}
+                                    {isSaved ? "Sauvegardé" : "Sauvegarder"}
+                                </Button>
+
                                 {docType === "quiz" && (
                                     <>
                                         <Button
@@ -446,26 +550,28 @@ export default function GeneratePage() {
                                             ) : null}
                                             Wooclap (Excel)
                                         </Button>
+
                                         <Button
-                                            variant="outline"
+                                            variant="default"
                                             size="sm"
-                                            onClick={() => handleExport("google")}
+                                            onClick={handleCreateAutoForm}
                                             disabled={!!isExporting}
-                                            className="text-purple-700 border-purple-100 hover:bg-purple-50"
+                                            className="bg-purple-700 hover:bg-purple-800 text-white border-none"
                                         >
-                                            {isExporting === "google" ? (
-                                                <div className="w-4 h-4 border-2 border-purple-700 border-t-transparent rounded-full animate-spin mr-1" />
-                                            ) : null}
-                                            Google Forms (CSV)
+                                            {isExporting === "auto_form" ? (
+                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
+                                            ) : (
+                                                <ExternalLink className="w-4 h-4 mr-1" />
+                                            )}
+                                            ⚡ Créer Formulaire (Drive)
                                         </Button>
 
-                                        {/* Google Classroom Button - DISABLED due to Auth issues
                                         {session?.googleAccessToken && (
                                             <Button
                                                 variant="outline"
                                                 size="sm"
                                                 onClick={fetchCourses}
-                                                disabled={!!isExporting}
+                                                disabled={!!isExporting || exportLoading}
                                                 className="text-emerald-700 border-emerald-100 hover:bg-emerald-50"
                                             >
                                                 {exportLoading ? (
@@ -474,7 +580,6 @@ export default function GeneratePage() {
                                                 Classroom
                                             </Button>
                                         )}
-                                        */}
 
                                         {!shareCode ? (
                                             <Button

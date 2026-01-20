@@ -87,8 +87,17 @@ async def webhook_received(request: Request, stripe_signature: str = Header(None
                 print(f"Payment success for user {user.email}. Activating subscription.")
                 user.plan_selection = "subscription"
                 user.stripe_customer_id = customer_id
-                # user.status = "active" # Optional: Auto-activate if they pay?
+                user.status = models.UserStatus.ACTIVE 
+                # (You might want to set status active here too if default was pending)
+                
                 db.commit()
+
+                # Send Confirmation Email
+                try:
+                    from backend.app.services.email_service import email_service
+                    email_service.send_approval_email(user)
+                except Exception as e:
+                    print(f"Failed to send approval email: {e}")
 
     return {"status": "success"}
 

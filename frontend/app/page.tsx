@@ -14,7 +14,7 @@ export default async function LandingPage() {
             {/* Navigation */}
             <nav className="flex items-center justify-between p-6 max-w-7xl mx-auto">
                 <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-                    Professeur Virtuel
+                    Votre Assistant Professeur
                 </div>
                 <div className="gap-4 flex">
                     {session ? (
@@ -129,7 +129,7 @@ export default async function LandingPage() {
                         Prêt à moderniser votre enseignement ?
                     </h2>
                     <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-indigo-100">
-                        Rejoignez les enseignants innovants qui utilisent Professeur Virtuel au quotidien.
+                        Rejoignez les enseignants innovants qui utilisent Votre Assistant Professeur au quotidien.
                         Aucune carte bancaire requise pour l'essai.
                     </p>
                     <div className="mt-10 flex items-center justify-center gap-x-6">
@@ -153,7 +153,7 @@ export default async function LandingPage() {
             {/* Footer */}
             <footer className="bg-white py-12 px-6 border-t">
                 <div className="text-center text-gray-500 text-sm">
-                    © 2026 Professeur Virtuel. Tous droits réservés.
+                    © 2026 Votre Assistant Professeur. Tous droits réservés.
                 </div>
             </footer>
         </div>

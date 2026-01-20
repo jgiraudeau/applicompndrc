@@ -89,5 +89,12 @@ class KnowledgeBase:
         """Returns all loaded Gemini file IDs."""
         return self.loaded_files
 
+    def get_file_ids_by_category(self, category: str):
+        """
+        Returns file IDs relevant to the category.
+        For now, returns all files as categorization is not yet implemented.
+        """
+        return self.loaded_files
+
 # Singleton
 knowledge_base = KnowledgeBase()
