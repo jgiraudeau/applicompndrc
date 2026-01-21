@@ -1,0 +1,191 @@
+===============================================================================
+COURS BTS NDRC - BLOC 1 : RELATION CLIENT ET NÉGOCIATION-VENTE (E4)
+LES CALCULS COMMERCIAUX
+Source: https://revisions-bts-ndrc.fr/
+===============================================================================
+
+LÉGENDE :
+- PVHT : Prix de Vente Hors Taxes
+- PVTTC : Prix de Vente Toutes Taxes Comprises
+- TVA : 20%, 5% ou 10%
+- MB : Marge Brute ou Marge Commerciale
+- TMQ : Taux de Marque
+- TMG : Taux de Marge
+- CA : Chiffre d'Affaires
+- CR : Coût de Revient
+
+===============================================================================
+L'ESSENTIEL DES CALCULS COMMERCIAUX
+===============================================================================
+
+| INTITULÉ                    | FORMULES                                           |
+|-----------------------------|---------------------------------------------------|
+| Coût d'achat HT             | Prix d'achat + frais d'achat                      |
+| PVHT                        | Coût d'achat HT + Marge                           |
+|                             | Coût d'achat HT / (1 – taux de marque)            |
+|                             | Coût d'achat HT × (1 + taux de marge)             |
+| PVTTC                       | PVHT × TVA (1,20 ; 1,055 ; 1,10)                  |
+|                             | PVHT × Coefficient Multiplicateur                  |
+| Taux de marque (TMQ)        | (MB × 100) / PVHT                                 |
+| Taux de marge (TMG)         | (MB × 100) / Coût d'achat                         |
+| Coefficient Multiplicateur  | (PVTTC / PAHT) × 100                              |
+| Montant de la TVA           | PVHT × 0,20 (ou 0,05 ou 0,10)                     |
+| Coût de distribution        | Frais d'achat × nTotal                            |
+| Coût de distribution Total  | Coût de distribution / nTotal                     |
+| Coût de revient (CR)        | Coût d'achat + coût de distribution               |
+| Coût de revient Total       | Coût de revient × nTotal                          |
+| Marge Brute/commerciale (MB)| PVHT – Coût d'achat HT                            |
+|                             | PVHT × TMQ                                        |
+|                             | Coût d'achat × TMG                                |
+| Marge Brute totale          | MB × nTotal                                       |
+| Marge Nette Total           | MN × nTotal                                       |
+| TVA déductible              | PVHT × taux de TVA (0,20 ; 0,10 ; 0,02 ; 0,05)    |
+|                             | Coût d'achat TTC – coût d'achat HT                |
+| TVA collectée               | PVTTC – PVHT                                      |
+| CA HT                       | nTotal × PVHT                                     |
+|                             | CA mensuel TTC / TVA                              |
+| CA TTC                      | PVTTC × nTotal                                    |
+
+===============================================================================
+LES POURCENTAGES
+===============================================================================
+
+VALEUR D'UN POURCENTAGE :
+(pourcentage × valeur) / 100
+Ex : 4% de 20 000 = (4 × 20 000) / 100 = 800
+
+AUGMENTATION (de x%) :
+VF = VI × (1 + (t/100))
+Ex : un prix à 15€ augmente de 10%
+VF = 15 × (1 + (10/100)) = 16,5€
+
+DIMINUTION (de x%) :
+VF = VI × (1 – (t/100))
+
+COEFFICIENT MULTIPLICATEUR :
+- Augmentation : CM = 1 + (t/100)
+- Diminution : CM = 1 – (t/100)
+
+TAUX D'ÉVOLUTION :
+Taux d'évolution = ((VF - VI) / VI) × 100
+
+===============================================================================
+LE SEUIL DE RENTABILITÉ
+===============================================================================
+
+DÉFINITION :
+Montant minimum de vente que l'entreprise doit réaliser avant de commencer à faire des bénéfices.
+
+CALCUL DU SEUIL DE RENTABILITÉ :
+- SR = (CA × CF) / MCV
+- SR = CF / taux de MCV
+
+===============================================================================
+LES CHARGES VARIABLES ET FIXES
+===============================================================================
+
+CHARGES VARIABLES (opérationnelles) :
+- Charges qui varient en fonction du chiffre d'affaires
+- Exemples : Achat de matières premières, Commission sur les ventes, Achat de marchandises, Redevance franchises
+
+CHARGES FIXES (structurelles) :
+- Charges indépendantes du niveau des ventes
+- Ne sont pas fonction de l'activité de l'entreprise
+- Exemples : Dette bancaire, apport des actionnaires, loyer, salaires fixes
+
+===============================================================================
+BUDGET PRÉVISIONNEL (Exemple)
+===============================================================================
+
+| INTITULÉ                      | EXEMPLE                                    |
+|-------------------------------|-------------------------------------------|
+| Durée de la mission           | 109h (70h préparation + 4h réalisation + 35h suivi) |
+| Coût du salaire alternant     | 82h × 5,37€/h + 10% charges = 484,33€     |
+| Coût commercial accompagnateur| 4h × 36€/h + 45% charges = 208,8€         |
+| Charges fixes et variables    | 500€                                       |
+| Budget prévisionnel total     | 1373,33€                                   |
+
+===============================================================================
+RENTABILITÉ PRÉVISIONNELLE (Exemple)
+===============================================================================
+
+| INTITULÉ                | EXEMPLE                          |
+|-------------------------|----------------------------------|
+| CA des ventes prévues   | 4000€                            |
+| Charges variables       | 500€                             |
+| MCV                     | 3500€                            |
+| Charges fixes           | 873,33€                          |
+| Résultat                | 3500 - 873,33 = 2626,67€         |
+| Seuil de rentabilité    | (4000 × 873,33) / 3500 = 998,09€ |
+
+===============================================================================
+LE POINT MORT
+===============================================================================
+
+DÉFINITION :
+Date à partir de laquelle l'entreprise va dégager du bénéfice.
+
+FORMULE :
+Point Mort = (SR / CA) × 360
+
+Exemple : PM = 221 jours
+- 221 - 180 (mi-année = 30 juin) = 41 jours
+- 41 - 31 (juillet) = 10 jours
+- Donc Point Mort atteint le 10 août
+
+===============================================================================
+INDICE DE SÉCURITÉ
+===============================================================================
+
+DÉFINITION :
+Pourcentage de baisse de chiffre d'affaires que l'entreprise peut s'accorder avant de commencer à dégager des pertes.
+
+FORMULE :
+Indice de sécurité = ((CA – SR) / CA) × 100
+
+Exemple : 6% d'indice de sécurité = le CA peut baisser de 6% avant pertes
+
+===============================================================================
+SUIVI DES VENTES
+===============================================================================
+
+| INTITULÉ                | CALCULS                                              |
+|-------------------------|-----------------------------------------------------|
+| Vente période 1         | Stock initial P1 + Livraison P1 – Stock initial P2  |
+| CA régional             | CA national moyen × Indice de disparité géographique|
+| Panier Moyen            | CA / nb de passages en caisse                       |
+| Résultat                | CA – (charges fixes + charges variables)            |
+| Seuil de Rentabilité    | (CF × CA) / MCV  ou  CF / taux de MCV               |
+| MCV                     | CA – CV                                             |
+| Taux de variation       | ((ventes N – ventes N-1) × 100) / ventes N-1        |
+
+===============================================================================
+LINÉAIRES
+===============================================================================
+
+| INTITULÉ                      | CALCULS                                          |
+|-------------------------------|--------------------------------------------------|
+| Linéaire Développé            | Linéaire au sol × Nombre de niveaux              |
+| Capacité de stockage          | Frontale × nb produits hauteur × nb produits profondeur |
+| Indice de sensibilité au CA   | Part de CA en % / part de linéaire en %          |
+| Indice de sensibilité marge   | Part de marge en % / part de linéaire en %       |
+| Linéaire optimum              | Linéaire initial × indice de sensibilité         |
+| Taux de transformation        | (nombre de ventes / trafic client) × 100         |
+| Coefficient occupation sols   | Mètre linéaire / surface totale du magasin       |
+| Indice d'attractivité         | Indice d'achat / indice de passage               |
+
+===============================================================================
+STOCKS
+===============================================================================
+
+| INTITULÉ                      | CALCULS                                          |
+|-------------------------------|--------------------------------------------------|
+| CMUP (Coût Moyen Unitaire Pondéré) | (stock initial valeur + entrées valeur) / (stock initial qté + entrées qté) |
+| Stock moyen                   | (stock initial + stock final) / 2                |
+| Coefficient de rotation       | Ventes de la période / stock moyen               |
+| Vitesse de rotation (jours)   | 360 / coefficient de rotation                    |
+| Vitesse de rotation (mois)    | 12 / coefficient de rotation                     |
+
+===============================================================================
+FIN DU COURS - CALCULS COMMERCIAUX
+===============================================================================
