@@ -228,3 +228,57 @@ async def generate_document(request: GenerateRequest, db: Session = Depends(get_
     except Exception as e:
         print(f"❌ Generation error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+class RefineRequest(BaseModel):
+    current_content: str
+    instruction: str
+    track: Optional[str] = "NDRC"
+
+@router.post("/refine", response_model=GenerateResponse)
+async def refine_document(request: RefineRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """
+    Refines existing content based on a specific instruction (Didactic Refinement Agent).
+    """
+    if not request.current_content or not request.instruction:
+        raise HTTPException(status_code=400, detail="Content and instruction are required")
+    
+    # Check Quota (Refining counts as generation or maybe less? Let's count it for now)
+    check_and_increment_usage(db, current_user, 'generate_course')
+    
+    try:
+        track = request.track or "NDRC"
+        
+        # System Prompt for the Refinement Agent
+        system_prompt = f"""Tu es un Éditeur Pédagogique Senior expert du BTS {track}.
+Ta mission est d'améliorer ou de modifier le document pédagogique fourni en suivant STRICTEMENT les instructions de l'utilisateur.
+
+RÈGLES D'OR :
+1. CONSERVE la structure Markdown existante (titres, tableaux, listes) sauf si l'instruction demande de la changer.
+2. RESPECTE les référentiels officiels du BTS {track} (ne pas inventer d'épreuves impossibles).
+3. ADINTEGRE les modifications de manière fluide et didactique.
+4. NE SOIS PAS BAVARD : Renvoie uniquement le document modifié complet, prêt à l'emploi. Pas de phrase d'intro du type "Voici le document modifié".
+
+Instruction de l'utilisateur : "{request.instruction}"
+"""
+        
+        # We reuse the get_model from gemini_service but with our specific refinement system prompt
+        # We pass 'track' to ensure regulatory groundings are still loaded in the context if needed by safety filters
+        model = gemini_service.get_model(custom_system_instruction=system_prompt, track=track)
+        
+        # The prompt sent to the model is the content itself
+        user_message = f"""Voici le contenu actuel à modifier :
+
+{request.current_content}
+"""
+        
+        response = model.generate_content([user_message])
+        
+        return GenerateResponse(
+            content=response.text,
+            document_type="refined", # Generic type for refined content
+            log_id=None # We might not create a new log for refinement to avoid clutter, or maybe update the previous one?
+        )
+
+    except Exception as e:
+        print(f"❌ Refinement error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

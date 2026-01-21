@@ -34,20 +34,21 @@ export default async function LandingPage() {
                 </div>
             </nav>
 
+
             {/* Hero Section */}
             <section className="relative px-6 pt-14 lg:px-8">
                 <div className="mx-auto max-w-3xl py-12 sm:py-20 text-center">
                     <div className="hidden sm:mb-8 sm:flex sm:justify-center">
                         <div className="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
-                            Nouveau : Génération de quiz automatique <span className="text-indigo-600 font-semibold">Voir les nouveautés &rarr;</span>
+                            Nouveau : Raffinement des cours par IA <span className="text-indigo-600 font-semibold">Voir les nouveautés &rarr;</span>
                         </div>
                     </div>
                     <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-900 pb-2">
-                        Votre assistant pédagogique intelligent pour le BTS NDRC
+                        Votre assistant pédagogique intelligent pour les BTS Tertiaires
                     </h1>
                     <p className="mt-6 text-lg leading-8 text-gray-600">
                         Gagnez du temps sur la préparation de vos cours et concentrez-vous sur ce qui compte vraiment : vos étudiants.
-                        Profitez d'une IA spécialisée pour créer des ressources pédagogiques en quelques secondes.
+                        Profitez d'une IA spécialisée pour créer et affiner des ressources pédagogiques en quelques secondes.
                     </p>
                     <div className="mt-10 flex items-center justify-center gap-x-6">
                         {session ? (
@@ -84,7 +85,7 @@ export default async function LandingPage() {
                             Tout ce dont vous avez besoin pour enseigner
                         </p>
                         <p className="mt-6 text-lg leading-8 text-gray-600">
-                            Une suite d'outils conçue par des enseignants, pour des enseignants.
+                            Une suite d'outils conçue pour les enseignants en BTS Tertiaires (NDRC, MCO, GPME...)
                         </p>
                     </div>
                     <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
@@ -95,25 +96,27 @@ export default async function LandingPage() {
                                     <CardTitle>Génération de Contenu</CardTitle>
                                 </CardHeader>
                                 <CardContent className="text-gray-600">
-                                    Créez des séquences de cours, des études de cas et des exercices corrigés en un clic grâce à notre IA entraînée sur le référentiel.
+                                    Créez des séquences de cours complètes, des études de cas et des QCM en un clic, conformes aux référentiels officiels.
                                 </CardContent>
                             </Card>
                             <Card className="border-none shadow-md">
                                 <CardHeader>
-                                    <GraduationCap className="h-10 w-10 text-indigo-600 mb-4" />
-                                    <CardTitle>Suivi des Compétences</CardTitle>
+                                    <div className="h-10 w-10 text-purple-600 mb-4 flex items-center justify-center bg-purple-100 rounded-lg">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-wand-2"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72" /><path d="m14 7 3 3" /><path d="M5 6v4" /><path d="M19 14v4" /><path d="M10 2v2" /><path d="M7 8H3" /><path d="M21 16h-4" /><path d="M11 3H9" /></svg>
+                                    </div>
+                                    <CardTitle>Raffinement Intelligent</CardTitle>
                                 </CardHeader>
                                 <CardContent className="text-gray-600">
-                                    Évaluez la progression de vos étudiants sur les blocs de compétences clés. Tableaux de bord automatisés.
+                                    Un agent "Éditeur Pédagogique" à votre service. Demandez des modifications précises ("Ajoute un exercice", "Simplifie le texte") pour un cours sur-mesure.
                                 </CardContent>
                             </Card>
                             <Card className="border-none shadow-md">
                                 <CardHeader>
                                     <BarChart3 className="h-10 w-10 text-indigo-600 mb-4" />
-                                    <CardTitle>Analytique & Stats</CardTitle>
+                                    <CardTitle>Exports Multi-Formats</CardTitle>
                                 </CardHeader>
                                 <CardContent className="text-gray-600">
-                                    Identifiez les décrocheurs et adaptez votre pédagogie grâce aux indicateurs de performance en temps réel.
+                                    Exportez vos ressources vers vos outils favoris : PDF, Word, Moodle (GIFT), Wooclap, Google Forms et Classroom.
                                 </CardContent>
                             </Card>
                         </div>

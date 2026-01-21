@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { GraduationCap, Sparkles, ArrowLeft, Copy, Check, FileText, Users, ListChecks, ClipboardCheck, Download, FileDown, HelpCircle, Calendar, Share2, ExternalLink, Share, Loader2, LogOut, Save } from "lucide-react";
+import { GraduationCap, Sparkles, ArrowLeft, Copy, Check, FileText, Users, ListChecks, ClipboardCheck, Download, FileDown, HelpCircle, Calendar, Share2, ExternalLink, Share, Loader2, LogOut, Save, Wand2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
@@ -99,30 +99,33 @@ export default function GeneratePage() {
         if (!refineInstruction || !generatedContent) return;
         setIsRefining(true);
         try {
-            // Simple append for now, or a real refine endpoint if we had one. 
-            // Re-using generation endpoint with a "refine" instruction effectively.
             const token = (session as any)?.accessToken;
-            const response = await fetch(`${API_BASE_URL}/api/generate/course`, {
+            const response = await fetch(`${API_BASE_URL}/api/generate/refine`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    topic: `${topic} (Refinement: ${refineInstruction})`,
-                    duration_hours: duration,
-                    document_type: docType,
-                    category: currentTrack,
-                    // In a real implementation we would send the previous content + instruction
+                    current_content: generatedContent,
+                    instruction: refineInstruction,
+                    track: currentTrack
                 }),
             });
+
             if (response.ok) {
                 const data = await response.json();
                 setGeneratedContent(data.content);
                 setRefineInstruction("");
                 setShowRefineInput(false);
+            } else {
+                const err = await response.text();
+                alert(`Erreur lors du raffinement : ${err}`);
             }
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error(e);
+            alert("Erreur technique lors du raffinement.");
+        }
         finally { setIsRefining(false); }
     };
 
@@ -539,6 +542,16 @@ export default function GeneratePage() {
                                 <Button
                                     variant="outline"
                                     size="sm"
+                                    onClick={() => setShowRefineInput(!showRefineInput)}
+                                    className={`${showRefineInput ? 'bg-purple-100 ring-2 ring-purple-200' : 'bg-white'} text-purple-700 border-purple-200 hover:bg-purple-50 mr-2`}
+                                >
+                                    <Wand2 className="w-4 h-4 mr-1" />
+                                    Affiner
+                                </Button>
+
+                                <Button
+                                    variant="outline"
+                                    size="sm"
                                     onClick={() => handleExport("pdf")}
                                     disabled={!!isExporting}
                                     className="text-red-600 border-red-100 hover:bg-red-50"
@@ -669,6 +682,37 @@ export default function GeneratePage() {
                         )}
                     </div>
                     <div className="flex-1 overflow-y-auto p-6">
+                        {showRefineInput && (
+                            <div className="bg-purple-50 p-4 rounded-lg border border-purple-100 mb-6 shadow-sm animate-in fade-in slide-in-from-top-2">
+                                <h3 className="text-sm font-semibold text-purple-800 mb-2 flex items-center gap-2">
+                                    <Wand2 className="w-4 h-4" />
+                                    Affiner le contenu avec l'IA
+                                </h3>
+                                <p className="text-xs text-purple-600 mb-3">
+                                    Décrivez ce que vous souhaitez modifier, ajouter ou corriger. L'IA réécrira le document pour vous.
+                                </p>
+                                <textarea
+                                    className="w-full p-3 border rounded-md text-sm mb-3 focus:ring-2 focus:ring-purple-200 outline-none text-slate-700"
+                                    placeholder="Ex: Ajoute un exercice pratique pour des BTS de 1ère année sur la négociation..."
+                                    rows={3}
+                                    value={refineInstruction}
+                                    onChange={(e) => setRefineInstruction(e.target.value)}
+                                />
+                                <div className="flex justify-end gap-2">
+                                    <Button variant="ghost" size="sm" onClick={() => setShowRefineInput(false)}>Annuler</Button>
+                                    <Button
+                                        size="sm"
+                                        onClick={handleRefine}
+                                        disabled={isRefining || !refineInstruction.trim()}
+                                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                                    >
+                                        {isRefining ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <Sparkles className="w-3 h-3 mr-2" />}
+                                        Appliquer les changements
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+
                         {generatedContent ? (
                             <div className="prose prose-sm max-w-none pb-8">
                                 <ReactMarkdown>{generatedContent}</ReactMarkdown>
