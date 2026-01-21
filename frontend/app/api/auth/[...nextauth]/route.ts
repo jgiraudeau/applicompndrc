@@ -5,9 +5,12 @@ import { API_BASE_URL } from "@/lib/api";
 
 // Helper to ensure API_BASE_URL is available
 const getApiUrl = () => {
-    // If running on server side, we might need to rely on the fallback in lib/api
-    // or ensure NEXT_PUBLIC_API_URL is available.
-    return API_BASE_URL;
+    let url = API_BASE_URL;
+    // Fix for Node v17+ expecting 127.0.0.1 instead of localhost for fetch
+    if (url.includes("localhost")) {
+        url = url.replace("localhost", "127.0.0.1");
+    }
+    return url;
 }
 const authOptions: AuthOptions = {
     providers: [

@@ -100,4 +100,40 @@ class EmailService:
         else:
             self._send_email(user.email, subject, body)
 
+    def send_subscription_confirmation_email(self, user: models.User):
+        """Called when payment is successful via Stripe"""
+        subject = "Confirmation de votre abonnement Professeur Virtuel Pro"
+        frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+        body = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; color: #333;">
+                <h2>Merci {user.full_name} !</h2>
+                <p>Votre abonnement à <strong>Professeur Virtuel Pro</strong> est confirmé.</p>
+                <p>Vous avez désormais un accès illimité à toutes les fonctionnalités.</p>
+                
+                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <h3>Détails de votre abonnement</h3>
+                    <ul>
+                        <li>Plan : Professeur Pro (Mensuel)</li>
+                        <li>Prix : 9,99€ / mois</li>
+                        <li>Renouvellement automatique</li>
+                    </ul>
+                </div>
+
+                <h3>Conditions d'utilisation et Résiliation</h3>
+                <p>Conformément à nos conditions générales, cet abonnement est sans engagement de durée.</p>
+                <p>Vous pouvez annuler votre abonnement à tout moment directement depuis votre <a href="{frontend_url}/dashboard">tableau de bord</a> ou en nous contactant.</p>
+                <p>L'annulation prendra effet à la fin de la période de facturation en cours.</p>
+
+                <br>
+                <p>Bonne préparation de cours !</p>
+                <p>L'équipe Professeur Virtuel</p>
+            </body>
+        </html>
+        """
+        if not self.smtp_user:
+            print(f"📧 [MOCK] Subscription Email to {user.email}")
+        else:
+            self._send_email(user.email, subject, body)
+
 email_service = EmailService()

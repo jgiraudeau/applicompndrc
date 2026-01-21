@@ -104,9 +104,9 @@ async def webhook_received(request: Request, stripe_signature: str = Header(None
                 # Send Confirmation Email
                 try:
                     from backend.app.services.email_service import email_service
-                    email_service.send_approval_email(user)
+                    email_service.send_subscription_confirmation_email(user)
                 except Exception as e:
-                    print(f"Failed to send approval email: {e}")
+                    print(f"Failed to send subscription confirmation email: {e}")
 
     return {"status": "success"}
 
