@@ -188,7 +188,7 @@ async def generate_document(request: GenerateRequest, db: Session = Depends(get_
         
         # Lazy import to avoid startup delays
         from backend.app.services.knowledge_service import knowledge_base
-        kb_files = knowledge_base.get_all_file_ids()
+        kb_files = knowledge_base.get_file_ids_by_category(track)
         
         for file_id in kb_files[:3]:
             try:

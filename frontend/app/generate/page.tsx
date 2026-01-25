@@ -89,6 +89,7 @@ export default function GeneratePage() {
     const [isSaving, setIsSaving] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
     const [currentTrack, setCurrentTrack] = useState("NDRC"); // Default track
+    const [activeTab, setActiveTab] = useState<'setup' | 'result'>('setup'); // Mobile tab state
 
     useEffect(() => {
         setMounted(true);
@@ -316,6 +317,8 @@ export default function GeneratePage() {
             setGeneratedContent(data.content);
             setLogId(data.log_id);
             setShareCode(null);
+            // Switch to result tab on mobile after generation
+            setActiveTab('result');
         } catch (error) {
             console.error(error);
             setGeneratedContent("❌ Une erreur est survenue lors de la génération.");
@@ -415,9 +418,26 @@ export default function GeneratePage() {
             {/* Debug Bar Removed */}
 
             {/* Main Content */}
-            <div className="flex-1 overflow-hidden flex">
+            <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
+
+                {/* Mobile Tab Bar */}
+                <div className="lg:hidden flex border-b bg-white shrink-0">
+                    <button
+                        className={`flex-1 p-3 text-sm font-medium border-b-2 ${activeTab === 'setup' ? 'border-primary text-primary' : 'border-transparent text-slate-500'}`}
+                        onClick={() => setActiveTab('setup')}
+                    >
+                        Paramétrage
+                    </button>
+                    <button
+                        className={`flex-1 p-3 text-sm font-medium border-b-2 ${activeTab === 'result' ? 'border-primary text-primary' : 'border-transparent text-slate-500'}`}
+                        onClick={() => setActiveTab('result')}
+                    >
+                        Résultat {generatedContent && '✨'}
+                    </button>
+                </div>
+
                 {/* Left Panel - Form */}
-                <div className="w-1/3 border-r bg-white p-6 flex flex-col gap-4 overflow-y-auto">
+                <div className={`w-full lg:w-1/3 border-r bg-white p-6 flex flex-col gap-4 overflow-y-auto ${activeTab === 'setup' ? 'block' : 'hidden lg:flex'}`}>
 
                     {/* Track Selector */}
                     <div>
@@ -528,7 +548,7 @@ export default function GeneratePage() {
                 </div>
 
                 {/* Right Panel - Preview */}
-                <div className="flex-1 flex flex-col min-h-0">
+                <div className={`flex-1 flex flex-col min-h-0 ${activeTab === 'result' ? 'block' : 'hidden lg:flex'}`}>
                     <div className="p-4 border-b bg-slate-50 flex justify-between items-center shrink-0">
                         <div className="flex items-center gap-2">
                             {(() => {
