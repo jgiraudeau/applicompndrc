@@ -184,12 +184,11 @@ export default function AdminPage() {
                     </div>
                     <Button
                         onClick={handleScan}
-                        variant="outline"
-                        className="border-purple-200 text-purple-700 hover:bg-purple-50"
+                        className="bg-purple-600 hover:bg-purple-700 text-white shadow-sm"
                         disabled={isLoading}
                     >
                         <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                        Synchroniser IA
+                        Vectoriser Nouveaux Fichiers
                     </Button>
                 </div>
 
