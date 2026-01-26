@@ -642,35 +642,9 @@ export default function GeneratePage() {
                                             Wooclap (Excel)
                                         </Button>
 
-                                        <Button
-                                            variant="default"
-                                            size="sm"
-                                            onClick={handleCreateAutoForm}
-                                            disabled={!!isExporting}
-                                            className="bg-purple-700 hover:bg-purple-800 text-white border-none"
-                                        >
-                                            {isExporting === "auto_form" ? (
-                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
-                                            ) : (
-                                                <ExternalLink className="w-4 h-4 mr-1" />
-                                            )}
-                                            ⚡ Créer Formulaire (Drive)
-                                        </Button>
 
-                                        {session?.googleAccessToken && (
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={fetchCourses}
-                                                disabled={!!isExporting || exportLoading}
-                                                className="text-emerald-700 border-emerald-100 hover:bg-emerald-50"
-                                            >
-                                                {exportLoading ? (
-                                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                                ) : <Share className="w-4 h-4 mr-2" />}
-                                                Classroom
-                                            </Button>
-                                        )}
+
+
 
                                         {!shareCode ? (
                                             <Button

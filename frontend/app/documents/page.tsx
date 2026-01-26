@@ -297,20 +297,7 @@ export default function DocumentsPage() {
                                         Word
                                     </Button>
 
-                                    {/* Classroom for all */}
-                                    {session?.googleAccessToken && (
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={fetchCourses}
-                                            disabled={exportLoading || !!isExporting}
-                                            title="Exporter vers Classroom"
-                                            className="text-emerald-700 border-emerald-100 hover:bg-emerald-50"
-                                        >
-                                            {exportLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Share className="w-4 h-4 mr-2" />}
-                                            Classroom
-                                        </Button>
-                                    )}
+
 
                                     {/* Quiz Specific Exports */}
                                     {selectedDoc.document_type === 'quiz' && (
@@ -323,10 +310,7 @@ export default function DocumentsPage() {
                                                 {isExporting === 'wooclap' ? <div className="w-4 h-4 border-2 border-slate-600 border-t-transparent rounded-full animate-spin" /> : <span className="mr-2 text-green-600 font-bold">W</span>}
                                                 Wooclap
                                             </Button>
-                                            <Button variant="default" size="sm" onClick={handleCreateAutoForm} disabled={!!isExporting} className="bg-purple-700 hover:bg-purple-800 text-white">
-                                                {isExporting === 'auto_form' ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <ExternalLink className="w-4 h-4 mr-2" />}
-                                                Drive Form
-                                            </Button>
+
                                         </>
                                     )}
 

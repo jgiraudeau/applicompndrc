@@ -353,18 +353,7 @@ export default function Home() {
                         <Save className="w-3 h-3 mr-1.5" />
                         Sauvegarder
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-7 text-xs bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-800 transition-colors"
-                        onClick={() => {
-                          setContentToExport(msg.content);
-                          fetchCourses();
-                        }}
-                      >
-                        <Share className="w-3 h-3 mr-1.5" />
-                        Classroom
-                      </Button>
+
                       <Button
                         variant="outline"
                         size="sm"

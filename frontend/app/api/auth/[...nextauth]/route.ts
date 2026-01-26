@@ -22,7 +22,7 @@ const authOptions: AuthOptions = {
                     prompt: "consent",
                     access_type: "offline",
                     response_type: "code",
-                    scope: "openid email profile https://www.googleapis.com/auth/classroom.courses.readonly https://www.googleapis.com/auth/classroom.coursework.students https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/forms.body"
+                    scope: "openid email profile"
                 }
             }
         }),

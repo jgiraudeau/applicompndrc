@@ -65,7 +65,15 @@ export function Navbar() {
                     <Link key={link.href} href={link.href}>
                         <Button
                             variant={isActive(link.href) ? "secondary" : "ghost"}
-                            className={`gap-2 ${isActive(link.href) ? `bg-${link.color.split('-')[1]}-50 ${link.color}` : "text-slate-600"}`}
+                            className={`gap-2 ${isActive(link.href)
+                                    ? link.color === "text-slate-600" ? "bg-slate-50 text-slate-600"
+                                        : link.color === "text-blue-600" ? "bg-blue-50 text-blue-600"
+                                            : link.color === "text-amber-600" ? "bg-amber-50 text-amber-600"
+                                                : link.color === "text-indigo-600" ? "bg-indigo-50 text-indigo-600"
+                                                    : link.color === "text-purple-600" ? "bg-purple-50 text-purple-600"
+                                                        : "bg-slate-50 text-slate-600"
+                                    : "text-slate-600"
+                                }`}
                         >
                             <link.icon className="w-4 h-4" />
                             <span>{link.label}</span>
@@ -122,7 +130,15 @@ export function Navbar() {
                         <Link key={link.href} href={link.href} onClick={() => setIsMenuOpen(false)}>
                             <Button
                                 variant={isActive(link.href) ? "secondary" : "ghost"}
-                                className={`w-full justify-start gap-3 h-12 text-base ${isActive(link.href) ? `bg-${link.color.split('-')[1]}-50 ${link.color}` : "text-slate-600"}`}
+                                className={`w-full justify-start gap-3 h-12 text-base ${isActive(link.href)
+                                    ? link.color === "text-slate-600" ? "bg-slate-50 text-slate-600"
+                                        : link.color === "text-blue-600" ? "bg-blue-50 text-blue-600"
+                                            : link.color === "text-amber-600" ? "bg-amber-50 text-amber-600"
+                                                : link.color === "text-indigo-600" ? "bg-indigo-50 text-indigo-600"
+                                                    : link.color === "text-purple-600" ? "bg-purple-50 text-purple-600"
+                                                        : "bg-slate-50 text-slate-600"
+                                    : "text-slate-600"
+                                    }`}
                             >
                                 <link.icon className="w-5 h-5" />
                                 {link.label}

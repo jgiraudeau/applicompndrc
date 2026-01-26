@@ -87,7 +87,7 @@ export default function RegisterPage() {
 
                             <div className="flex flex-col space-y-3 pt-2">
                                 <Label>Choix de l'abonnement</Label>
-                                <div className="grid grid-cols-3 gap-2">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                     <div
                                         className={`border rounded-lg p-3 text-center cursor-pointer ${formData.plan === 'free' ? 'border-blue-500 bg-blue-50' : 'hover:bg-gray-50'}`}
                                         onClick={() => setFormData({ ...formData, plan: 'free' })}
