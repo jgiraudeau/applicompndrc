@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { GraduationCap, Sparkles, ArrowLeft, Copy, Check, FileText, Users, ListChecks, ClipboardCheck, Download, FileDown, HelpCircle, Calendar, Share2, ExternalLink, Share, Loader2, LogOut, Save, Wand2 } from "lucide-react";
+import { GraduationCap, Sparkles, ArrowLeft, Copy, Check, FileText, Users, ListChecks, ClipboardCheck, Download, FileDown, HelpCircle, Calendar, Share2, ExternalLink, Share, Loader2, LogOut, Save, Wand2, Globe, ShoppingCart } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
@@ -20,6 +20,8 @@ const DOCUMENT_TYPES = [
     { id: "quiz", label: "Quiz / QCM", icon: HelpCircle, color: "text-indigo-600 bg-indigo-50 border-indigo-200" },
     { id: "planning_annuel", label: "Planning Annuel", icon: Calendar, color: "text-emerald-600 bg-emerald-50 border-emerald-200" },
     { id: "jeu_de_role", label: "Jeu de Rôle (E4)", icon: Users, color: "text-rose-600 bg-rose-50 border-rose-200" },
+    { id: "sujet_e5b_wp", label: "Sujet E5B (WordPress)", icon: Globe, color: "text-cyan-600 bg-cyan-50 border-cyan-200" },
+    { id: "sujet_e5b_presta", label: "Sujet E5B (PrestaShop)", icon: ShoppingCart, color: "text-pink-600 bg-pink-50 border-pink-200" },
 ];
 
 const TRACKS_DATA: Record<string, { label: string; blocks: { id: string; label: string }[] }> = {
@@ -506,12 +508,12 @@ export default function GeneratePage() {
 
                     <div>
                         <label className="text-sm font-medium text-slate-700 mb-1 block">
-                            {docType === 'jeu_de_role' ? 'Contexte / Fiche de Situation *' : 'Thème du cours *'}
+                            {['jeu_de_role', 'sujet_e5b_wp', 'sujet_e5b_presta'].includes(docType) ? 'Contexte / Fiche de Situation *' : 'Thème du cours *'}
                         </label>
-                        {docType === 'jeu_de_role' ? (
+                        {['jeu_de_role', 'sujet_e5b_wp', 'sujet_e5b_presta'].includes(docType) ? (
                             <textarea
                                 className="w-full border rounded-md p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none min-h-[150px]"
-                                placeholder="Collez ici le contexte complet de l'entreprise, du client et de la situation de l'étudiant..."
+                                placeholder="Collez ici le contexte complet de l'entreprise, du client et de la situation..."
                                 value={topic}
                                 onChange={(e) => setTopic(e.target.value)}
                             />

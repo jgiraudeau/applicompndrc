@@ -222,6 +222,95 @@ Ta mission est de créer un SUJET D'EXAMEN E4 (Jeu de Rôle de Négociation) com
 - Utilise strictement les **tableaux Markdown** ci-dessus.
 - Sois réaliste et cohérent avec la situation fournie.
 - Si des infos manquent dans la situation, invente-les de manière plausible pour compléter le scénario.
+""",
+
+    "sujet_e5b_wp": """Tu es un professeur expert en Digitalisation de la Relation Client (BTS NDRC).
+Ta mission est de créer un SUJET D'EXAMEN E5B (Pratique WordPress) complet.
+
+À partir du contexte fourni par l'utilisateur (Entreprise, Activité, Problématique), génère un sujet structuré comme suit :
+
+# Sujet Pratique E5B : Digitalisation de la Relation Client (WordPress)
+
+## Contexte de la mision
+> **Entreprise** : [Nom fourni]
+> **Activité** : [Activité fournie]
+> **Problématique** : [Problématique fournie]
+> **Outils** : Site vitrine sous WordPress.
+> **Élément Marquant Récent** : [Invente une distinction, ex: Label RSE, Prix Innovation...]
+
+## Travail à Réaliser (5 Missions Maximum)
+*Pose des questions pratiques basées sur les compétences WordPress suivantes.*
+
+### Mission 1 : Optimisation de l'Apparence et Identité
+1.  **Question** : [Créer/Modifier l'identité, logo, slogan...]
+2.  **Question** : [Gérer les widgets pied de page ou colonne latérale...]
+
+### Mission 2 : Gestion de Contenu
+3.  **Question** : [Créer un article ou page optimisée SEO avec balises...]
+4.  **Question** : [Insérer un média légendé ou une galerie...]
+
+### Mission 3 : Fonctionnalités Avancées
+5.  **Question** : [Gérer un formulaire, un pop-up, ou navigation, menus...]
+
+## Annexes (Ressources pour le candidat)
+*   **Annexe 1** : Description du produit phare ou service à mettre en avant.
+*   **Annexe 2** : Liste des réseaux sociaux à intégrer.
+*   **Annexe 3** : Données SEO cibles (Mots-clés principaux).
+
+**Compétences WordPress ciblées (Référence) :**
+- Apparence (Identité, menus, widgets).
+- Contenu (Articles, pages, blocs Gutenberg/Spectra, médias).
+- SEO (Yoast, balises, méta-description).
+- Utilisateurs (Rôles, comptes).
+
+**Formatage :**
+- Utilise le Markdown propre avec titres et listes.
+- Sois direct et précis dans les consignes ("Vous devez...", "Réalisez...").
+""",
+
+    "sujet_e5b_presta": """Tu es un professeur expert en Digitalisation de la Relation Client (BTS NDRC).
+Ta mission est de créer un SUJET D'EXAMEN E5B (Pratique PrestaShop) complet.
+
+À partir du contexte fourni par l'utilisateur (Entreprise, Activité, Problématique), génère un sujet structuré comme suit :
+
+# Sujet Pratique E5B : Digitalisation de la Relation Client (PrestaShop)
+
+## Contexte de la mision
+> **Entreprise** : [Nom fourni]
+> **Activité** : [Activité fournie]
+> **Problématique** : [Problématique fournie]
+> **Outils** : Boutique en ligne sous PrestaShop.
+> **Élément Marquant Récent** : [Invente une distinction, ex: Label Client 2024...]
+
+## Travail à Réaliser (5 Missions Maximum)
+*Pose des questions pratiques basées sur les compétences PrestaShop suivantes.*
+
+### Mission 1 : Gestion du Catalogue Produit
+1.  **Question** : [Créer un produit avec déclinaisons, prix TTC/HT...]
+2.  **Question** : [Gérer les stocks et les catégories...]
+
+### Mission 2 : Animation Commerciale & Marketing
+3.  **Question** : [Créer une promotion panier ou catalogue...]
+4.  **Question** : [Mettre en avant des produits phares ou carrousel...]
+
+### Mission 3 : Relation Client & SAV
+5.  **Question** : [Gérer un client, traiter un message SAV ou un retour produit...]
+
+## Annexes (Ressources pour le candidat)
+*   **Annexe 1** : Fiche technique du produit à créer.
+*   **Annexe 2** : Conditions de la promotion à paramétrer.
+*   **Annexe 3** : Détail du client ou de la réclamation à traiter.
+
+**Compétences PrestaShop ciblées (Référence) :**
+- Catalogue (Produits, catégories, attributs, marques, stocks).
+- Commandes & Promos (Panier, réductions, avoirs).
+- Modules (Carrousel, produits phares, réassurance, avis).
+- SEO (Méta-description, balise titre).
+- Clients & SAV (Groupes clients, messages prédéfinis).
+
+**Formatage :**
+- Utilise le Markdown propre avec titres et listes.
+- Sois direct et précis dans les consignes ("Vous devez...", "Réalisez...").
 """
 }
 
@@ -229,7 +318,7 @@ class GenerateRequest(BaseModel):
     topic: str
     duration_hours: Optional[int] = 4
     target_block: Optional[str] = None
-    document_type: Literal["dossier_prof", "dossier_eleve", "fiche_deroulement", "evaluation", "quiz", "planning_annuel", "jeu_de_role"] = "dossier_prof"
+    document_type: Literal["dossier_prof", "dossier_eleve", "fiche_deroulement", "evaluation", "quiz", "planning_annuel", "jeu_de_role", "sujet_e5b_wp", "sujet_e5b_presta"] = "dossier_prof"
     category: Optional[str] = "NDRC"
 
 class GenerateResponse(BaseModel):
