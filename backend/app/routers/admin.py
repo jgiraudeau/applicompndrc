@@ -128,21 +128,27 @@ def delete_user(
     
     return {"message": "User deleted successfully"}
 
+from fastapi import BackgroundTasks
+
 @router.post("/scan")
 def scan_knowledge_base(
+    background_tasks: BackgroundTasks,
     current_user: models.User = Depends(auth.get_current_admin_user)
 ):
     """
-    Manually triggers the scanning of the 'knowledge' directory
-    and uploads new files to Gemini.
+    Manually triggers the scanning of the 'knowledge' directory.
+    Runs in BACKGROUND to avoid timeouts with large number of files.
     """
     try:
         from backend.app.services.knowledge_service import knowledge_base
-        files = knowledge_base.scan_and_load()
+        
+        # Run in background
+        background_tasks.add_task(knowledge_base.scan_and_load)
+        
         return {
-            "message": "Synchronisation terminée avec succès", 
-            "files_count": len(files) if files else 0
+            "message": "Synchronisation lancée en arrière-plan. Cela peut prendre plusieurs minutes.", 
+            "status": "background_processing_started"
         }
     except Exception as e:
-        print(f"Error during scan: {e}")
-        raise HTTPException(status_code=500, detail=f"Erreur lors du scan: {str(e)}")
+        print(f"Error starting scan: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur lors du lancement du scan: {str(e)}")
