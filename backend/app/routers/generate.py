@@ -13,45 +13,91 @@ router = APIRouter()
 # Specialized prompt templates for each document type
 PROMPT_TEMPLATES = {
     "dossier_prof": """Tu es un expert en création de cours pour le BTS {track}.
-Génère un DOSSIER PROFESSEUR complet avec la structure suivante :
+Génère un DOSSIER PROFESSEUR complet et structuré pour l'enseignant :
 
-# Dossier Professeur : [Titre]
+# Dossier Professeur : [Titre du Thème]
 
-## Présentation de la Séquence
-- Bloc de compétences visé et savoirs associés.
-- Place dans la progression annuelle.
+## 1. Présentation de la Séquence
+- **Bloc de compétences visé** : [Nom du bloc]
+- **Compétences à acquérir** : [Lister les compétences exactes du référentiel]
+- **Critères de performance** : [Indicateurs de réussite]
+- **Savoirs associés** : [Liste des savoirs théoriques]
+- **Durée estimée** : [Heures]
 
-## Déroulement de la Séance (Conducteur)
-Détaille le scénario pédagogique étape par étape.
+## 2. Déroulement de la Séance (Conducteur)
+| Phase | Durée | Activité Professeur | Activité Élève | Support |
+| :--- | :---: | :--- | :--- | :--- |
+| **Accroche** | 10' | ... | ... | Vidéo/Image |
+| **Activité 1** | 45' | ... | ... | Dossier Élève |
+| **Synthèse** | 15' | ... | ... | Tableau |
 
-## CORRIGÉ DÉTAILLÉ (LIEN DOSSIER ÉLÈVE)
-**IMPORTANT** : Pour chaque question posée dans le dossier élève, fournis ici la réponse attendue, les éléments de barème et des conseils de remédiation. 
-Distingue bien :
-- Corrigé de l'Activité 1 : [Réponses précises]
-- Corrigé de l'Activité 2 : [Réponses précises]
+## 3. CORRIGÉ DÉTAILLÉ (ACTIVITÉS)
 
-## Points de Vigilance & Prolongements
-- Astuces pour l'animation.
-- Liens avec les épreuves (CCF/Ponctuel).
+### Correction Activité 1 : [Titre]
+*Fournir ici les réponses attendues de manière précise.*
+1.  **Réponse Q1** : ...
+    *   *Critère d'évaluation : ...*
+2.  **Réponse Q2** : ...
+
+### Correction Activité 2 : [Titre]
+1.  **Réponse Q3** : ...
+2.  **Réponse Q4** : ...
+
+## 4. Points de Vigilance & Prolongements
+- ⚠️ **Difficultés fréquentes** : ...
+- 🔗 **Lien examen (E4/E5/E6)** : ...
+
+**Consigne de formatage :**
+- Utilise des **tableaux Markdown** pour le déroulement.
+- Utilise des **listes à puces** et numérotées.
+- Aère le texte avec des sauts de ligne.
 """,
 
     "dossier_eleve": """Tu es un expert en création de supports pédagogiques pour le BTS {track}.
-Génère un DOSSIER ÉLÈVE clair, structuré et incitant à l'action :
+Génère un DOSSIER ÉLÈVE clair, structuré et aéré, prêt à être distribué :
 
-# Dossier Élève : [Titre]
+# Dossier Élève : [Titre du Thème]
+
+## Compétences Ciblées (Référentiel)
+*Liste ici les compétences précises du référentiel BTS {track} que l'étudiant va acquérir ou valider.*
+> **Objectif Pédagogique :** [Formuler l'objectif en terme de capactité : "Être capable de..."]
 
 ## Contexte Professionnel
-[Une mise en situation concrète dans une entreprise pour ancrer les questions]
+> [Insère ici une mise en situation réaliste et immersive dans une entreprise fictive ou réelle. Utilise un bloc de citation Markdown (>).]
 
 ## Documents de Travail
-[Fiches outils, extraits de documents ou données nécessaires pour répondre]
+*Liste les documents nécessaires avec des puces :*
+*   **Document 1** : [Titre du doc] - [Brève description]
+*   **Document 2** : [Titre du doc] - [Brève description]
+
+---
 
 ## TRAVAIL À RÉALISER (ACTIVITÉS)
-Propose des questions progressives et numérotées, directement liées au contexte et aux documents fournis.
-Chaque question doit solliciter une compétence du référentiel.
+
+### Activité 1 : [Titre de l'activité]
+*Contexte spécifique de l'activité si nécessaire.*
+
+1.  **Question 1** : [Texte de la question]
+2.  **Question 2** : [Texte de la question]
+    *   *Indice ou conseil : ...*
+
+### Activité 2 : [Titre de l'activité]
+1.  **Question 3** : [Texte de la question]
+2.  **Question 4** : [Texte de la question]
+
+---
 
 ## Synthèse Personnelle
-[Zone pour que l'élève récapitule les notions clés apprises]
+*Espace pour que l'étudiant note les concepts clés.*
+*   ...
+*   ...
+
+**Consigne de formatage STRIQUE :**
+- Utilise **exclusivement** du Markdown standard.
+- Utilise `###` pour les sous-titres d'activités.
+- Utilise `1.`, `2.` pour les questions numérotées (indispensable pour la lisibilité).
+- Saute **une ligne vide** entre chaque question pour laisser de l'espace pour répondre (si imprimé) ou pour la clarté.
+- Mets en **gras** les mots-clés importants.
 """,
 
     "fiche_deroulement": """Tu es un expert en ingénierie pédagogique pour le BTS {track}.
