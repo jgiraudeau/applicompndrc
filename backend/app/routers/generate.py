@@ -179,13 +179,57 @@ Génère une PROGRESSION ANNUELLE détaillée et structurée :
 - Planning des DS et des examens blancs.
 - Rappel des modalités officielles (Ponctuel/CCF) selon le référentiel fourni.
 """,
+
+    "jeu_de_role": """Tu es un professeur de vente expert et membre du jury E4 pour le BTS NDRC.
+Ta mission est de créer un SUJET D'EXAMEN E4 (Jeu de Rôle de Négociation) complet et prêt à l'emploi.
+
+À partir de la fiche de situation fournie (contenant le contexte de stage de l'étudiant), génère :
+
+# Sujet d'Examen E4 : Négociation-Vente
+
+## 1. Contexte & Analyse (Pour le Candidat)
+> Synthèse professionnelle de la situation de l'étudiant, posant le cadre de la simulation.
+
+## 2. Fiche Sujet Candidat
+| **Rubrique** | **Détails de la Situation** |
+| :--- | :--- |
+| **Entreprise / Organisation** | [Nom et activité] |
+| **Cible (Client/Prospect)** | [Nom, fonction, typologie] |
+| **Objectif Principal** | [Vendre quoi ? Quel contrat ?] |
+| **Objectifs Secondaires** | [Découverte, prise de RDV,fidélisation...] |
+| **Contexte Spécifique** | [Détail du Rdv, lieu, historique relationnel] |
+| **Contraintes / Objections** | [Budget, concurrence, délais...] |
+| **Informations à exploiter** | [Chiffres clés, offre promo en cours...] |
+
+## 3. Fiche Jeu de Rôle (Pour le Jury / Client)
+*Ce tableau guide le membre du jury qui jouera le rôle du client face à l'étudiant.*
+
+| **Paramètre** | **Consignes pour le Jury (Client)** |
+| :--- | :--- |
+| **Identité & Fonction** | [Qui êtes-vous ? (DG, Acheteur, Particulier...)] |
+| **Attitude générale** | [Ex: Méfiant, pressé, sympathique mais dur en affaires...] |
+| **Vos Besoins (Cachés)** | [Ce que le candidat doit découvrir par ses questions] |
+| **Vos Freins / Objections** | 1. [Objection technique majeure]<br>2. [Objection prix]<br>3. [Objection concurrence] |
+| **Critères d'Achat** | [Qu'est-ce qui vous fera signer ? (Prix, SAV, Confiance...)] |
+| **Scénario de Négociation** | **Phase 1** : Refusez la première offre.<br>**Phase 2** : Acceptez de négocier si remise de X%.<br>**Phase 3** : Signez si le candidat valide la livraison. |
+
+## 4. Grille d'Évaluation Rapide (Points Clés)
+- [ ] A réalisé une découverte complète (QQOQCP).
+- [ ] A traité l'objection prix avec la méthode CRAC.
+- [ ] A verrouillé la vente (Bon de commande signé).
+
+**Consigne de formatage :**
+- Utilise strictement les **tableaux Markdown** ci-dessus.
+- Sois réaliste et cohérent avec la situation fournie.
+- Si des infos manquent dans la situation, invente-les de manière plausible pour compléter le scénario.
+"""
 }
 
 class GenerateRequest(BaseModel):
     topic: str
     duration_hours: Optional[int] = 4
     target_block: Optional[str] = None
-    document_type: Literal["dossier_prof", "dossier_eleve", "fiche_deroulement", "evaluation", "quiz", "planning_annuel"] = "dossier_prof"
+    document_type: Literal["dossier_prof", "dossier_eleve", "fiche_deroulement", "evaluation", "quiz", "planning_annuel", "jeu_de_role"] = "dossier_prof"
     category: Optional[str] = "NDRC"
 
 class GenerateResponse(BaseModel):

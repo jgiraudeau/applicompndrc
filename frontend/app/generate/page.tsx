@@ -19,6 +19,7 @@ const DOCUMENT_TYPES = [
     { id: "evaluation", label: "Évaluation", icon: ClipboardCheck, color: "text-amber-600 bg-amber-50 border-amber-200" },
     { id: "quiz", label: "Quiz / QCM", icon: HelpCircle, color: "text-indigo-600 bg-indigo-50 border-indigo-200" },
     { id: "planning_annuel", label: "Planning Annuel", icon: Calendar, color: "text-emerald-600 bg-emerald-50 border-emerald-200" },
+    { id: "jeu_de_role", label: "Jeu de Rôle (E4)", icon: Users, color: "text-rose-600 bg-rose-50 border-rose-200" },
 ];
 
 const TRACKS_DATA: Record<string, { label: string; blocks: { id: string; label: string }[] }> = {
@@ -504,12 +505,23 @@ export default function GeneratePage() {
                     <hr className="my-2" />
 
                     <div>
-                        <label className="text-sm font-medium text-slate-700 mb-1 block">Thème du cours *</label>
-                        <Input
-                            placeholder="Ex: La négociation commerciale en B2B"
-                            value={topic}
-                            onChange={(e) => setTopic(e.target.value)}
-                        />
+                        <label className="text-sm font-medium text-slate-700 mb-1 block">
+                            {docType === 'jeu_de_role' ? 'Contexte / Fiche de Situation *' : 'Thème du cours *'}
+                        </label>
+                        {docType === 'jeu_de_role' ? (
+                            <textarea
+                                className="w-full border rounded-md p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none min-h-[150px]"
+                                placeholder="Collez ici le contexte complet de l'entreprise, du client et de la situation de l'étudiant..."
+                                value={topic}
+                                onChange={(e) => setTopic(e.target.value)}
+                            />
+                        ) : (
+                            <Input
+                                placeholder="Ex: La négociation commerciale en B2B"
+                                value={topic}
+                                onChange={(e) => setTopic(e.target.value)}
+                            />
+                        )}
                     </div>
 
                     <div>
