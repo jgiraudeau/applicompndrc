@@ -1,0 +1,190 @@
+===============================================================================
+COURS BTS NDRC - BLOC 2 : RELATION CLIENT À DISTANCE ET DIGITALISATION (E5)
+RCDD - COURS COMPLET 2024-2026
+Source: https://paviecaillebot.wordpress.com/
+===============================================================================
+
+SOMMAIRE 2024-2025 : NDRC 1ère ANNÉE
+=====================================
+
+Dossier 01 : Introduction aux notions clés de la RC à distance et de la Digitalisation
+Dossier 02 : Créer et entretenir la Relation Client à distance
+Dossier 02 : Exercices d'application (Scoring BDD + Campagne e-mailing)
+Dossier 03 : Vendre à distance
+Dossier 04 : Développer une relation client omnicanale et mesurer l'expérience client
+Dossier 05 : Encadrer et animer une équipe de téléacteurs
+Dossier 06 : Évaluer une équipe de téléacteurs
+Dossier 07 : Animer une communication digitale sur les réseaux sociaux
+Dossier 08 : Optimiser le SEO et SEA et évaluer leur performance
+Dossier 09 : Animer une communication digitale avec une newsletter
+
+SOMMAIRE 2025-2026 : NDRC 2ème ANNÉE
+=====================================
+
+Dossier 10 : Répondre à la question de réflexion commerciale de l'épreuve E5 A
+Dossier 11 : Diagnostiquer le processus de vente en e-commerce pour améliorer le taux de conversion
+Dossier 12 : Diagnostiquer l'activité d'un site de e-commerce
+
+===============================================================================
+DOSSIER 02 : CRÉER ET ENTRETENIR LA RELATION CLIENT À DISTANCE
+===============================================================================
+
+NOTIONS CLÉS :
+
+CRM (Customer Relationship Management) / GRC (Gestion de la Relation Client)
+- Ensemble des outils et techniques informatiques pour capter, traiter, analyser les informations relatives aux clients et prospects
+- But : fidéliser en offrant des services personnalisés
+- Outil de base : BDD clients/prospects
+
+MARKETING AUTOMATION (Campagne marketing automatisée)
+- Permet de personnaliser et automatiser les actions commerciales
+- Exemple : envoi d'e-mails personnalisés
+- Basé sur le comportement de l'internaute sur le site e-commerce
+
+INBOUND MARKETING (Pull Marketing / Marketing entrant)
+- Le prospect vient à l'entreprise
+- Stratégie à long terme
+- Le marketing automation en est un élément important
+
+OUTBOUND MARKETING (Push Marketing / Marketing sortant)
+- L'entreprise va vers le prospect
+- Prospection ciblée (coût et efficacité)
+- Canaux : phoning, e-mailing, événements en présentiel (salons)
+
+PIPE COMMERCIAL (Tunnel de vente)
+- Outil stratégique pour visualiser les opportunités de vente
+- Évaluation du potentiel chiffre d'affaires
+- Regroupe les étapes du processus de vente (de la prise de contact à la conclusion)
+
+===============================================================================
+DOSSIER 03 : VENDRE À DISTANCE
+===============================================================================
+
+SEO (Search Engine Optimization)
+- Optimisation pour les moteurs de recherche
+- Ensemble des techniques pour améliorer la position d'un site sur les SERP
+- SERP = Search Engine Results Page (pages de résultats des moteurs de recherche)
+
+CONCEPTS CLÉS :
+- Entonnoir de prospection
+- Tunnel de conversion
+- Marketing de contenu
+- Contact qualifié
+
+===============================================================================
+DOSSIER 04 : RELATION CLIENT OMNICANALE ET EXPÉRIENCE CLIENT
+===============================================================================
+
+OMNICANALITÉ
+- Intégration de tous les canaux de contact client
+- Expérience fluide entre les différents points de contact
+- Exemples : secteur bancaire, retail
+
+INDICATEUR NPS (Net Promoter Score)
+- Mesure de l'expérience client
+- Évaluation de la satisfaction et de la recommandation
+
+PARCOURS CLIENT
+- Cartographie de tous les points de contact
+- Identification des moments clés
+- Amélioration de l'expérience globale
+
+===============================================================================
+DOSSIER 05 & 06 : MANAGEMENT D'ÉQUIPE DE TÉLÉACTEURS
+===============================================================================
+
+ENCADRER UNE ÉQUIPE DE TÉLÉACTEURS
+- Organisation du travail
+- Répartition des tâches
+- Animation quotidienne
+- Motivation de l'équipe
+
+ÉVALUER UNE ÉQUIPE DE TÉLÉACTEURS
+- Indicateurs de performance (KPIs)
+- Suivi des objectifs
+- Entretiens individuels
+- Actions correctives
+
+===============================================================================
+DOSSIER 07 : COMMUNICATION DIGITALE SUR LES RÉSEAUX SOCIAUX
+===============================================================================
+
+PESO MODEL
+- Paid (Médias payants)
+- Earned (Médias gagnés - RP, bouche-à-oreille)
+- Shared (Médias partagés - réseaux sociaux)
+- Owned (Médias propriétaires - site web, blog)
+
+Animation de la communication digitale :
+- Création de contenus
+- Planification des publications
+- Engagement de la communauté
+- Analyse des performances
+
+===============================================================================
+DOSSIER 08 : SEO ET SEA
+===============================================================================
+
+SEO (Search Engine Optimization)
+- Référencement naturel
+- Optimisation on-page et off-page
+- Mots-clés, contenu, liens
+
+SEA (Search Engine Advertising)
+- Référencement payant
+- Google Ads
+- Annonces sur moteur de recherche et YouTube
+
+ÉVALUATION DE LA PERFORMANCE
+- Métriques clés
+- ROI des campagnes
+- Ajustement des stratégies
+
+===============================================================================
+DOSSIER 09 : NEWSLETTER
+===============================================================================
+
+ANIMATION D'UNE COMMUNICATION DIGITALE PAR NEWSLETTER
+- Création de contenus
+- Segmentation de la base
+- Taux d'ouverture et de clics
+- Optimisation des campagnes
+
+===============================================================================
+DOSSIER 10 : ÉPREUVE E5 A - RÉFLEXION COMMERCIALE
+===============================================================================
+
+Méthodologie pour répondre à la question de réflexion commerciale
+
+===============================================================================
+DOSSIER 11 : E-COMMERCE ET TAUX DE CONVERSION
+===============================================================================
+
+DIAGNOSTIC DU PROCESSUS DE VENTE EN E-COMMERCE
+- Analyse du tunnel de conversion
+- Identification des points de friction
+
+AMÉLIORATION DU TAUX DE CONVERSION
+- Réduction de l'abandon de panier
+- Automatisation des relances
+- Optimisation de l'UX
+
+===============================================================================
+DOSSIER 12 : DIAGNOSTIC D'ACTIVITÉ E-COMMERCE
+===============================================================================
+
+ANALYSE DE LA PERFORMANCE
+- KPIs e-commerce
+- Analyse du trafic
+- Performance newsletter
+- Performance campagnes e-mailing
+
+===============================================================================
+LEXIQUE : 70 NOTIONS DE RCDD À MAÎTRISER (1ère année)
+===============================================================================
+
+[Liste des 70 notions clés disponible dans le cours complet]
+
+===============================================================================
+FIN DU COURS - BLOC 2 RCDD
+===============================================================================
