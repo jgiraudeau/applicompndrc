@@ -111,13 +111,22 @@ class GeminiService:
         )
 
     def upload_file_to_gemini(self, file_path: str, mime_type: str = None):
-        """Uploads a file to Gemini and waits for processing."""
+        """Uploads a file to Gemini, avoiding duplicates."""
         try:
+            display_name = os.path.basename(file_path)
+            
+            # Check if file exists based on display_name
+            # Note: list_files() returns an iterable. We check active files.
+            for f in genai.list_files():
+                if f.display_name == display_name:
+                    print(f"   ℹ️ File '{display_name}' already exists on Gemini (URI: {f.uri}). Skipping upload.")
+                    return f
+
             print(f"👉 Uploading {file_path} to Gemini...")
             if mime_type:
-                uploaded_file = genai.upload_file(file_path, mime_type=mime_type)
+                uploaded_file = genai.upload_file(file_path, mime_type=mime_type, display_name=display_name)
             else:
-                uploaded_file = genai.upload_file(file_path)
+                uploaded_file = genai.upload_file(file_path, display_name=display_name)
             
             print(f"   File ID: {uploaded_file.name}")
             
