@@ -4,8 +4,28 @@ import docx
 import google.generativeai as genai
 from backend.app.services.gemini_service import gemini_service
 
-# Knowledge base root
-KNOWLEDGE_DIR = Path(__file__).resolve().parent.parent.parent.parent / 'knowledge'
+# Knowledge base root discovery
+possible_paths = [
+    Path(__file__).resolve().parent.parent.parent.parent / 'backend' / 'knowledge', # Local dev relative from file
+    Path(__file__).resolve().parent.parent.parent.parent / 'knowledge',         # Recursive relative
+    Path(os.getcwd()) / 'backend' / 'knowledge',                                # From CWD (Repo root)
+    Path(os.getcwd()) / 'knowledge',                                            # From CWD (Backend root)
+    Path('/app/backend/knowledge'),                                             # Docker absolute
+    Path('/app/knowledge'),                                                     # Docker absolute alternative
+]
+
+KNOWLEDGE_DIR = None
+for path in possible_paths:
+    if path.exists():
+        KNOWLEDGE_DIR = path
+        break
+
+if not KNOWLEDGE_DIR:
+    # Fallback to default relative path even if not exists, to avoid crash at import time
+    KNOWLEDGE_DIR = Path(__file__).resolve().parent.parent.parent.parent / 'knowledge'
+    print(f"⚠️ Warning: Knowledge directory not found in scanned paths. Defaulting to {KNOWLEDGE_DIR}")
+else:
+    print(f"✅ Knowledge directory found at: {KNOWLEDGE_DIR}")
 
 class KnowledgeBase:
     def __init__(self):
