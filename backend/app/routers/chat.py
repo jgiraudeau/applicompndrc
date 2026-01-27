@@ -39,7 +39,7 @@ async def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db), cur
     from backend.app.services.knowledge_service import knowledge_base
     
     # Get knowledge files for the requested category
-    target_category = request.category if request.category else 'bts_ndrc'
+    target_category = request.category if request.category else 'NDRC'
     kb_files = knowledge_base.get_file_ids_by_category(target_category)
     
     # Normalize track for regulatory grounding
