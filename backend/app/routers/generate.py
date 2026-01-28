@@ -180,51 +180,69 @@ Génère une PROGRESSION ANNUELLE détaillée et structurée :
 - Rappel des modalités officielles (Ponctuel/CCF) selon le référentiel fourni.
 """,
 
-    "jeu_de_role": """Tu es un expert créateur de sujets d'examen pour le BTS NDRC (Épreuve E4).
-Ta mission est de générer DEUX fiches techniques strictement conformes au format officiel, à partir de la situation fournie.
+    "jeu_de_role": """Tu es un expert créateur de sujets d'examen certifiants pour le BTS NDRC (Épreuve E4).
+Ta mission est de générer les DEUX fiches (Candidat et Jury) pour une simulation de Négociation Vente.
+Le format doit être STRICTEMENT celui des documents officiels.
 
-RÈGLE D'OR : NE SOIS PAS BAVARD.
-- Ne mets AUCUNE phrase d'introduction (ni "Bonjour", ni "Voici le sujet...").
-- Ne mets AUCUNE explication sur la durée ou le contexte.
-- Commence DIRECTEMENT par le titre "# FICHE SUJET – CANDIDAT".
-
-# FICHE SUJET – CANDIDAT
-
-| **MODIFICATION DES PARAMÈTRES À PRENDRE EN COMPTE PAR LE CANDIDAT POUR LA SIMULATION** | **DÉTAILS À COMPLÉTER PAR L'IA** |
-| :--- | :--- |
-| **Objet de l’activité** | [Vente, Négociation, ou Animation...] |
-| **Date(s) et durée** | [Ex: 14 Octobre, 15 minutes] |
-| **Lieu** | [Ex: Bureau du client / Showroom...] |
-| **Délimitation de Séquence(s)** | [Ex: De l'accueil jusqu'à la conclusion] |
-| **Acteur(s) concernés (statut/rôle)** | [Ex: M. Dupont, Responsable des achats] |
-| **Historique de la relation / Relation à l’entreprise**<br>*(Objectif : définir à quel moment de cette relation vous intervenez)* | [Ex: Client fidèle depuis 3 ans / Prospect froid...] |
-| **Objectifs de la simulation** | [Ex: Vendre la nouvelle gamme / Obtenir un 2ème RDV...] |
-| **Informations à exploiter** | [Ex: Baisse du CA client / Offre promotionnelle en cours...] |
-| **Contrainte(s)** | [Ex: Budget limité / Urgence de livraison...] |
+RÈGLES D'OR :
+1. AUCUN RÉCIT, AUCUNE PHRASE D'INTRO.
+2. PAS DE MENTION "Voici le sujet".
+3. Le document doit commencer immédiatement par l'entête du BTS.
+4. Remplis la colonne de droite avec des informations réalistes et contextuelles.
+5. Ne modifie PAS la colonne de gauche (Intitulés).
 
 ---
 
-# FICHE SUJET – JURY
+**BTS NÉGOCIATION ET DIGITALISATION DE LA RELATION CLIENT**
+**SESSION 2025**
+**E4 – RELATION CLIENT ET NEGOCIATION VENTE**
 
-| **MODIFICATION DES PARAMÈTRES À PRENDRE EN COMPTE PAR LE JURY POUR LA SIMULATION** | **DÉTAILS À COMPLÉTER PAR L'IA** |
+**FICHE SUJET – nom du CANDIDAT :**
+
+☑ Négociation Vente et Accompagnement de la Relation Client
+☐ Organisation et Animation d’un Évènement commercial
+
+| **MODIFICATION DES PARAMÈTRES À PRENDRE EN COMPTE PAR LE CANDIDAT POUR LA SIMULATION** | **DÉTAILS DE LA SITUATION** |
+| :--- | :--- |
+| **Objet de l’activité** | [Définir l'objet exact : Vente de..., Négociation tarifaire, etc.] |
+| **Date(s) et durée** | [Date réaliste] - Durée : 20 minutes (dont 10 min de simulation) |
+| **Lieu** | [Lieu précis : Showroom, Bureau client, Salon...] |
+| **Délimitation de Séquence(s)** | [Début : Accueil... Fin : Prise de congé] |
+| **Acteur(s) concernés (statut/rôle)** | [M./Mme X, fonction exacte] |
+| **Historique de la relation / Relation à l’entreprise**<br>*(Objectif : définir à quel moment de cette relation vous intervenez)* | [Contexte : Client depuis X temps, ou Prospect qualifié, Suite à un premier contact...] |
+| **Objectifs de la simulation** | [Vendre le produit Y, Faire signer le devis Z, Obtenir un 2nd RDV...] |
+| **Informations à exploiter** | [Données chiffrées, Promo en cours, Besoins spécifiques décelés...] |
+| **Contrainte(s)** | [Budget serré, Délai court, Décideur absent...] |
+
+---
+
+**PAGE 2**
+
+**BTS NÉGOCIATION ET DIGITALISATION DE LA RELATION CLIENT**
+**SESSION 2025**
+**E4 – RELATION CLIENT ET NEGOCIATION VENTE**
+
+**FICHE SUJET – nom du JURY**
+
+☑ Négociation Vente et Accompagnement de la Relation Client
+☐ Organisation et Animation d’un Évènement commercial
+
+| **MODIFICATION DES PARAMÈTRES À PRENDRE EN COMPTE PAR LE JURY POUR LA SIMULATION** | **DÉTAILS POUR LE JURY** |
 | :--- | :--- |
 | **Objet de l’activité** | [Idem Candidat] |
-| **Identité**<br>*(Objectif : définir et personnaliser le profil)* | [Nom, âge, trait de caractère dominant] |
-| **Relation à l’entreprise** | [Ex: A déjà eu un litige / Très satisfait...] |
+| **Identité**<br>*(Objectif : définir et personnaliser le profil)* | [Nom, Âge, Traits de personnalité (ex: Sceptique, Pressé, Chaleureux)] |
+| **Relation à l’entreprise** | [Ancienneté relationnelle, Niveau de satisfaction actuel] |
 | **Date de la rencontre** | [Date] |
 | **Lieu** | [Lieu] |
-| **Historique de la relation**<br>*(Objectif : Définir le moment, le lieu...)* | [Contexte précis de la rencontre] |
-| **Objectifs de la simulation** | [Ce que le candidat doit atteindre] |
+| **Historique de la relation**<br>*(Objectif : Définir le moment, le lieu...)* | [Rappel du contexte précédent la rencontre] |
+| **Objectifs de la simulation** | [Ce que le vendeur doit réussir à faire] |
 | **Délimitation de Séquence (s)** | [Idem Candidat] |
-| **Motivations**<br>*(Objectif : définir le ou les bénéfices attendus)* | [Ex: Gagner du temps, réduire les coûts, moderniser...] |
-| **Freins**<br>*(Objectif : Rechercher les raisons de non achat)* | [Ex: Peur du changement / Prix trop élevé...] |
-| **Contrainte(s)** | [Ex: Doit consulter son associé avant de signer] |
-| **Objections** | 1. [Objection Prix]<br>2. [Objection Technique]<br>3. [Objection Concurrence] |
+| **Motivations**<br>*(Objectif : définir le ou les bénéfices attendus)* | [Besoin de fiabilité, Gain de temps, Innovation, Image de marque...] |
+| **Freins**<br>*(Objectif : Rechercher les raisons de non achat)* | [Peur du risque, Budget, Complexité de mise en œuvre...] |
+| **Contrainte(s)** | [Doit en parler à sa direction, Budget bloqué jusqu'en Janvier...] |
+| **Objections** | 1. [Objection majeure sur le prix]<br>2. [Objection technique ou concurrentielle]<br>3. [Objection de principe ou de délai] |
 
-**Consigne de Remplissage :**
-- Remplis la colonne de droite avec des éléments **réalistes**, **crédibles** et **en lien direct avec la situation fournie**.
-- Sois précis (invente des noms, des chiffres, des dates).
-- Ne change PAS les intitulés de la colonne de gauche.
+---
 """,
 
     "sujet_e5b_wp": """Tu es un expert créateur de sujets d'examen pour le BTS NDRC (Épreuve E5B - Pratique WordPress).
