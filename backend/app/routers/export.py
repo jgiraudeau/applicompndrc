@@ -85,40 +85,102 @@ def md_to_pdf(md_text):
 
 def md_to_docx(md_text):
     """
-    Converts Markdown to DOCX using pure python-docx with manual Table parsing.
-    Removes need for Pandoc/System dependencies.
+    Converts Markdown to DOCX using pure python-docx with improved Table parsing and Layout control.
+    Supports Landscape mode for Grids.
     """
     print(f"DEBUG: Starting DOCX generation... Content len: {len(md_text)}")
     try:
         doc = Document()
+        from docx.enum.section import WD_SECTION, WD_ORIENT
+        from docx.shared import Inches, Pt
+        from docx.enum.text import WD_ALIGN_PARAGRAPH
         
-        # Clean margins
-        for section in doc.sections:
-            section.top_margin = docx.shared.Inches(1)
-            section.bottom_margin = docx.shared.Inches(1)
-            section.left_margin = docx.shared.Inches(1)
-            section.right_margin = docx.shared.Inches(1)
+        # Helper to set narrow margins
+        def set_narrow_margins(section):
+            section.top_margin = Inches(0.5)
+            section.bottom_margin = Inches(0.5)
+            section.left_margin = Inches(0.5)
+            section.right_margin = Inches(0.5)
+
+        # Initial Section
+        set_narrow_margins(doc.sections[0])
 
         lines = md_text.split('\n')
         iterator = iter(lines)
         
+        in_table = False
+        table_lines = []
+
+        def flush_table(lines_to_flush):
+            if not lines_to_flush: return
+            
+            # Parse header
+            header_row = lines_to_flush[0].strip().split('|')[1:-1]
+            header_row = [h.strip() for h in header_row]
+            
+            # Create Table
+            table = doc.add_table(rows=1, cols=len(header_row))
+            table.style = 'Table Grid'
+            
+            # Fill Header
+            hdr_cells = table.rows[0].cells
+            for i, h_text in enumerate(header_row):
+                if i < len(hdr_cells):
+                    hdr_cells[i].text = h_text
+                    # Make header bold
+                    for paragraph in hdr_cells[i].paragraphs:
+                        for run in paragraph.runs:
+                            run.font.bold = True
+            
+            # Fill Rows
+            for line in lines_to_flush[1:]:
+                # skip separator
+                if '---' in line: continue
+                
+                row_data = line.strip().split('|')[1:-1]
+                row_data = [d.strip() for d in row_data]
+                
+                # Check mismatch cols
+                if len(row_data) != len(header_row):
+                     # Simple logic: pad or truncate
+                     if len(row_data) < len(header_row):
+                         row_data += [''] * (len(header_row) - len(row_data))
+                     else:
+                         row_data = row_data[:len(header_row)]
+                
+                row_cells = table.add_row().cells
+                for i, cell_text in enumerate(row_data):
+                    # Handle breaks <br>
+                    clean_text = cell_text.replace('<br>', '\n').replace('<br/>', '\n')
+                    row_cells[i].text = clean_text
+
         for line in iterator:
             stripped = line.strip()
             
-            # 1. Detect Tables
+            # Table Detection
             if stripped.startswith('|'):
-                # It's a table row!
-                if set(stripped.replace('|', '').replace('-', '').replace(':', '').strip()) == set():
-                    # Skip separator line |---|
-                    continue
+                in_table = True
+                table_lines.append(stripped)
+                continue
+            else:
+                if in_table:
+                    flush_table(table_lines)
+                    table_lines = []
+                    in_table = False
+                    doc.add_paragraph() # Spacer
 
-                p = doc.add_paragraph()
-                p.style = 'No Spacing' # Compact
-                runner = p.add_run(stripped)
-                runner.font.name = 'Courier New' # Monospace to align columns roughly
+            # 1. Section/Page Breaks for Grids
+            # Detect "PAGE 2 : GRILLE" or similar keywords
+            if stripped.upper().startswith('# PAGE 2') or stripped.upper().startswith('## PAGE 2') or "GRILLE D'AIDE" in stripped.upper():
+                # Add Section Break
+                new_section = doc.add_section(WD_SECTION.NEW_PAGE)
+                new_section.orientation = WD_ORIENT.LANDSCAPE
+                new_section.page_width = Inches(11.69) # A4 Landscape width
+                new_section.page_height = Inches(8.27) # A4 Landscape height
+                set_narrow_margins(new_section)
                 
             # 2. Headers
-            elif stripped.startswith('# '):
+            if stripped.startswith('# '):
                 doc.add_heading(stripped[2:], level=0)
             elif stripped.startswith('## '):
                 doc.add_heading(stripped[3:], level=1)
@@ -133,10 +195,17 @@ def md_to_docx(md_text):
                 parts = stripped.split('.', 1)
                 content = parts[1].strip() if len(parts) > 1 else stripped
                 doc.add_paragraph(content, style='List Number')
-                
+            
             # 4. Standard Text
             elif stripped:
-                doc.add_paragraph(stripped)
+                p = doc.add_paragraph(stripped)
+                # Keep With Next check for titles (simple heuristic)
+                if len(stripped) < 50 and stripped.endswith(':'):
+                    p.paragraph_format.keep_with_next = True
+
+        # Flush trailing table
+        if in_table:
+            flush_table(table_lines)
 
         result = io.BytesIO()
         doc.save(result)
@@ -148,7 +217,7 @@ def md_to_docx(md_text):
         print(f"❌ Pure Python DOCX Error: {e}")
         # Fallback to absolute basic
         doc = Document()
-        doc.add_paragraph(md_text)
+        doc.add_paragraph(f"Error generating formatted doc: {e}\n\nRaw Content:\n{md_text}")
         result = io.BytesIO()
         doc.save(result)
         return result.getvalue()
