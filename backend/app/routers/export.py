@@ -154,15 +154,19 @@ def md_to_docx(md_text):
         return result.getvalue()
 
 @router.post("/pdf")
-async def export_pdf(request: ExportRequest):
+async def export_pdf(request: ExportRequest, current_user: User = Depends(get_current_user)):
     print(f"DEBUG: Export PDF Request Received. Content len: {len(request.content)}")
     try:
+        import unicodedata
+        safe_filename = unicodedata.normalize('NFKD', request.filename).encode('ascii', 'ignore').decode('ascii')
+        safe_filename = re.sub(r'[^a-zA-Z0-9_\-]', '_', safe_filename)
+        
         pdf_bytes = md_to_pdf(request.content)
         return Response(
             content=pdf_bytes,
             media_type="application/pdf",
             headers={
-                "Content-Disposition": f"attachment; filename={request.filename}.pdf",
+                "Content-Disposition": f"attachment; filename={safe_filename}.pdf",
                 "Access-Control-Expose-Headers": "Content-Disposition"
             }
         )
@@ -173,15 +177,19 @@ async def export_pdf(request: ExportRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/docx")
-async def export_docx(request: ExportRequest):
+async def export_docx(request: ExportRequest, current_user: User = Depends(get_current_user)):
     print(f"DEBUG: Export DOCX Request Received. Content len: {len(request.content)}")
     try:
+        import unicodedata
+        safe_filename = unicodedata.normalize('NFKD', request.filename).encode('ascii', 'ignore').decode('ascii')
+        safe_filename = re.sub(r'[^a-zA-Z0-9_\-]', '_', safe_filename)
+
         docx_bytes = md_to_docx(request.content)
         return Response(
             content=docx_bytes,
             media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             headers={
-                "Content-Disposition": f"attachment; filename={request.filename}.docx",
+                "Content-Disposition": f"attachment; filename={safe_filename}.docx",
                 "Access-Control-Expose-Headers": "Content-Disposition"
             }
         )
@@ -211,9 +219,10 @@ async def export_gift(request: ExportRequest, current_user: User = Depends(get_c
         {request.content}
         """
         
-        import google.generativeai as genai
-        model = genai.GenerativeModel(gemini_service.model_name)
-        response = model.generate_content(prompt)
+        response = gemini_service.client.models.generate_content(
+            model=gemini_service.model_name,
+            contents=prompt
+        )
         gift_content = response.text.strip()
         
         # Clean potential AI noise
@@ -256,9 +265,10 @@ async def export_wooclap(request: ExportRequest, current_user: User = Depends(ge
         {request.content}
         """
         
-        import google.generativeai as genai
-        model = genai.GenerativeModel(gemini_service.model_name)
-        response = model.generate_content(prompt)
+        response = gemini_service.client.models.generate_content(
+            model=gemini_service.model_name,
+            contents=prompt
+        )
         
         json_str = response.text.strip()
         json_str = re.sub(r'^```json\n?', '', json_str)
@@ -303,9 +313,10 @@ async def export_google(request: ExportRequest, current_user: User = Depends(get
         {request.content}
         """
         
-        import google.generativeai as genai
-        model = genai.GenerativeModel(gemini_service.model_name)
-        response = model.generate_content(prompt)
+        response = gemini_service.client.models.generate_content(
+            model=gemini_service.model_name,
+            contents=prompt
+        )
         
         csv_content = response.text.strip()
         csv_content = re.sub(r'^```csv\n?', '', csv_content)

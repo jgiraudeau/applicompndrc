@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 import docx
-import google.generativeai as genai
 from backend.app.services.gemini_service import gemini_service
 
 # Knowledge base root discovery

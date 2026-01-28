@@ -4,7 +4,7 @@ from typing import Optional, List
 import google.oauth2.credentials
 from googleapiclient.discovery import build
 from backend.app.services.gemini_service import gemini_service
-import google.generativeai as genai
+
 import json
 import re
 
@@ -39,8 +39,10 @@ async def create_google_form_endpoint(request: GoogleFormRequest):
         - Pas de ```json au début ou à la fin. Juste le tableau [ ... ].
         """
         
-        model = genai.GenerativeModel(gemini_service.model_name)
-        response = model.generate_content(prompt)
+        response = gemini_service.client.models.generate_content(
+            model=gemini_service.model_name,
+            contents=prompt
+        )
         
         cleaned_json = response.text.replace('```json', '').replace('```', '').strip()
         # Handle potential leading/trailing whitespace or text

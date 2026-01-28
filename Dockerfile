@@ -18,6 +18,7 @@ WORKDIR /app
 
 # Copy requirements first for caching
 COPY requirements.txt .
+# Force cache bust - Ensure fpdf2/python-docx are installed
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the code

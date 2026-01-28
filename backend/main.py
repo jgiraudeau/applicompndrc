@@ -108,7 +108,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # TEMPORARY DEBUG: Allow all to fix potential CORS blocking on export
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -131,6 +131,5 @@ app.include_router(classroom.router, prefix="/api/classroom", tags=["classroom"]
 app.include_router(setup.router, prefix="/api/setup", tags=["setup"])  # ⚠️ TEMPORARY - Disable after first admin creation
 
 @app.get("/")
-@app.get("/")
 def read_root():
-    return {"status": "online", "message": "Bienvenue sur l'API du Professeur Virtuel [VERSION TEST DEBUG]"}
+    return {"status": "online", "message": "Bienvenue sur l'API du Professeur Virtuel"}

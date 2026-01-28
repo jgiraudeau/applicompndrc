@@ -6,7 +6,7 @@ from backend.app.database import get_db
 from backend.app.models import ActivityLog
 from backend.app.services.gemini_service import gemini_service
 # Lazy import: knowledge_base will be imported inside functions to avoid startup delays
-import google.generativeai as genai
+from google import genai
 
 router = APIRouter()
 
@@ -418,9 +418,9 @@ async def generate_document(request: GenerateRequest, db: Session = Depends(get_
 **Durée souhaitée** : {request.duration_hours} heures
 """
         if request.target_block:
-            user_prompt += f"**Bloc ciblé** : {request.target_block}\n"
+            user_prompt += f"**Bloc ciblé** : {request.target_block}\\n"
 
-        user_prompt += f"\nUtilise le référentiel BTS {track} et les synthèses de cours disponibles."
+        user_prompt += f"\\nUtilise le référentiel BTS {track} et les synthèses de cours disponibles."
 
         # Pass track to get_model to ensure correct regulatory grounding
         model = gemini_service.get_model(custom_system_instruction=system_prompt, track=track)
@@ -433,7 +433,8 @@ async def generate_document(request: GenerateRequest, db: Session = Depends(get_
         
         for file_id in kb_files[:3]:
             try:
-                file_obj = genai.get_file(file_id)
+                # Use client from service instead of deprecated genai.get_file
+                file_obj = gemini_service.client.files.get(name=file_id)
                 content_parts.append(file_obj)
             except:
                 pass
