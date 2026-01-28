@@ -180,48 +180,46 @@ Génère une PROGRESSION ANNUELLE détaillée et structurée :
 - Rappel des modalités officielles (Ponctuel/CCF) selon le référentiel fourni.
 """,
 
-    "jeu_de_role": """Tu es un professeur de vente expert et membre du jury E4 pour le BTS NDRC.
-Ta mission est de créer un SUJET D'EXAMEN E4 (Jeu de Rôle de Négociation) complet et prêt à l'emploi.
+    "jeu_de_role": """Tu es un expert créateur de sujets d'examen pour le BTS NDRC (Épreuve E4).
+Ta mission est de générer DEUX fiches techniques strictement conformes au format officiel, à partir de la situation fournie.
 
-À partir de la fiche de situation fournie (contenant le contexte de stage de l'étudiant), génère :
+# FICHE SUJET – CANDIDAT
 
-# Sujet d'Examen E4 : Négociation-Vente
-
-## 1. Contexte & Analyse (Pour le Candidat)
-> Synthèse professionnelle de la situation de l'étudiant, posant le cadre de la simulation.
-
-## 2. Fiche Sujet Candidat
-| **Rubrique** | **Détails de la Situation** |
+| **MODIFICATION DES PARAMÈTRES À PRENDRE EN COMPTE PAR LE CANDIDAT POUR LA SIMULATION** | **DÉTAILS À COMPLÉTER PAR L'IA** |
 | :--- | :--- |
-| **Entreprise / Organisation** | [Nom et activité] |
-| **Cible (Client/Prospect)** | [Nom, fonction, typologie] |
-| **Objectif Principal** | [Vendre quoi ? Quel contrat ?] |
-| **Objectifs Secondaires** | [Découverte, prise de RDV,fidélisation...] |
-| **Contexte Spécifique** | [Détail du Rdv, lieu, historique relationnel] |
-| **Contraintes / Objections** | [Budget, concurrence, délais...] |
-| **Informations à exploiter** | [Chiffres clés, offre promo en cours...] |
+| **Objet de l’activité** | [Vente, Négociation, ou Animation...] |
+| **Date(s) et durée** | [Ex: 14 Octobre, 15 minutes] |
+| **Lieu** | [Ex: Bureau du client / Showroom...] |
+| **Délimitation de Séquence(s)** | [Ex: De l'accueil jusqu'à la conclusion] |
+| **Acteur(s) concernés (statut/rôle)** | [Ex: M. Dupont, Responsable des achats] |
+| **Historique de la relation / Relation à l’entreprise**<br>*(Objectif : définir à quel moment de cette relation vous intervenez)* | [Ex: Client fidèle depuis 3 ans / Prospect froid...] |
+| **Objectifs de la simulation** | [Ex: Vendre la nouvelle gamme / Obtenir un 2ème RDV...] |
+| **Informations à exploiter** | [Ex: Baisse du CA client / Offre promotionnelle en cours...] |
+| **Contrainte(s)** | [Ex: Budget limité / Urgence de livraison...] |
 
-## 3. Fiche Jeu de Rôle (Pour le Jury / Client)
-*Ce tableau guide le membre du jury qui jouera le rôle du client face à l'étudiant.*
+---
 
-| **Paramètre** | **Consignes pour le Jury (Client)** |
+# FICHE SUJET – JURY
+
+| **MODIFICATION DES PARAMÈTRES À PRENDRE EN COMPTE PAR LE JURY POUR LA SIMULATION** | **DÉTAILS À COMPLÉTER PAR L'IA** |
 | :--- | :--- |
-| **Identité & Fonction** | [Qui êtes-vous ? (DG, Acheteur, Particulier...)] |
-| **Attitude générale** | [Ex: Méfiant, pressé, sympathique mais dur en affaires...] |
-| **Vos Besoins (Cachés)** | [Ce que le candidat doit découvrir par ses questions] |
-| **Vos Freins / Objections** | 1. [Objection technique majeure]<br>2. [Objection prix]<br>3. [Objection concurrence] |
-| **Critères d'Achat** | [Qu'est-ce qui vous fera signer ? (Prix, SAV, Confiance...)] |
-| **Scénario de Négociation** | **Phase 1** : Refusez la première offre.<br>**Phase 2** : Acceptez de négocier si remise de X%.<br>**Phase 3** : Signez si le candidat valide la livraison. |
+| **Objet de l’activité** | [Idem Candidat] |
+| **Identité**<br>*(Objectif : définir et personnaliser le profil)* | [Nom, âge, trait de caractère dominant] |
+| **Relation à l’entreprise** | [Ex: A déjà eu un litige / Très satisfait...] |
+| **Date de la rencontre** | [Date] |
+| **Lieu** | [Lieu] |
+| **Historique de la relation**<br>*(Objectif : Définir le moment, le lieu...)* | [Contexte précis de la rencontre] |
+| **Objectifs de la simulation** | [Ce que le candidat doit atteindre] |
+| **Délimitation de Séquence (s)** | [Idem Candidat] |
+| **Motivations**<br>*(Objectif : définir le ou les bénéfices attendus)* | [Ex: Gagner du temps, réduire les coûts, moderniser...] |
+| **Freins**<br>*(Objectif : Rechercher les raisons de non achat)* | [Ex: Peur du changement / Prix trop élevé...] |
+| **Contrainte(s)** | [Ex: Doit consulter son associé avant de signer] |
+| **Objections** | 1. [Objection Prix]<br>2. [Objection Technique]<br>3. [Objection Concurrence] |
 
-## 4. Grille d'Évaluation Rapide (Points Clés)
-- [ ] A réalisé une découverte complète (QQOQCP).
-- [ ] A traité l'objection prix avec la méthode CRAC.
-- [ ] A verrouillé la vente (Bon de commande signé).
-
-**Consigne de formatage :**
-- Utilise strictement les **tableaux Markdown** ci-dessus.
-- Sois réaliste et cohérent avec la situation fournie.
-- Si des infos manquent dans la situation, invente-les de manière plausible pour compléter le scénario.
+**Consigne de Remplissage :**
+- Remplis la colonne de droite avec des éléments **réalistes**, **crédibles** et **en lien direct avec la situation fournie**.
+- Sois précis (invente des noms, des chiffres, des dates).
+- Ne change PAS les intitulés de la colonne de gauche.
 """,
 
     "sujet_e5b_wp": """Tu es un professeur expert en Digitalisation de la Relation Client (BTS NDRC).
