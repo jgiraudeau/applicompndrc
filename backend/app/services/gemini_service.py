@@ -7,10 +7,18 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 # Load env vars safely by finding the backend root (2 levels up from services)
+# Load env vars safely by finding the backend root (2 levels up from services)
 env_path = Path(__file__).resolve().parent.parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
 print(f"DEBUG: Loading .env from {env_path}")
 API_KEY = os.getenv("GOOGLE_API_KEY")
+
+# DEBUG: Print loaded keys to debug logs (masked)
+if API_KEY:
+    print(f"DEBUG: GOOGLE_API_KEY found, length: {len(API_KEY)}")
+    print(f"DEBUG: GOOGLE_API_KEY prefix: {API_KEY[:4]}...")
+else:
+    print("❌ ERROR: GOOGLE_API_KEY is MISSING in Environment.")
 
 REGULATORY_GROUNDINGS = {
     "NDRC": """
