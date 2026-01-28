@@ -154,7 +154,8 @@ def md_to_docx(md_text):
         return result.getvalue()
 
 @router.post("/pdf")
-async def export_pdf(request: ExportRequest, current_user: User = Depends(get_current_user)):
+async def export_pdf(request: ExportRequest):
+    print(f"DEBUG: Export PDF Request Received. Content len: {len(request.content)}")
     try:
         pdf_bytes = md_to_pdf(request.content)
         return Response(
@@ -166,11 +167,14 @@ async def export_pdf(request: ExportRequest, current_user: User = Depends(get_cu
             }
         )
     except Exception as e:
-        print(f"❌ PDF Export Error: {e}")
+        print(f"❌ PDF Export Error CRASH: {e}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/docx")
-async def export_docx(request: ExportRequest, current_user: User = Depends(get_current_user)):
+async def export_docx(request: ExportRequest):
+    print(f"DEBUG: Export DOCX Request Received. Content len: {len(request.content)}")
     try:
         docx_bytes = md_to_docx(request.content)
         return Response(
@@ -182,7 +186,9 @@ async def export_docx(request: ExportRequest, current_user: User = Depends(get_c
             }
         )
     except Exception as e:
-        print(f"❌ DOCX Export Error: {e}")
+        print(f"❌ DOCX Export Error CRASH: {e}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 # --- Specialized Quiz Exports ---
