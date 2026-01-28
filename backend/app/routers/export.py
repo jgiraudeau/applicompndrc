@@ -36,49 +36,89 @@ class ExportRequest(BaseModel):
 
 def md_to_pdf(md_text):
     """
-    Converts Markdown to PDF using FPDF2's HTML engine.
-    Pure Python, no external dependencies.
+    Converts Markdown to PDF using FPDF2 with manual parsing for better control.
+    Supports Landscape switching for Grids.
     """
     print(f"DEBUG: Starting PDF generation... Content len: {len(md_text)}")
     try:
-        from fpdf import FPDF, HTMLMixin
-        import markdown
+        from fpdf import FPDF
         
-        class PDF(FPDF, HTMLMixin):
-            pass
+        class PDF(FPDF):
+            def header(self):
+                # Optional: Add logo or title on every page
+                pass
+            
+            def footer(self):
+                self.set_y(-15)
+                self.set_font('Helvetica', 'I', 8)
+                self.cell(0, 10, f'Page {self.page_no()}', 0, align='C')
 
-        # 1. Convert Markdown -> HTML
-        try:
-            html_body = markdown.markdown(md_text, extensions=['tables', 'fenced_code', 'nl2br'])
-            print("DEBUG: HTML conversion done.")
-        except Exception as e:
-            print(f"ERROR: Markdown conversion failed: {e}")
-            raise e
-
-        # 2. Setup PDF
         pdf = PDF()
+        pdf.set_auto_page_break(auto=True, margin=15)
         pdf.add_page()
+        pdf.set_font("Helvetica", size=11)
         
-        # 3. Add Content
-        try:
-            pdf.write_html(html_body)
-        except Exception as e:
-             print(f"ERROR: FPDF write_html failed: {e}")
-             # Fallback to simple text
-             pdf.set_font("Arial", size=10)
-             pdf.multi_cell(0, 10, md_text)
+        lines = md_text.split('\n')
         
+        in_code_block = False
+        
+        for line in lines:
+            stripped = line.strip()
+            
+            # Detect Landscape Trigger
+            if stripped.upper().startswith('# PAGE 2') or stripped.upper().startswith('## PAGE 2') or "GRILLE D'AIDE" in stripped.upper():
+                pdf.add_page(orientation='L')
+            
+            # Headers
+            if stripped.startswith('# '):
+                pdf.set_font("Helvetica", 'B', 16)
+                pdf.cell(0, 10, stripped[2:], new_x="LMARGIN", new_y="NEXT")
+                pdf.set_font("Helvetica", size=11)
+            elif stripped.startswith('## '):
+                pdf.set_font("Helvetica", 'B', 14)
+                pdf.ln(5)
+                pdf.cell(0, 10, stripped[3:], new_x="LMARGIN", new_y="NEXT")
+                pdf.set_font("Helvetica", size=11)
+            elif stripped.startswith('### '):
+                pdf.set_font("Helvetica", 'B', 12)
+                pdf.ln(2)
+                pdf.cell(0, 10, stripped[4:], new_x="LMARGIN", new_y="NEXT")
+                pdf.set_font("Helvetica", size=11)
+            
+            # Simple Table Handling (Basic support)
+            elif stripped.startswith('|'):
+                # FPDF simple table rendering is complex, falling back to monospaced text for tables for robustness in PDF
+                # or we could attempt to parse it. For now, monospaced is safer than crashing unless we implement full table logic.
+                pdf.set_font("Courier", size=9)
+                pdf.multi_cell(0, 5, line)
+                pdf.set_font("Helvetica", size=11)
+            
+            # Lists
+            elif stripped.startswith('- ') or stripped.startswith('* '):
+                pdf.set_x(15) # Indent
+                pdf.multi_cell(0, 6, chr(149) + " " + stripped[2:]) # Bullet char
+            
+            elif re.match(r'^\d+\. ', stripped):
+                 pdf.set_x(15) # Indent
+                 pdf.multi_cell(0, 6, stripped)
+
+            # Normal Text
+            else:
+                if stripped:
+                    pdf.multi_cell(0, 6, stripped)
+                    pdf.ln(1)
+
         output = bytes(pdf.output())
         print(f"DEBUG: PDF generation success, bytes: {len(output)}")
         return output
 
     except Exception as e:
         print(f"❌ Pure Python PDF Error: {e}")
-        # Ultimate fallback: Text
+        # Fallback to Text
         from fpdf import FPDF
         pdf = FPDF()
         pdf.add_page()
-        pdf.set_font("Arial", size=12)
+        pdf.set_font("Helvetica", size=12)
         safe_text = md_text.encode('latin-1', 'replace').decode('latin-1')
         pdf.multi_cell(0, 10, safe_text)
         return bytes(pdf.output())
