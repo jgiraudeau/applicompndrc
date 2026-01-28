@@ -16,6 +16,20 @@ from fastapi import Depends
 
 router = APIRouter()
 
+@router.get("/test")
+async def test_export_env():
+    try:
+        import fpdf
+        import docx
+        return {
+            "status": "ok", 
+            "message": "Environment is healthy",
+            "fpdf_version": getattr(fpdf, '__version__', 'unknown'),
+            "docx_version": getattr(docx, '__version__', 'unknown')
+        }
+    except Exception as e:
+        return {"status": "error", "detail": f"Dependency missing: {str(e)}"}
+
 class ExportRequest(BaseModel):
     content: str
     filename: Optional[str] = "document"
