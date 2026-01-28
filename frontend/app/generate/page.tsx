@@ -77,6 +77,7 @@ export default function GeneratePage() {
     const [shareCode, setShareCode] = useState<string | null>(null);
     const [isPublishing, setIsPublishing] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const [suggestedFilename, setSuggestedFilename] = useState<string | null>(null); // New state
 
     // Google Classroom State
     const { data: session }: any = useSession();
@@ -318,6 +319,7 @@ export default function GeneratePage() {
 
             const data = await response.json();
             setGeneratedContent(data.content);
+            setSuggestedFilename(data.filename || null); // Store filename
             setLogId(data.log_id);
             setShareCode(null);
             // Switch to result tab on mobile after generation
@@ -380,7 +382,9 @@ export default function GeneratePage() {
                 },
                 body: JSON.stringify({
                     content: generatedContent,
-                    filename: `${topic.replace(/\s+/g, '_')}_${docType}`
+                    filename: suggestedFilename
+                        ? `${suggestedFilename}_${docType}`
+                        : `${topic.slice(0, 30).replace(/\s+/g, '_')}_${docType}` // Fallback truncated to 30 chars
                 }),
             });
 
@@ -398,7 +402,12 @@ export default function GeneratePage() {
             const a = document.createElement("a");
             a.style.display = "none";
             a.href = url;
-            a.download = `${topic.replace(/\s+/g, '_')}_${docType}_export.${extension}`;
+            // Use same filename logic for download attribute
+            const safeName = suggestedFilename
+                ? `${suggestedFilename}_${docType}`
+                : `${topic.slice(0, 30).replace(/\s+/g, '_')}_${docType}`;
+
+            a.download = `${safeName}_export.${extension}`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);

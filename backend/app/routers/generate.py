@@ -387,10 +387,12 @@ class GenerateResponse(BaseModel):
     content: str
     document_type: str
     log_id: Optional[int] = None
+    filename: Optional[str] = None # Added field
 
 from backend.app.auth import get_current_user
 from backend.app.models import User
 from backend.app.services.usage_service import check_and_increment_usage
+import re
 
 @router.post("/course", response_model=GenerateResponse)
 async def generate_document(request: GenerateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
@@ -421,6 +423,7 @@ async def generate_document(request: GenerateRequest, db: Session = Depends(get_
             user_prompt += f"**Bloc ciblé** : {request.target_block}\\n"
 
         user_prompt += f"\\nUtilise le référentiel BTS {track} et les synthèses de cours disponibles."
+        user_prompt += "\\n\\nIMPORTANT : La première ligne de ta réponse doit être un commentaire HTML caché contenant un nom de fichier court et simplifié (max 30 chars, pas d'espace, pas d'accents, use des underscores) basé sur le nom de l'entreprise ou le sujet principal. Format : `<!-- FILENAME: Nom_Entreprise_Court -->`."
 
         # Pass track to get_model to ensure correct regulatory grounding
         model = gemini_service.get_model(custom_system_instruction=system_prompt, track=track)
@@ -443,6 +446,18 @@ async def generate_document(request: GenerateRequest, db: Session = Depends(get_
         
         response = model.generate_content(content_parts)
         
+        # Extract Filename and Clean Content
+        full_text = response.text
+        filename = None
+        
+        # Regex to find <!-- FILENAME: ... -->
+        match = re.search(r"<!--\s*FILENAME:\s*(.*?)\s*-->", full_text)
+        if match:
+            filename = match.group(1).strip()
+            # Remove the line from content to avoid showing it
+            full_text = full_text.replace(match.group(0), "").strip()
+            
+        
         # Log activity
         try:
             new_log = ActivityLog(
@@ -462,9 +477,10 @@ async def generate_document(request: GenerateRequest, db: Session = Depends(get_
             log_id = None
 
         return GenerateResponse(
-            content=response.text, 
+            content=full_text, 
             document_type=request.document_type,
-            log_id=log_id
+            log_id=log_id,
+            filename=filename
         )
     
     except Exception as e:
