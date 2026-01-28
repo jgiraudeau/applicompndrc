@@ -25,6 +25,7 @@ def md_to_pdf(md_text):
     Converts Markdown to PDF using FPDF2's HTML engine.
     Pure Python, no external dependencies.
     """
+    print(f"DEBUG: Starting PDF generation... Content len: {len(md_text)}")
     try:
         from fpdf import FPDF, HTMLMixin
         import markdown
@@ -33,19 +34,29 @@ def md_to_pdf(md_text):
             pass
 
         # 1. Convert Markdown -> HTML
-        # We replace specific chars that might break latin-1 if no unicode font is loaded
-        # But FPDF2 is decent. Let's try direct conversion.
-        html_body = markdown.markdown(md_text, extensions=['tables', 'fenced_code', 'nl2br'])
-        
+        try:
+            html_body = markdown.markdown(md_text, extensions=['tables', 'fenced_code', 'nl2br'])
+            print("DEBUG: HTML conversion done.")
+        except Exception as e:
+            print(f"ERROR: Markdown conversion failed: {e}")
+            raise e
+
         # 2. Setup PDF
         pdf = PDF()
         pdf.add_page()
         
         # 3. Add Content
-        # write_html handles tables reasonably well for a lightweight tool
-        pdf.write_html(html_body)
+        try:
+            pdf.write_html(html_body)
+        except Exception as e:
+             print(f"ERROR: FPDF write_html failed: {e}")
+             # Fallback to simple text
+             pdf.set_font("Arial", size=10)
+             pdf.multi_cell(0, 10, md_text)
         
-        return bytes(pdf.output())
+        output = bytes(pdf.output())
+        print(f"DEBUG: PDF generation success, bytes: {len(output)}")
+        return output
 
     except Exception as e:
         print(f"❌ Pure Python PDF Error: {e}")
@@ -63,6 +74,7 @@ def md_to_docx(md_text):
     Converts Markdown to DOCX using pure python-docx with manual Table parsing.
     Removes need for Pandoc/System dependencies.
     """
+    print(f"DEBUG: Starting DOCX generation... Content len: {len(md_text)}")
     try:
         doc = Document()
         
@@ -82,37 +94,10 @@ def md_to_docx(md_text):
             # 1. Detect Tables
             if stripped.startswith('|'):
                 # It's a table row!
-                # Collect all table lines
-                table_lines = [stripped]
-                
-                # Peek ahead
-                # We need to handle the loop manually or consume the iterator
-                # Simplified: Just gather lines until not starting with |
-                # Note: This simple loop might be tricky with the main iterator.
-                # Let's revert to a simpler line-by-line check or buffers.
-                # For robustness in this constrained edit, we'll treat it as paragraph if complex,
-                # BUT let's try to grab the next lines if possible.
-                # IMPLEMENTATION CHOICE: Python-docx table building is verbose.
-                # Fallback to simple paragraph for now to ensure STABILITY, 
-                # unless we are sure about the structure.
-                # User wants TABLE support.
-                
-                # Let's try a heuristic:
-                # If we see |, split by |.
-                row_data = [c.strip() for c in stripped.split('|') if c.strip()]
-                # If it looks like a separator header |---|---|, skip
                 if set(stripped.replace('|', '').replace('-', '').replace(':', '').strip()) == set():
+                    # Skip separator line |---|
                     continue
 
-                # Hack: Add a small table for THIS row? No, that's ugly.
-                # Better: Add a tab-separated paragraph?
-                # Best: Add a real table row to a 'current_table' if one exists?
-                
-                # REWRITE STRATEGY: 
-                # We can't easily state-machine this in a quick function replacement without risk.
-                # We will fall back to "Code Block" style for tables to preserve alignment visually?
-                # Or just put it in a monospaced paragraph.
-                
                 p = doc.add_paragraph()
                 p.style = 'No Spacing' # Compact
                 runner = p.add_run(stripped)
@@ -141,7 +126,9 @@ def md_to_docx(md_text):
 
         result = io.BytesIO()
         doc.save(result)
-        return result.getvalue()
+        docx_bytes = result.getvalue()
+        print(f"DEBUG: DOCX generation success, bytes: {len(docx_bytes)}")
+        return docx_bytes
 
     except Exception as e:
         print(f"❌ Pure Python DOCX Error: {e}")
