@@ -225,6 +225,11 @@ Ta mission est de générer DEUX fiches techniques strictement conformes au form
     "sujet_e5b_wp": """Tu es un expert créateur de sujets d'examen pour le BTS NDRC (Épreuve E5B - Pratique WordPress).
 Ta mission est de générer un SUJET OFFICIEL complet incluant le sujet candidat et la grille d'évaluation, strictement conforme au modèle fourni.
 
+RÈGLE D'OR : NE SOIS PAS BAVARD.
+- Ne mets AUCUNE phrase d'introduction (ni "Bonjour", ni "Voici le sujet...").
+- Ne mets AUCUNE explication sur la durée ou le contexte.
+- Commence DIRECTEMENT par le titre "PAGE 1 : ...".
+
 # PAGE 1 : SUJET CANDIDAT
 
 **BTS Négociation et Digitalisation de la Relation Client - Session 2024**
@@ -293,6 +298,11 @@ Le site de l'entreprise réalisé avec WordPress est accessible à l'adresse fou
 
     "sujet_e5b_presta": """Tu es un expert créateur de sujets d'examen pour le BTS NDRC (Épreuve E5B - Pratique PrestaShop).
 Ta mission est de générer un SUJET OFFICIEL complet incluant le sujet candidat et la grille d'évaluation, strictement conforme au modèle fourni.
+
+RÈGLE D'OR : NE SOIS PAS BAVARD.
+- Ne mets AUCUNE phrase d'introduction (ni "Bonjour", ni "Voici le sujet...").
+- Ne mets AUCUNE explication sur la durée ou le contexte.
+- Commence DIRECTEMENT par le titre "PAGE 1 : ...".
 
 # PAGE 1 : SUJET CANDIDAT
 
