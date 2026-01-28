@@ -23,87 +23,48 @@ class ExportRequest(BaseModel):
 def md_to_pdf(md_text):
     """
     Converts Markdown to PDF using Pypandoc (to HTML) -> WeasyPrint (to PDF).
-    This ensures high-quality rendering of Tables and CSS styling.
+    Fallback to FPDF if dependencies are missing.
     """
     try:
         import pypandoc
         from weasyprint import HTML, CSS
-    except ImportError as e:
-        print(f"❌ Missing dependencies for PDF export: {e}")
-        # Fallback simplistic text PDF if strictly necessary, but better to fail hard so we fix env.
-        raise HTTPException(status_code=500, detail="Configuration serveur incomplète (WeasyPrint/Pandoc manquant).")
+        
+        # 1. Convert Markdown -> HTML
+        try:
+            html_body = pypandoc.convert_text(md_text, 'html', format='markdown', extra_args=['--table-of-contents'])
+        except:
+            import markdown
+            html_body = markdown.markdown(md_text, extensions=['tables'])
 
-    # 1. Convert Markdown -> HTML
-    # We add some markdown extensions for tables if using 'markdown' lib, 
-    # but pypandoc handles GFM tables out of the box usually.
-    try:
-        html_body = pypandoc.convert_text(md_text, 'html', format='markdown', extra_args=['--table-of-contents'])
+        # 2. CSS
+        css_string = """
+        @page { size: A4; margin: 20mm; }
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 11pt; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background-color: #f2f2f2; font-weight: bold; }
+        """
+
+        # 3. Generate
+        return HTML(string=html_body).write_pdf(stylesheets=[CSS(string=css_string)])
+
     except Exception as e:
-        # Fallback if pypandoc fails (e.g. pandoc missing)
-        print(f"⚠️ Pypandoc failed, falling back to 'markdown' lib: {e}")
-        import markdown
-        html_body = markdown.markdown(md_text, extensions=['tables', 'fenced_code'])
+        print(f"⚠️ WeasyPrint/Pandoc Failed: {e}. Falling back to FPDF.")
+        from fpdf import FPDF
+        
+        class SimplePDF(FPDF):
+            def footer(self):
+                self.set_y(-15)
+                self.set_font('Arial', 'I', 8)
+                self.cell(0, 10, 'Page ' + str(self.page_no()), 0, 0, 'C')
 
-    # 2. Add minimal CSS for professional rendering
-    css_string = """
-    @page {
-        size: A4;
-        margin: 20mm;
-    }
-    body {
-        font-family: Helvetica, Arial, sans-serif;
-        font-size: 11pt;
-        line-height: 1.5;
-        color: #333;
-    }
-    h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px; margin-top: 0; }
-    h2 { color: #2980b9; margin-top: 20px; border-bottom: 1px solid #eee; }
-    h3 { color: #34495e; margin-top: 15px; }
-    
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 15px;
-        margin-bottom: 15px;
-    }
-    th, td {
-        border: 1px solid #bdc3c7;
-        padding: 8px;
-        text-align: left;
-    }
-    th {
-        background-color: #ecf0f1;
-        font-weight: bold;
-    }
-    tr:nth-child(even) { background-color: #f9f9f9; }
-    
-    blockquote {
-        background: #f9f9f9;
-        border-left: 5px solid #ccc;
-        margin: 1.5em 10px;
-        padding: 0.5em 10px;
-        font-style: italic;
-    }
-    code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; font-family: courier; }
-    ul, ol { padding-left: 20px; }
-    """
-
-    # 3. Assemble full HTML
-    full_html = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="utf-8">
-    </head>
-    <body>
-        {html_body}
-    </body>
-    </html>
-    """
-
-    # 4. Generate PDF
-    pdf_bytes = HTML(string=full_html).write_pdf(stylesheets=[CSS(string=css_string)])
-    return pdf_bytes
+        pdf = SimplePDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        # Latin-1 encoding fix
+        text = md_text.encode('latin-1', 'replace').decode('latin-1')
+        pdf.multi_cell(0, 10, text)
+        return bytes(pdf.output())
 
 def md_to_docx(md_text):
     """
@@ -138,21 +99,28 @@ def md_to_docx(md_text):
 
         return docx_bytes
 
-    except OSError:
-        # Fallback if Pandoc is not installed on the system
-        print("⚠️ Pandoc not found. Falling back to simple text dump.")
-        doc = Document()
-        doc.add_paragraph("ERREUR : Pandoc n'est pas installé sur le serveur.")
-        doc.add_paragraph("Veuillez installer Pandoc pour un export propre des tableaux.")
-        doc.add_paragraph("-" * 20)
-        doc.add_paragraph(md_text)
-        
-        result = io.BytesIO()
-        doc.save(result)
-        return result.getvalue()
     except Exception as e:
-        print(f"❌ Pandoc Conversion Error: {e}")
-        raise e
+        # Catch ALL errors (OSError, ImportError, etc.)
+        print(f"⚠️ Pandoc Conversion FAILED: {e}")
+        print("🔄 Falling back to basic python-docx generation...")
+        
+        try:
+            doc = Document()
+            doc.add_heading("NOTE: Export Basique (Serveur en cours de configuration)", level=0)
+            doc.add_paragraph("L'export avancé (tableaux) a échoué. Voici le contenu brut :")
+            doc.add_paragraph("-" * 20)
+            
+            # Basic Dump
+            lines = md_text.split('\n')
+            for line in lines:
+                doc.add_paragraph(line)
+            
+            result = io.BytesIO()
+            doc.save(result)
+            return result.getvalue()
+        except Exception as e2:
+             print(f"❌ Critical Export Error: {e2}")
+             raise e2
 
 @router.post("/pdf")
 async def export_pdf(request: ExportRequest, current_user: User = Depends(get_current_user)):
