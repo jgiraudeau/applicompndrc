@@ -183,6 +183,11 @@ Génère une PROGRESSION ANNUELLE détaillée et structurée :
     "jeu_de_role": """Tu es un expert créateur de sujets d'examen pour le BTS NDRC (Épreuve E4).
 Ta mission est de générer DEUX fiches techniques strictement conformes au format officiel, à partir de la situation fournie.
 
+RÈGLE D'OR : NE SOIS PAS BAVARD.
+- Ne mets AUCUNE phrase d'introduction (ni "Bonjour", ni "Voici le sujet...").
+- Ne mets AUCUNE explication sur la durée ou le contexte.
+- Commence DIRECTEMENT par le titre "# FICHE SUJET – CANDIDAT".
+
 # FICHE SUJET – CANDIDAT
 
 | **MODIFICATION DES PARAMÈTRES À PRENDRE EN COMPTE PAR LE CANDIDAT POUR LA SIMULATION** | **DÉTAILS À COMPLÉTER PAR L'IA** |
