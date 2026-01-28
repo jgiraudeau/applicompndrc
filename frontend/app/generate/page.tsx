@@ -482,7 +482,10 @@ export default function GeneratePage() {
                     <div>
                         <label className="text-sm font-medium text-slate-700 mb-2 block">Type de document</label>
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                            {DOCUMENT_TYPES.map((type) => {
+                            {DOCUMENT_TYPES.filter(type => {
+                                const isNDRCSpecific = ["jeu_de_role", "sujet_e5b_wp", "sujet_e5b_presta"].includes(type.id);
+                                return currentTrack === "NDRC" || !isNDRCSpecific;
+                            }).map((type) => {
                                 const Icon = type.icon;
                                 const isSelected = docType === type.id;
                                 return (
