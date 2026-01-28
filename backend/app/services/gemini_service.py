@@ -127,30 +127,45 @@ class GeminiService:
         return self._model_name
 
     def _find_best_model(self):
-        """Auto-detects the best available model, preferring Flash."""
+        """Auto-detects the best available model, preferring latest Flash versions."""
         try:
-            # New SDK uses client.models.list() which returns iterables of model objects
-            # Assuming model object has .name attribute
-            models = list(self.client.models.list())
-            available = [m.name for m in models if "generateContent" in (m.supported_generation_methods or [])]
+            # New SDK returns iterables of model objects. 
+            # We list them all to filter by name.
+            all_models = list(self.client.models.list())
+            available_names = [m.name for m in all_models]
             
-            # Since names in new SDK might be 'models/gemini-1.5-flash', we filter string containment
-            if not available:
-                # Fallback if supported_generation_methods is empty or not present in some versions
-                available = [m.name for m in models]
+            print(f"DEBUG: Found {len(available_names)} models.")
+            
+            # Priority List (Newest to Oldest)
+            priorities = [
+                "gemini-2.5-flash", 
+                "gemini-2.0-flash", 
+                "gemini-1.5-flash",
+                "gemini-flash"
+            ]
 
-            best = next((m for m in available if "flash" in m), None)
-            if not best:
-                best = next((m for m in available if "1.5" in m), available[0] if available else None)
+            best = None
+            for p in priorities:
+                # Check for exact match or models/match
+                match = next((name for name in available_names if name.endswith(p)), None)
+                if match:
+                    best = match
+                    break
             
-            # Clean up 'models/' prefix if present for uniformity, though new SDK usually handles both
-            if best and best.startswith("models/"):
-                 best = best.replace("models/", "")
-                 
-            return best or "gemini-1.5-flash"
+            if not best:
+                # Fallback: any flash
+                best = next((name for name in available_names if "flash" in name), None)
+            
+            if not best:
+                # Fallback: any 2.0 or 1.5
+                best = next((name for name in available_names if "2.0" in name or "1.5" in name), available_names[0] if available_names else "gemini-2.0-flash")
+
+            # Clean prefix if present, purely for clean logs, but keep consistent for usage
+            # The SDK usually accepts both. Let's return the full name if it came from the list.
+            return best
         except Exception as e:
-            # Re-raise to be caught by the property
-            raise e
+            print(f"⚠️ Model detection failed ({e}). Fallback to gemini-2.0-flash.")
+            return "gemini-2.0-flash"
 
     def get_model(self, custom_system_instruction: str = "", track: str = "NDRC"):
         """Returns a LegacyCompatibleModel with regulatory grounding and custom instructions."""
