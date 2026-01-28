@@ -20,72 +20,90 @@ class ExportRequest(BaseModel):
     content: str
     filename: Optional[str] = "document"
 
-class PDFGenerator(FPDF):
-    def __init__(self):
-        super().__init__()
-        # 25mm left, 20mm top, 25mm right
-        self.set_margins(25, 20, 25)
-        self.set_auto_page_break(auto=True, margin=20)
-        self.add_page()
-        self.usable_width = self.w - self.l_margin - self.r_margin
-
-    def clean_text(self, text):
-        # fpdf2 standard fonts only support latin-1
-        # Replacing common problematic chars
-        return text.replace('•', '*').replace('…', '...').replace('—', '-').encode('latin-1', 'replace').decode('latin-1')
-
-    def add_md_content(self, md_text):
-        lines = md_text.split('\n')
-        for line in lines:
-            stripped = line.strip()
-            if not stripped:
-                self.ln(5)
-                continue
-                
-            clean_line = self.clean_text(stripped)
-            
-            if stripped.startswith('# '):
-                self.set_font("Helvetica", 'B', 18)
-                self.set_text_color(44, 62, 80)
-                self.ln(10)
-                self.multi_cell(self.usable_width, 10, clean_line[2:], align='C')
-                self.ln(5)
-                # Bottom border
-                curr_y = self.get_y()
-                self.set_draw_color(52, 152, 219)
-                self.line(self.l_margin, curr_y, self.w - self.r_margin, curr_y)
-                self.ln(5)
-            elif stripped.startswith('## '):
-                self.set_font("Helvetica", 'B', 15)
-                self.set_text_color(41, 128, 185)
-                self.ln(5)
-                self.multi_cell(self.usable_width, 8, clean_line[3:])
-                self.ln(2)
-            elif stripped.startswith('### '):
-                self.set_font("Helvetica", 'B', 13)
-                self.set_text_color(52, 73, 94)
-                self.ln(3)
-                self.multi_cell(self.usable_width, 7, clean_line[4:])
-            elif stripped.startswith('- ') or stripped.startswith('* '):
-                self.set_font("Helvetica", '', 11)
-                self.set_text_color(0, 0, 0)
-                self.set_x(self.l_margin + 5)
-                self.multi_cell(self.usable_width - 5, 6, f"* {clean_line[2:]}")
-            elif re.match(r'^\d+\. ', stripped):
-                self.set_font("Helvetica", '', 11)
-                self.set_text_color(0, 0, 0)
-                self.set_x(self.l_margin + 5)
-                self.multi_cell(self.usable_width - 5, 6, clean_line)
-            else:
-                self.set_font("Helvetica", '', 11)
-                self.set_text_color(0, 0, 0)
-                self.multi_cell(self.usable_width, 6, clean_line)
-
 def md_to_pdf(md_text):
-    pdf = PDFGenerator()
-    pdf.add_md_content(md_text)
-    # output() returns bytes/bytearray in fpdf2
-    return bytes(pdf.output())
+    """
+    Converts Markdown to PDF using Pypandoc (to HTML) -> WeasyPrint (to PDF).
+    This ensures high-quality rendering of Tables and CSS styling.
+    """
+    try:
+        import pypandoc
+        from weasyprint import HTML, CSS
+    except ImportError as e:
+        print(f"❌ Missing dependencies for PDF export: {e}")
+        # Fallback simplistic text PDF if strictly necessary, but better to fail hard so we fix env.
+        raise HTTPException(status_code=500, detail="Configuration serveur incomplète (WeasyPrint/Pandoc manquant).")
+
+    # 1. Convert Markdown -> HTML
+    # We add some markdown extensions for tables if using 'markdown' lib, 
+    # but pypandoc handles GFM tables out of the box usually.
+    try:
+        html_body = pypandoc.convert_text(md_text, 'html', format='markdown', extra_args=['--table-of-contents'])
+    except Exception as e:
+        # Fallback if pypandoc fails (e.g. pandoc missing)
+        print(f"⚠️ Pypandoc failed, falling back to 'markdown' lib: {e}")
+        import markdown
+        html_body = markdown.markdown(md_text, extensions=['tables', 'fenced_code'])
+
+    # 2. Add minimal CSS for professional rendering
+    css_string = """
+    @page {
+        size: A4;
+        margin: 20mm;
+    }
+    body {
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 11pt;
+        line-height: 1.5;
+        color: #333;
+    }
+    h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px; margin-top: 0; }
+    h2 { color: #2980b9; margin-top: 20px; border-bottom: 1px solid #eee; }
+    h3 { color: #34495e; margin-top: 15px; }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
+    th, td {
+        border: 1px solid #bdc3c7;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #ecf0f1;
+        font-weight: bold;
+    }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+    
+    blockquote {
+        background: #f9f9f9;
+        border-left: 5px solid #ccc;
+        margin: 1.5em 10px;
+        padding: 0.5em 10px;
+        font-style: italic;
+    }
+    code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; font-family: courier; }
+    ul, ol { padding-left: 20px; }
+    """
+
+    # 3. Assemble full HTML
+    full_html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        {html_body}
+    </body>
+    </html>
+    """
+
+    # 4. Generate PDF
+    pdf_bytes = HTML(string=full_html).write_pdf(stylesheets=[CSS(string=css_string)])
+    return pdf_bytes
 
 def md_to_docx(md_text):
     """
