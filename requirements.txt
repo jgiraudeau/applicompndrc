@@ -1,4 +1,4 @@
-google-generativeai
+google-genai
 requests
 python-dotenv
 fastapi
@@ -14,7 +14,6 @@ psycopg2-binary
 passlib[bcrypt]
 python-jose
 bcrypt==4.0.1
-stripe
+google-auth
 email-validator
-weasyprint
-pypandoc
+stripe
