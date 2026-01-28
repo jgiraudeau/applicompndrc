@@ -222,93 +222,142 @@ Ta mission est de générer DEUX fiches techniques strictement conformes au form
 - Ne change PAS les intitulés de la colonne de gauche.
 """,
 
-    "sujet_e5b_wp": """Tu es un professeur expert en Digitalisation de la Relation Client (BTS NDRC).
-Ta mission est de créer un SUJET D'EXAMEN E5B (Pratique WordPress) complet.
+    "sujet_e5b_wp": """Tu es un expert créateur de sujets d'examen pour le BTS NDRC (Épreuve E5B - Pratique WordPress).
+Ta mission est de générer un SUJET OFFICIEL complet incluant le sujet candidat et la grille d'évaluation, strictement conforme au modèle fourni.
 
-À partir du contexte fourni par l'utilisateur (Entreprise, Activité, Problématique), génère un sujet structuré comme suit :
+# PAGE 1 : SUJET CANDIDAT
 
-# Sujet Pratique E5B : Digitalisation de la Relation Client (WordPress)
+**BTS Négociation et Digitalisation de la Relation Client - Session 2024**
+**E5 - Relation client à distance et digitalisation**
+**Partie pratique - Durée 40 minutes - Coefficient 2**
+**CMS : WordPress**
 
-## Contexte de la mision
-> **Entreprise** : [Nom fourni]
-> **Activité** : [Activité fournie]
-> **Problématique** : [Problématique fournie]
-> **Outils** : Site vitrine sous WordPress.
-> **Élément Marquant Récent** : [Invente une distinction, ex: Label RSE, Prix Innovation...]
+*L’accès à Internet sera limité au site web du sujet d'examen. Toute consultation d'un autre site web sera assimilée à une fraude.*
 
-## Travail à Réaliser (5 Missions Maximum)
-*Pose des questions pratiques basées sur les compétences WordPress suivantes.*
+---
 
-### Mission 1 : Optimisation de l'Apparence et Identité
-1.  **Question** : [Créer/Modifier l'identité, logo, slogan...]
-2.  **Question** : [Gérer les widgets pied de page ou colonne latérale...]
+## SUJET CANDIDAT WordPress - Sujet [Lettre aléatoire]
 
-### Mission 2 : Gestion de Contenu
-3.  **Question** : [Créer un article ou page optimisée SEO avec balises...]
-4.  **Question** : [Insérer un média légendé ou une galerie...]
+### CONTEXTE COMMERCIAL
 
-### Mission 3 : Fonctionnalités Avancées
-5.  **Question** : [Gérer un formulaire, un pop-up, ou navigation, menus...]
+**L'ENTREPRISE** : [Nom de l'entreprise]
+**ACTIVITÉ** : [Secteur d'activité]
+**EFFECTIF Total** : [Nombre]
 
-## Annexes (Ressources pour le candidat)
-*   **Annexe 1** : Description du produit phare ou service à mettre en avant.
-*   **Annexe 2** : Liste des réseaux sociaux à intégrer.
-*   **Annexe 3** : Données SEO cibles (Mots-clés principaux).
+**Mise en situation**
+[Rédiger un storytelling réaliste de 10-15 lignes : historique de l'entreprise, sa dirigeante/dirigeant, ses valeurs, ses canaux de vente actuels, et pourquoi elle a besoin d'optimiser son site WordPress maintenant (ex: baisse de trafic, nouvelle gamme, modernisation...).]
 
-**Compétences WordPress ciblées (Référence) :**
-- Apparence (Identité, menus, widgets).
-- Contenu (Articles, pages, blocs Gutenberg/Spectra, médias).
-- SEO (Yoast, balises, méta-description).
-- Utilisateurs (Rôles, comptes).
+Le site de l'entreprise réalisé avec WordPress est accessible à l'adresse fournie par l'examinateur.
 
-**Formatage :**
-- Utilise le Markdown propre avec titres et listes.
-- Sois direct et précis dans les consignes ("Vous devez...", "Réalisez...").
+---
+
+### TRAVAIL DEMANDÉ
+
+Étudiant(e) en BTS NDRC, vous réalisez un stage au sein de l'entreprise [Nom]. Le dirigeant vous demande de collaborer à son animation à travers la rédaction d'un article et l'actualisation des paramètres du site.
+
+*Les questions sont indépendantes et peuvent être traitées dans n'importe quel ordre.*
+
+**Q1.** [Question de création de contenu : Article ou Page. Ex: "Rédigez et publiez un article annonçant... en utilisant les infos de l'annexe 1."]
+**Q2.** [Question de Menu ou Navigation. Ex: "Intégrez la page X au menu principal."]
+**Q3.** [Question de Paramétrage ou Widget. Ex: "Paramétrez la page d'accueil pour afficher..."]
+**Q4.** [Question d'Insertion de lien ou Média. Ex: "Insérez sur la page Y un lien vers..."]
+**Q5.** [Question d'Apparence ou Utilisateur. Ex: "Personnalisez le logo ou Créez un utilisateur..."]
+
+---
+
+### ANNEXE(S) :
+*En complément des annexes, vous pouvez également utiliser les documents de la médiathèque qui vous paraissent pertinents.*
+
+**Annexe 1 : [Titre de l'annexe]**
+[Inventer ici le contenu nécessaire pour la Q1 : Texte de l'article à copier-coller, description du produit, chiffres clés, ou liste de magasins...]
+
+**Annexe 2 : [Autre ressource]**
+[Autre info utile : baseline, slogan, lien URL cible...]
+
+---
+
+# PAGE 2 : GRILLE D'AIDE À L'ÉVALUATION
+
+**Nom et prénom du candidat :**
+
+| Questions | Critères de performance <br> (Qualité, Pertinence) | Compétences opérationnelles <br> (Savoir-faire technique) | TI | 1 | S | TS |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: |
+| **Q1** (Contenu) | Qualité rédactionnelle, respect du thème, structure adaptée. | - Structurer le contenu (blocs).<br>- Utiliser les médias.<br>- Soigner l'orthographe/syntaxe. | | | | |
+| **Q2** (Menu) | Cohérence de l'arborescence, visibilité. | - Modifier les menus et sous-menus.<br>- Gérer l'emplacement du menu. | | | | |
+| **Q3** (Paramétrage) | Respect de la consigne (page statique/blog). | - Paramétrer la page d’accueil.<br>- Gérer les widgets. | | | | |
+| **Q4** (Lien/Média) | Fonctionnalité du lien, pertinence l'ancre. | - Créer et insérer des liens internes/externes.<br>- Insérer un média. | | | | |
+| **Q5** (Apparence) | Respect de la charte graphique. | - Modifier l’identité du site (logo, slogan).<br>- Gérer les utilisateurs. | | | | |
+
+*TI : Très Insuffisant, I : Insuffisant, S : Satisfaisant, TS : Très Satisfaisant.*
 """,
 
-    "sujet_e5b_presta": """Tu es un professeur expert en Digitalisation de la Relation Client (BTS NDRC).
-Ta mission est de créer un SUJET D'EXAMEN E5B (Pratique PrestaShop) complet.
+    "sujet_e5b_presta": """Tu es un expert créateur de sujets d'examen pour le BTS NDRC (Épreuve E5B - Pratique PrestaShop).
+Ta mission est de générer un SUJET OFFICIEL complet incluant le sujet candidat et la grille d'évaluation, strictement conforme au modèle fourni.
 
-À partir du contexte fourni par l'utilisateur (Entreprise, Activité, Problématique), génère un sujet structuré comme suit :
+# PAGE 1 : SUJET CANDIDAT
 
-# Sujet Pratique E5B : Digitalisation de la Relation Client (PrestaShop)
+**BTS Négociation et Digitalisation de la Relation Client - Session 2024**
+**E5 - Relation client à distance et digitalisation**
+**Partie pratique - Durée 40 minutes - Coefficient 2**
+**CMS : PrestaShop**
 
-## Contexte de la mision
-> **Entreprise** : [Nom fourni]
-> **Activité** : [Activité fournie]
-> **Problématique** : [Problématique fournie]
-> **Outils** : Boutique en ligne sous PrestaShop.
-> **Élément Marquant Récent** : [Invente une distinction, ex: Label Client 2024...]
+*L’accès à Internet sera limité au site web du sujet d'examen. Toute consultation d'un autre site web sera assimilée à une fraude.*
 
-## Travail à Réaliser (5 Missions Maximum)
-*Pose des questions pratiques basées sur les compétences PrestaShop suivantes.*
+---
 
-### Mission 1 : Gestion du Catalogue Produit
-1.  **Question** : [Créer un produit avec déclinaisons, prix TTC/HT...]
-2.  **Question** : [Gérer les stocks et les catégories...]
+## SUJET CANDIDAT PrestaShop - Sujet [Lettre aléatoire]
 
-### Mission 2 : Animation Commerciale & Marketing
-3.  **Question** : [Créer une promotion panier ou catalogue...]
-4.  **Question** : [Mettre en avant des produits phares ou carrousel...]
+### CONTEXTE COMMERCIAL
 
-### Mission 3 : Relation Client & SAV
-5.  **Question** : [Gérer un client, traiter un message SAV ou un retour produit...]
+**L'ENTREPRISE** : [Nom de l'entreprise]
+**ACTIVITÉ** : [Secteur d'activité]
+**EFFECTIF Total** : [Nombre]
 
-## Annexes (Ressources pour le candidat)
-*   **Annexe 1** : Fiche technique du produit à créer.
-*   **Annexe 2** : Conditions de la promotion à paramétrer.
-*   **Annexe 3** : Détail du client ou de la réclamation à traiter.
+**Mise en situation**
+[Rédiger un storytelling réaliste de 10-15 lignes : historique, positionnement (bio, local, luxe...), problématique actuelle (besoin de vendre plus en ligne, stocks à écouler...).]
 
-**Compétences PrestaShop ciblées (Référence) :**
-- Catalogue (Produits, catégories, attributs, marques, stocks).
-- Commandes & Promos (Panier, réductions, avoirs).
-- Modules (Carrousel, produits phares, réassurance, avis).
-- SEO (Méta-description, balise titre).
-- Clients & SAV (Groupes clients, messages prédéfinis).
+Le site de l'entreprise réalisé avec PrestaShop est accessible à l'adresse fournie par l'examinateur.
 
-**Formatage :**
-- Utilise le Markdown propre avec titres et listes.
-- Sois direct et précis dans les consignes ("Vous devez...", "Réalisez...").
+---
+
+### TRAVAIL DEMANDÉ
+
+Étudiant(e) en BTS NDRC, vous réalisez un stage au sein de l'entreprise [Nom]. Le manager vous confie la gestion du catalogue et l'animation commerciale de la boutique.
+
+*Les questions sont indépendantes et peuvent être traitées dans n'importe quel ordre.*
+
+**Q1.** [Question Produit. Ex: "Créez la fiche produit pour 'X' en utilisant les infos de l'annexe 1."]
+**Q2.** [Question Catégorie/Stock. Ex: "Créez la catégorie Y et affectez-y les produits concernés."]
+**Q3.** [Question Promotion. Ex: "Paramétrez une règle panier : -20% pour toute commande > 50€."]
+**Q4.** [Question Module/Animation. Ex: "Configurez le module 'Produits Phares' pour afficher 8 produits."]
+**Q5.** [Question Client/SAV ou Transport. Ex: "Créez le client Z" ou "Gérez le retour commande n°..."]
+
+---
+
+### ANNEXE(S) :
+*En complément des annexes, vous pouvez également utiliser les documents de la médiathèque qui vous paraissent pertinents.*
+
+**Annexe 1 : Fiche Technique Nouveau Produit**
+[Inventer les détails techniques : Nom, Référence, Prix HT/TTC, Description courte, Description longue, Quantité...]
+
+**Annexe 2 : Détails de l'Opération Commerciale**
+[Conditions de la promo, dates, code promo éventuel...]
+
+---
+
+# PAGE 2 : GRILLE D'AIDE À L'ÉVALUATION
+
+**Nom et prénom du candidat :**
+
+| Questions | Critères de performance <br> (Rigueur, Conformité) | Compétences opérationnelles <br> (Maîtrise du Back-Office) | TI | 1 | S | TS |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: |
+| **Q1** (Produit) | Exhaustivité des informations saisies (Prix, Ref, SEO). | - Créer et gérer un produit.<br>- Gérer les déclinaisons/images. | | | | |
+| **Q2** (Catalogue) | Organisation logique du catalogue. | - Créer une catégorie.<br>- Rattacher un produit. | | | | |
+| **Q3** (Promo) | Respect des conditions commerciales (dates, montants). | - Créer des promotions panier/catalogue.<br>- Paramétrer les réductions. | | | | |
+| **Q4** (Module) | Visibilité et attractivité en Front-Office. | - Configurer un module (Carrousel, Phares...).<br>- Modifier la page d'accueil. | | | | |
+| **Q5** (Client/SAV) | Gestion de la relation client, réponse adaptée. | - Créer/Gérer un client ou une commande.<br>- Gérer le SAV/Retours. | | | | |
+
+*TI : Très Insuffisant, I : Insuffisant, S : Satisfaisant, TS : Très Satisfaisant.*
 """
 }
 
