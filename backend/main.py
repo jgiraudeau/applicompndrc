@@ -131,5 +131,6 @@ app.include_router(classroom.router, prefix="/api/classroom", tags=["classroom"]
 app.include_router(setup.router, prefix="/api/setup", tags=["setup"])  # ⚠️ TEMPORARY - Disable after first admin creation
 
 @app.get("/")
+@app.get("/")
 def read_root():
-    return {"status": "online", "message": "Bienvenue sur l'API du Professeur Virtuel"}
+    return {"status": "online", "message": "Bienvenue sur l'API du Professeur Virtuel [VERSION TEST DEBUG]"}
