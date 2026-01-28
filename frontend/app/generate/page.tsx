@@ -481,7 +481,7 @@ export default function GeneratePage() {
                     {/* Document Type Selector */}
                     <div>
                         <label className="text-sm font-medium text-slate-700 mb-2 block">Type de document</label>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
                             {DOCUMENT_TYPES.map((type) => {
                                 const Icon = type.icon;
                                 const isSelected = docType === type.id;
@@ -489,13 +489,13 @@ export default function GeneratePage() {
                                     <button
                                         key={type.id}
                                         onClick={() => setDocType(type.id)}
-                                        className={`p-3 rounded-lg border text-left transition-all ${isSelected
+                                        className={`p-3 rounded-lg border text-left transition-all active:scale-95 touch-manipulation min-h-[80px] flex flex-col justify-between ${isSelected
                                             ? `${type.color} border-2`
                                             : "bg-white border-slate-200 hover:border-slate-300"
                                             }`}
                                     >
                                         <Icon className={`w-5 h-5 mb-1 ${isSelected ? "" : "text-slate-400"}`} />
-                                        <div className={`text-xs font-medium ${isSelected ? "" : "text-slate-600"}`}>
+                                        <div className={`text-xs font-medium leading-tight ${isSelected ? "" : "text-slate-600"}`}>
                                             {type.label}
                                         </div>
                                     </button>
@@ -540,7 +540,7 @@ export default function GeneratePage() {
                     <Button
                         onClick={handleGenerate}
                         disabled={isLoading || !topic.trim()}
-                        className={`mt-4 ${selectedType.color.includes('blue') ? 'bg-blue-500 hover:bg-blue-600' :
+                        className={`mt-4 w-full min-h-[48px] active:scale-95 transition-transform touch-manipulation ${selectedType.color.includes('blue') ? 'bg-blue-500 hover:bg-blue-600' :
                             selectedType.color.includes('green') ? 'bg-green-500 hover:bg-green-600' :
                                 selectedType.color.includes('purple') ? 'bg-purple-500 hover:bg-purple-600' :
                                     selectedType.color.includes('indigo') ? 'bg-indigo-500 hover:bg-indigo-600' :
