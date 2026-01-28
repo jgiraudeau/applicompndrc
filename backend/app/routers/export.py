@@ -88,39 +88,53 @@ def md_to_pdf(md_text):
     return bytes(pdf.output())
 
 def md_to_docx(md_text):
-    doc = Document()
-    
-    # Standard margins (1 inch) are default, but let's ensure they are clean
-    sections = doc.sections
-    for section in sections:
-        section.top_margin = docx.shared.Inches(1)
-        section.bottom_margin = docx.shared.Inches(1)
-        section.left_margin = docx.shared.Inches(1)
-        section.right_margin = docx.shared.Inches(1)
-    
-    lines = md_text.split('\n')
-    for line in lines:
-        stripped = line.strip()
-        if not stripped:
-            continue
-            
-        if stripped.startswith('# '):
-            doc.add_heading(stripped[2:], level=0)
-        elif stripped.startswith('## '):
-            doc.add_heading(stripped[3:], level=1)
-        elif stripped.startswith('### '):
-            doc.add_heading(stripped[4:], level=2)
-        elif stripped.startswith('- ') or stripped.startswith('* '):
-            doc.add_paragraph(stripped[2:], style='List Bullet')
-        elif re.match(r'^\d+\. ', stripped):
-            space_idx = stripped.find(' ')
-            doc.add_paragraph(stripped[space_idx+1:], style='List Number')
-        else:
-            doc.add_paragraph(stripped)
-            
-    result = io.BytesIO()
-    doc.save(result)
-    return result.getvalue()
+    """
+    Converts Markdown to DOCX using Pandoc (via pypandoc).
+    This handles tables, headers, and complex formatting much better than manual parsing.
+    """
+    import pypandoc
+    import tempfile
+    import os
+
+    try:
+        # Create a temporary file for the output
+        with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as tmp_docx:
+            output_filename = tmp_docx.name
+
+        # Convert content
+        # extra_args=['--reference-doc=custom-reference.docx'] could be used later for styling
+        pypandoc.convert_text(
+            md_text, 
+            'docx', 
+            format='markdown', 
+            outputfile=output_filename,
+            extra_args=['--toc-depth=2'] # Optional cleanup args
+        )
+
+        # Read the file back as bytes
+        with open(output_filename, "rb") as f:
+            docx_bytes = f.read()
+
+        # Clean up
+        os.unlink(output_filename)
+
+        return docx_bytes
+
+    except OSError:
+        # Fallback if Pandoc is not installed on the system
+        print("⚠️ Pandoc not found. Falling back to simple text dump.")
+        doc = Document()
+        doc.add_paragraph("ERREUR : Pandoc n'est pas installé sur le serveur.")
+        doc.add_paragraph("Veuillez installer Pandoc pour un export propre des tableaux.")
+        doc.add_paragraph("-" * 20)
+        doc.add_paragraph(md_text)
+        
+        result = io.BytesIO()
+        doc.save(result)
+        return result.getvalue()
+    except Exception as e:
+        print(f"❌ Pandoc Conversion Error: {e}")
+        raise e
 
 @router.post("/pdf")
 async def export_pdf(request: ExportRequest, current_user: User = Depends(get_current_user)):
