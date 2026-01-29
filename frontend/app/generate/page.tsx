@@ -19,7 +19,8 @@ const DOCUMENT_TYPES = [
     { id: "evaluation", label: "Évaluation", icon: ClipboardCheck, color: "text-amber-600 bg-amber-50 border-amber-200" },
     { id: "quiz", label: "Quiz / QCM", icon: HelpCircle, color: "text-indigo-600 bg-indigo-50 border-indigo-200" },
     { id: "planning_annuel", label: "Planning Annuel", icon: Calendar, color: "text-emerald-600 bg-emerald-50 border-emerald-200" },
-    { id: "jeu_de_role", label: "Jeu de Rôle (E4)", icon: Users, color: "text-rose-600 bg-rose-50 border-rose-200" },
+    { id: "jeu_de_role", label: "Jeu de Rôle (E4 - Négociation)", icon: Users, color: "text-rose-600 bg-rose-50 border-rose-200" },
+    { id: "jeu_de_role_evenement", label: "Jeu de Rôle (E4 - Évènement)", icon: Sparkles, color: "text-orange-600 bg-orange-50 border-orange-200" },
     { id: "sujet_e5b_wp", label: "Sujet E5B (WordPress)", icon: Globe, color: "text-cyan-600 bg-cyan-50 border-cyan-200" },
     { id: "sujet_e5b_presta", label: "Sujet E5B (PrestaShop)", icon: ShoppingCart, color: "text-pink-600 bg-pink-50 border-pink-200" },
 ];

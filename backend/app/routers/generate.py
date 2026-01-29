@@ -245,6 +245,70 @@ RÈGLES D'OR :
 ---
 """,
 
+    "jeu_de_role_evenement": """Tu es un expert créateur de sujets d'examen certifiants pour le BTS NDRC (Épreuve E4).
+Ta mission est de générer les DEUX fiches (Candidat et Jury) pour une simulation d'Organisation et Animation d’un Évènement Commercial.
+Le format doit être STRICTEMENT celui des documents officiels.
+
+RÈGLES D'OR :
+1. AUCUN RÉCIT, AUCUNE PHRASE D'INTRO.
+2. Le document doit commencer immédiatement par l'entête du BTS.
+3. Remplis la colonne de droite avec des informations réalistes et contextuelles.
+4. IMPORTANT : Tu DOIS fournir des éléments chiffrés précis (Coûts location/traiteur/com, nombre de leads, taux de transformation, panier moyen...) pour permettre au candidat de calculer un budget ou un ROI, sans donner directement le Seuil de Rentabilité ou le Point Mort.
+5. Structure la situation pour couvrir l'AVANT (prépa), le PENDANT (animation), et l'APRÈS (bilan).
+
+---
+
+**BTS NÉGOCIATION ET DIGITALISATION DE LA RELATION CLIENT**
+**SESSION 2025**
+**E4 – RELATION CLIENT ET NEGOCIATION VENTE**
+
+**FICHE SUJET – nom du CANDIDAT :**
+
+☐ Négociation Vente et Accompagnement de la Relation Client
+☑ Organisation et Animation d’un Évènement commercial
+
+| **MODIFICATION DES PARAMÈTRES À PRENDRE EN COMPTE PAR LE CANDIDAT POUR LA SIMULATION** | **DÉTAILS DE LA SITUATION** |
+| :--- | :--- |
+| **Objet de l’activité** | [Type d'évènement : Portes Ouvertes, Salon, Petit-déjeuner pro, Lancement produit...] |
+| **Date(s) et durée** | [Dates réalistes] - Durée simulation : 20 min |
+| **Lieu** | [Lieu précis] |
+| **Délimitation de Séquence(s)** | [Couvrir AVANT - PENDANT - APRÈS ou focus spécifique selon le cas] |
+| **Acteur(s) concernés (statut/rôle)** | [M./Mme X, Manager ou Partenaire (Jury)] |
+| **Contexte de l'évènement** | [Pourquoi cet évènement ? Objectifs qualitatifs et quantitatifs visés] |
+| **Objectifs de la simulation** | [Ce que le candidat doit faire : Négocier le budget, Valider le plan de comm, Présenter le bilan...] |
+| **Données chiffrées à exploiter** | [LISTE PRÉCISE : Coûts fixes (salle, staff), Coûts variables (traiteur/pers), Objectifs de vente, Nb invités...] |
+| **Contrainte(s)** | [Budget réduit de 10%, Délai très court, Prestatire défaillant...] |
+
+---
+
+**PAGE 2**
+
+**BTS NÉGOCIATION ET DIGITALISATION DE LA RELATION CLIENT**
+**SESSION 2025**
+**E4 – RELATION CLIENT ET NEGOCIATION VENTE**
+
+**FICHE SUJET – nom du JURY**
+
+☐ Négociation Vente et Accompagnement de la Relation Client
+☑ Organisation et Animation d’un Évènement commercial
+
+| **MODIFICATION DES PARAMÈTRES À PRENDRE EN COMPTE PAR LE JURY POUR LA SIMULATION** | **DÉTAILS POUR LE JURY** |
+| :--- | :--- |
+| **Objet de l’activité** | [Idem Candidat] |
+| **Identité** | [Rôle exact du Jury : Manager,Directeur Financier, ou Partenaire] |
+| **Contexte Managérial** | [Attitude à adopter : Exigeant sur les chiffres, Inquiet sur le ROI, ou Enthousiaste mais prudent] |
+| **Date de la rencontre** | [Date] |
+| **Lieu** | [Lieu] |
+| **Historique / Situation** | [Rappel du contexte : Évènement récurrent ou Première édition ?] |
+| **Objectifs de la simulation** | [Mettre le candidat au défi sur la rentabilité ou l'organisation] |
+| **Consignes de jeu** | [Ex: Refuser le budget si ROI < 15%, Demander des justicatifs sur les coûts...] |
+| **Éléments de réponse attendus** | [Le candidat doit aborder : Coûts Totaux, Marge espérée, Nombre de clients à acquérir pour atteindre le Point Mort...] |
+| **Contrainte(s)** | [Imposer une réduction de budget de dernière minute] |
+| **Objections** | 1. "C'est trop cher pour un simple petit-déjeuner."<br>2. "Êtes-vous sûr de rentabiliser cet investissement ?"<br>3. "L'organisation me semble trop complexe pour notre petite équipe." |
+
+---
+""",
+
     "sujet_e5b_wp": """Tu es un expert créateur de sujets d'examen pour le BTS NDRC (Épreuve E5B - Pratique WordPress).
 Ta mission est de générer un SUJET OFFICIEL complet incluant le sujet candidat et la grille d'évaluation, strictement conforme au modèle fourni.
 
@@ -398,7 +462,7 @@ class GenerateRequest(BaseModel):
     topic: str
     duration_hours: Optional[int] = 4
     target_block: Optional[str] = None
-    document_type: Literal["dossier_prof", "dossier_eleve", "fiche_deroulement", "evaluation", "quiz", "planning_annuel", "jeu_de_role", "sujet_e5b_wp", "sujet_e5b_presta"] = "dossier_prof"
+    document_type: Literal["dossier_prof", "dossier_eleve", "fiche_deroulement", "evaluation", "quiz", "planning_annuel", "jeu_de_role", "jeu_de_role_evenement", "sujet_e5b_wp", "sujet_e5b_presta"] = "dossier_prof"
     category: Optional[str] = "NDRC"
 
 class GenerateResponse(BaseModel):
