@@ -20,7 +20,7 @@ interface Message {
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([
-    { role: "bot", content: "Bonjour ! Je suis Votre Assistant Professeur. Je connais tout le contenu du BTS NDRC. Comment puis-je vous aider aujourd'hui ?" }
+    { role: "bot", content: "Bonjour ! Je suis votre Assistant Pédagogique BTS Tertiaires, je vous aide à adapter vos contenus aux programmes et aux profils de vos étudiants. Sur quel sujet souhaitez-vous travailler ?" }
   ]);
   const [input, setInput] = useState("");
   // Persistent state for the active file context

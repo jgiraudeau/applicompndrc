@@ -116,7 +116,8 @@ function OnboardingContent() {
                 });
 
                 if (res.ok) {
-                    setStep("confirmation");
+                    // Auto-activation successful -> Redirect to Dashboard
+                    window.location.href = "/dashboard";
                 } else {
                     alert("Une erreur est survenue. Veuillez réessayer.");
                 }

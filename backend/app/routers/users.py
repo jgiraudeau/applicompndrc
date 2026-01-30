@@ -20,9 +20,11 @@ def update_user_plan(
         raise HTTPException(status_code=400, detail="Invalid plan selection")
     
     current_user.plan_selection = plan_update.plan
-    # We keep status as PENDING until admin approves, but this marks the onboarding step as "done" from user side?
-    # Maybe we don't need to change status, just save the plan.
-    # The Admin will see the selected plan in the "Demandes" tab.
     
+    # Auto-activate if Trial is selected
+    if plan_update.plan == "trial":
+        current_user.status = models.UserStatus.ACTIVE
+        current_user.is_active = True
+
     db.commit()
-    return {"message": "Plan updated", "plan": current_user.plan_selection}
+    return {"message": "Plan updated", "plan": current_user.plan_selection, "status": current_user.status}
