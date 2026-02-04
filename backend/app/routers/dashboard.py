@@ -8,9 +8,7 @@ from datetime import datetime, timedelta
 
 router = APIRouter(tags=["dashboard"])
 
-FREE_GENERATION_LIMIT = 5
-FREE_CHAT_LIMIT = 15
-TRIAL_DAYS = 15
+from backend.app.services.usage_service import FREE_GENERATION_LIMIT, FREE_CHAT_LIMIT, FREE_TRIAL_DAYS as TRIAL_DAYS
 
 @router.get("/stats")
 async def get_stats(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
