@@ -4,9 +4,9 @@ from datetime import datetime, timedelta
 from .. import models
 
 # LIMITS
-FREE_GENERATION_LIMIT = 5
-FREE_CHAT_LIMIT = 15
-FREE_TRIAL_DAYS = 15
+FREE_GENERATION_LIMIT = 100
+FREE_CHAT_LIMIT = 200
+FREE_TRIAL_DAYS = 90
 
 def check_and_increment_usage(db, user: models.User, action_type: str):
     """
