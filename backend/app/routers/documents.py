@@ -1,9 +1,9 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from sqlalchemy.orm import Session
-from backend.app.services.gemini_service import gemini_service
-from backend.app.database import get_db
-from backend.app.auth import get_current_active_user
-from backend.app.models import User, SavedDocument
+from ..services.gemini_service import gemini_service
+from ..database import get_db
+from ..auth import get_current_active_user
+from ..models import User, SavedDocument
 from pydantic import BaseModel
 from typing import List
 import shutil

@@ -2,9 +2,9 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Optional, Literal
 from sqlalchemy.orm import Session
-from backend.app.database import get_db
-from backend.app.models import ActivityLog
-from backend.app.services.gemini_service import gemini_service
+from ..database import get_db
+from ..models import ActivityLog
+from ..services.gemini_service import gemini_service
 # Lazy import: knowledge_base will be imported inside functions to avoid startup delays
 from google import genai
 
@@ -473,9 +473,9 @@ class GenerateResponse(BaseModel):
     log_id: Optional[int] = None
     filename: Optional[str] = None # Added field
 
-from backend.app.auth import get_current_user
-from backend.app.models import User
-from backend.app.services.usage_service import check_and_increment_usage
+from ..auth import get_current_user
+from ..models import User
+from ..services.usage_service import check_and_increment_usage
 import re
 
 @router.post("/course", response_model=GenerateResponse)
@@ -515,7 +515,7 @@ async def generate_document(request: GenerateRequest, db: Session = Depends(get_
         content_parts = []
         
         # Lazy import to avoid startup delays
-        from backend.app.services.knowledge_service import knowledge_base
+        from ..services.knowledge_service import knowledge_base
         kb_files = knowledge_base.get_file_ids_by_category(track)
         
         for file_id in kb_files[:3]:

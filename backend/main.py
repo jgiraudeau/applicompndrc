@@ -1,21 +1,22 @@
+# Reload trigger: 1234
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from backend.app.routers import chat
-from backend.app.routers import documents
-from backend.app.routers import generate
-from backend.app.routers import export
-from backend.app.routers import dashboard
-from backend.app.routers import student
-from backend.app.routers import admin
-from backend.app.routers import auth
-from backend.app.routers import classroom
-from backend.app.routers import users # Added this line
-from backend.app.routers import stripe_routes # Added this line
-from backend.app.routers import google_integration # New Google Integration
-from backend.app.routers import setup # Temporary admin setup endpoint
-from backend.app.database import engine, Base
-import backend.app.models as models
+from app.routers import chat
+from app.routers import documents
+from app.routers import generate
+from app.routers import export
+from app.routers import dashboard
+from app.routers import student
+from app.routers import admin
+from app.routers import auth
+from app.routers import classroom
+from app.routers import users # Added this line
+from app.routers import stripe_routes # Added this line
+from app.routers import google_integration # New Google Integration
+from app.routers import setup # Temporary admin setup endpoint
+from app.database import engine, Base
+import app.models as models
 import os
 
 # Lifespan event to load knowledge base on startup

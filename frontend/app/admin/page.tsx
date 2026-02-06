@@ -86,7 +86,7 @@ export default function AdminPage() {
 
             if (response.ok) {
                 const data = await response.json();
-                alert(`✅ Synchronisation réussie !\n${data.files_count} fichiers chargés.`);
+                alert(`✅ Synchronisation réussie !\n${data.files_count ? data.files_count + ' fichiers chargés.' : 'Scan lancé en arrière-plan.'}`);
             } else {
                 const err = await response.text();
                 alert(`Erreur: ${err}`);

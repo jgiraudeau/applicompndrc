@@ -100,7 +100,7 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     # Send welcome email (async ideally)
     # Send welcome email (async ideally)
     try:
-        from backend.app.services.email_service import email_service
+        from ..services.email_service import email_service
         email_service.send_welcome_email(new_user)
     except Exception as e:
         print(f"Failed to send welcome email: {e}")
@@ -202,7 +202,7 @@ def google_login(token_data: GoogleToken, db: Session = Depends(get_db)):
             # Send welcome email (async ideally, but sync for now)
             # Send welcome email (async ideally, but sync for now)
             try:
-                from backend.app.services.email_service import email_service
+                from ..services.email_service import email_service
                 email_service.send_welcome_email(user)
             except Exception as e:
                 print(f"Failed to send welcome email: {e}")

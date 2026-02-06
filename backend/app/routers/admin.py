@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from .. import models, auth
 from ..database import get_db
+from ..services.knowledge_service import knowledge_base
 
 router = APIRouter()
 
@@ -89,7 +90,7 @@ def update_user_status(
         if new_status_str == "active" and old_status != "active":
             user.is_active = True
             try:
-                from app.services.email_service import email_service
+                from ..services.email_service import email_service
                 email_service.send_approval_email(user)
             except Exception as e:
                 print(f"Warning: Email sending failed: {e}")
@@ -98,7 +99,7 @@ def update_user_status(
         if new_status_str == "rejected":
             user.is_active = False
             try:
-                from app.services.email_service import email_service
+                from ..services.email_service import email_service
                 email_service.send_rejection_email(user)
             except Exception as e:
                 print(f"Warning: Email sending failed: {e}")
@@ -140,8 +141,6 @@ def scan_knowledge_base(
     Runs in BACKGROUND to avoid timeouts with large number of files.
     """
     try:
-        from app.services.knowledge_service import knowledge_base
-        
         # Run in background
         background_tasks.add_task(knowledge_base.scan_and_load)
         

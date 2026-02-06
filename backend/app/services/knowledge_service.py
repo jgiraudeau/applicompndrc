@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 import docx
-from backend.app.services.gemini_service import gemini_service
+from .gemini_service import gemini_service
 
 # Knowledge base root discovery
 possible_paths = [
@@ -96,11 +96,12 @@ class KnowledgeBase:
                             with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False, encoding='utf-8') as tmp:
                                 tmp.write(text_content)
                                 tmp_path = tmp.name
-                            gemini_file = gemini_service.upload_file_to_gemini(tmp_path, mime_type='text/plain')
+                            # Use original filename but mark as text conversion if needed, or just keep original name for clarity
+                            gemini_file = gemini_service.upload_file_to_gemini(tmp_path, mime_type='text/plain', display_name=file_path.name)
                             os.unlink(tmp_path)
                     else:
                         mime = self._get_mime_type(file_path)
-                        gemini_file = gemini_service.upload_file_to_gemini(str(file_path), mime_type=mime)
+                        gemini_file = gemini_service.upload_file_to_gemini(str(file_path), mime_type=mime, display_name=file_path.name)
 
                     if gemini_file:
                         # Store in index

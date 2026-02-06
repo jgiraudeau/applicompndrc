@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 import google.oauth2.credentials
 from googleapiclient.discovery import build
-from backend.app.services.gemini_service import gemini_service
+from ..services.gemini_service import gemini_service
 
 import json
 import re

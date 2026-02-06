@@ -7,11 +7,11 @@ import docx.shared
 import io
 import re
 import pandas as pd
-from backend.app.services.gemini_service import gemini_service
+from ..services.gemini_service import gemini_service
 import json
 
-from backend.app.auth import get_current_user
-from backend.app.models import User
+from ..auth import get_current_user
+from ..models import User
 from fastapi import Depends
 
 router = APIRouter()

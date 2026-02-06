@@ -1,14 +1,16 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from sqlalchemy import func
-from backend.app.database import get_db
-from backend.app.models import ActivityLog, PublishedQuiz, User
-from backend.app.auth import get_current_user
+from sqlalchemy import func, desc
+from ..database import get_db
+from ..models import ActivityLog, PublishedQuiz, User
+from ..auth import get_current_user
+from sqlalchemy.orm import joinedload
 from datetime import datetime, timedelta
+import collections
 
 router = APIRouter(tags=["dashboard"])
 
-from backend.app.services.usage_service import FREE_GENERATION_LIMIT, FREE_CHAT_LIMIT, FREE_TRIAL_DAYS as TRIAL_DAYS
+from ..services.usage_service import FREE_GENERATION_LIMIT, FREE_CHAT_LIMIT, FREE_TRIAL_DAYS as TRIAL_DAYS
 
 @router.get("/stats")
 async def get_stats(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

@@ -181,10 +181,11 @@ class GeminiService:
             system_instruction=full_system_instruction
         )
 
-    def upload_file_to_gemini(self, file_path: str, mime_type: str = None):
+    def upload_file_to_gemini(self, file_path: str, mime_type: str = None, display_name: str = None):
         """Uploads a file to Gemini, avoiding duplicates."""
         try:
-            display_name = os.path.basename(file_path)
+            if not display_name:
+                display_name = os.path.basename(file_path)
             
             # Check existing files
             # client.files.list() returns iterable

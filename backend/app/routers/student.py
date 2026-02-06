@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from backend.app.database import get_db
-from backend.app.models import ActivityLog, PublishedQuiz
+from ..database import get_db
+from ..models import ActivityLog, PublishedQuiz
 from pydantic import BaseModel
 import uuid
 from datetime import datetime

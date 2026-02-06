@@ -4,7 +4,7 @@ from email.mime.multipart import MIMEMultipart
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from backend.app import models
+from .. import models
 
 # Load env explicitly to ensure SMTP credentials are found
 env_path = Path(__file__).resolve().parent.parent.parent / '.env'
