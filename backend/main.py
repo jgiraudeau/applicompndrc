@@ -1,7 +1,16 @@
 # Reload trigger: 1234
-from fastapi import FastAPI
+import os
+import sys
+
+# Ensure 'app' is importable whether run from 'backend/' or project root
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+from sqlalchemy.orm import Session
+import logging
+
 from app.routers import chat
 from app.routers import documents
 from app.routers import generate
