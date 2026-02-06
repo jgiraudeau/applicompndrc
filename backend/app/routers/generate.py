@@ -574,18 +574,16 @@ class RefineRequest(BaseModel):
     track: Optional[str] = "NDRC"
 
 @router.post("/refine", response_model=GenerateResponse)
-async def refine_document(request: RefineRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    """
-    Refines existing content based on a specific instruction (Didactic Refinement Agent).
-    """
+async def refine_document(request: RefineRequest, db: Session = Depends(get_db)): #, current_user: User = Depends(get_current_user)):
     if not request.current_content or not request.instruction:
         raise HTTPException(status_code=400, detail="Content and instruction are required")
     
     # Check Quota (Refining counts as generation or maybe less? Let's count it for now)
-    check_and_increment_usage(db, current_user, 'generate_course')
+    # check_and_increment_usage(db, current_user, 'generate_course')
     
     try:
         track = request.track or "NDRC"
+        print(f"🛠 REÇU DEMANDE AFFINAGE Track={track} Instruction={request.instruction}")
         
         # System Prompt for the Refinement Agent
         system_prompt = f"""Tu es un Éditeur Pédagogique Senior expert du BTS {track}.

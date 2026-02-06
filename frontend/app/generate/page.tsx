@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { GraduationCap, Sparkles, ArrowLeft, Copy, Check, FileText, Users, ListChecks, ClipboardCheck, Download, FileDown, HelpCircle, Calendar, Share2, ExternalLink, Share, Loader2, LogOut, Save, Wand2, Globe, ShoppingCart } from "lucide-react";
+import { GraduationCap, Sparkles, ArrowLeft, Copy, Check, FileText, Users, ListChecks, ClipboardCheck, Download, FileDown, HelpCircle, Calendar, Share2, ExternalLink, Share, Loader2, LogOut, Save, Wand2, Globe, ShoppingCart, RotateCcw } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Link from "next/link";
@@ -129,9 +129,9 @@ export default function GeneratePage() {
                 const err = await response.text();
                 alert(`Erreur lors du raffinement : ${err}`);
             }
-        } catch (e) {
+        } catch (e: any) {
             console.error(e);
-            alert("Erreur technique lors du raffinement.");
+            alert("Erreur technique lors du raffinement : " + e.message);
         }
         finally { setIsRefining(false); }
     };
@@ -424,6 +424,17 @@ export default function GeneratePage() {
 
     const selectedType = DOCUMENT_TYPES.find(d => d.id === docType) || DOCUMENT_TYPES[0];
 
+    const handleReset = () => {
+        if (topic || generatedContent) {
+            if (confirm("Voulez-vous effacer le formulaire et le résultat ?")) {
+                setTopic("");
+                setGeneratedContent("");
+                setSuggestedFilename(null);
+                setLogId(null);
+            }
+        }
+    };
+
     if (!mounted) return null;
 
     return (
@@ -452,6 +463,21 @@ export default function GeneratePage() {
 
                 {/* Left Panel - Form */}
                 <div className={`w-full lg:w-1/3 border-r bg-white p-6 flex flex-col gap-4 overflow-y-auto ${activeTab === 'setup' ? 'block' : 'hidden lg:flex'}`}>
+
+                    <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-semibold text-slate-800">Paramètres</h3>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleReset}
+                            disabled={!topic && !generatedContent}
+                            className="text-slate-400 hover:text-red-600 hover:bg-red-50"
+                            title="Réinitialiser le formulaire"
+                        >
+                            <RotateCcw className="w-4 h-4 mr-2" />
+                            Réinitialiser
+                        </Button>
+                    </div>
 
                     {/* Track Selector */}
                     <div>
