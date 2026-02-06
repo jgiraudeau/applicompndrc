@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { GraduationCap, Sparkles, ArrowLeft, Copy, Check, FileText, Users, ListChecks, ClipboardCheck, Download, FileDown, HelpCircle, Calendar, Share2, ExternalLink, Share, Loader2, LogOut, Save, Wand2, Globe, ShoppingCart } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
 import { Navbar } from "@/components/Navbar";
@@ -521,9 +522,9 @@ export default function GeneratePage() {
 
                     <div>
                         <label className="text-sm font-medium text-slate-700 mb-1 block">
-                            {['jeu_de_role', 'sujet_e5b_wp', 'sujet_e5b_presta'].includes(docType) ? 'Contexte / Fiche de Situation *' : 'Thème du cours *'}
+                            {['jeu_de_role', 'jeu_de_role_evenement', 'sujet_e5b_wp', 'sujet_e5b_presta'].includes(docType) ? 'Contexte / Fiche de Situation *' : 'Thème du cours *'}
                         </label>
-                        {['jeu_de_role', 'sujet_e5b_wp', 'sujet_e5b_presta'].includes(docType) ? (
+                        {['jeu_de_role', 'jeu_de_role_evenement', 'sujet_e5b_wp', 'sujet_e5b_presta'].includes(docType) ? (
                             <textarea
                                 className="w-full border rounded-md p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none min-h-[150px]"
                                 placeholder="Collez ici le contexte complet de l'entreprise, du client et de la situation..."
@@ -736,7 +737,7 @@ export default function GeneratePage() {
 
                         {generatedContent ? (
                             <div className="prose prose-sm max-w-none pb-8">
-                                <ReactMarkdown>{generatedContent}</ReactMarkdown>
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{generatedContent}</ReactMarkdown>
                             </div>
                         ) : (
                             <div className="flex flex-col items-center justify-center h-full text-slate-400">

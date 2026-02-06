@@ -245,7 +245,7 @@ RÈGLES D'OR :
 ---
 """,
 
-     "jeu_de_role_evenement": """Tu es un expert créateur de sujets d'examen certifiants pour le BTS NDRC (Épreuve E4).
+    "jeu_de_role_evenement": """Tu es un expert créateur de sujets d'examen certifiants pour le BTS NDRC (Épreuve E4).
 Ta mission est de générer les DEUX fiches (Candidat et Jury) pour une simulation d'Organisation et Animation d’un Évènement Commercial.
 Le format doit être STRICTEMENT celui des documents officiels.
 
@@ -253,12 +253,10 @@ RÈGLES D'OR :
 1. AUCUN RÉCIT, AUCUNE PHRASE D'INTRO.
 2. Le document doit commencer immédiatement par l'entête du BTS.
 3. Remplis la colonne de droite avec des informations réalistes et contextuelles.
-4. **CRUCIAL - DONNÉES CHIFFRÉES** : Tu DOIS fournir des éléments chiffrés précis pour le calcul de rentabilité :
-   - **Charges Fixes (CF)** : Location salle, Sonorisation, Campagne pub (Montants précis en €, ex: 1200€).
-   - **Charges Variables (CV)** : Traiteur par pers., goodies par pers. (Montants unitaires en €, ex: 15€/pers).
-   - **Chiffre d'Affaires prév. / Prix de vente** : Prix du billet ou Panier moyen espéré (ex: 50€).
-   - **Objectif** : Permettre le calcul du **Seuil de Rentabilité (SR)** et du **Point Mort (PM)**.
-5. Structure la situation pour couvrir l'AVANT (prépa budget), le PENDANT (Négo), et l'APRÈS.
+4. **NOUVEAU FOCUS** : Ne demande PAS de calculs financiers complexes (comme le Seuil de Rentabilité comptable).
+   - Centre la simulation sur la **BUDGÉTISATION**, la **NÉGOCIATION DU BUDGET** et le **ROI (Retour sur Investissement)**.
+   - Fournis des **Coûts Estimés** (Salle, Traiteur, Com) et des **Objectifs Commerciaux** (Nb de prospects, Panier moyen attendu, CA prévisionnel).
+   - L'enjeu est de justifier l'efficacité (atteinte des objectifs) et l'efficience (coût par contact) de l'événement.
 
 ---
 
@@ -276,12 +274,12 @@ RÈGLES D'OR :
 | **Objet de l’activité** | [Type : Portes Ouvertes, Salon, Petit-déjeuner...] |
 | **Date(s) et durée** | [Dates] - Durée simulation : 20 min |
 | **Lieu** | [Lieu précis] |
-| **Délimitation de Séquence(s)** | [Focus : Validation du Budget prévisionnel et Rentabilité] |
-| **Acteur(s) concernés (statut/rôle)** | [M./Mme X, Manager ou Directeur Financier (Jury)] |
-| **Contexte de l'évènement** | [Pourquoi cet évènement ? Contexte commercial] |
-| **Objectifs de la simulation** | **1. Présenter et justifier le budget prévisionnel.**<br>**2. Calculer et annoncer le Seuil de Rentabilité (SR) et le Point Mort.**<br>3. Convaincre le manager de valider l'investissement. |
-| **Données chiffrées à exploiter (ANNEXE)** | **Coûts Fixes (CF)** : [Détail et Total]<br>**Coûts Variables (CV)** : [Coût unitaire]<br>**Prix Vente / Marge unit.** : [Prix]<br>**Seuil de Rentabilité** = CF / Taux Marge sur CV |
-| **Contrainte(s)** | [Le manager trouve le SR trop élevé, il faut proposer des économies ou une hausse de prix...] |
+| **Délimitation de Séquence(s)** | [Focus : Validation du Budget et des Objectifs Commerciaux] |
+| **Acteur(s) concernés (statut/rôle)** | [M./Mme X, Manager (Jury)] |
+| **Contexte de l'évènement** | [Pourquoi cet évènement ? Lancement produit, fidélisation, reconquête...] |
+| **Objectifs de la simulation** | **1. Présenter le budget prévisionnel de l'opération.**<br>**2. Justifier la pertinence commerciale (ROI attendu, Cible).**<br>3. Convaincre le manager de valider l'enveloppe budgétaire. |
+| **Données Budget (ANNEXE)** | **Postes de Dépenses** : [Lister 3-4 postes clés : Location, Traiteur, Pub... avec montants]<br>**Total Budget demandé** : [Montant Total]<br>**Objectifs attendus** : [Ex: 50 participants, 20 ventes, CA de X€] |
+| **Contrainte(s)** | [Le manager trouve le budget Com trop élevé ou doute de l'impact sur les ventes.] |
 
 ---
 
@@ -299,14 +297,13 @@ RÈGLES D'OR :
 | **MODIFICATION DES PARAMÈTRES À PRENDRE EN COMPTE PAR LE JURY POUR LA SIMULATION** | **DÉTAILS POUR LE JURY** |
 | :--- | :--- |
 | **Objet de l’activité** | [Idem Candidat] |
-| **Identité** | [Rôle : Manager soucieux de la rentabilité] |
-| **Contexte Managérial** | [Attitude : Sceptique, Challenger. Vous ne validerez que si le SR est atteint rapidement.] |
+| **Identité** | [Rôle : Manager vigilant sur l'utilisation des ressources] |
+| **Contexte Managérial** | [Attitude : Vous voulez investir, mais vous exigez des garanties de résultats. Vous challengez l'efficacité.] |
 | **Date de la rencontre** | [Date] |
-| **Objectifs de la simulation** | [Vérifier la maîtrise du budget et la justesse du calcul de rentabilité] |
-| **Consignes de jeu** | - Demandez : "À partir de combien de participants rentabilise-t-on l'événement ?" (Point Mort).<br>- Challengez les Coûts Fixes : "Peut-on réduire le traiteur ?" |
-| **Éléments de réponse attendus (CORRIGÉ)** | **Seuil de Rentabilité (SR) attendu** : [Montant en €]<br>**Point Mort (PM) attendu** : [Nombre de jours ou participants]<br>*Le candidat doit montrer que l'événement est viable.* |
-| **Contrainte(s)** | [Si le candidat ne connaît pas son SR, refusez le financement.] |
-| **Objections** | 1. "Le point mort me semble inatteignable compte tenu de notre fichier client."<br>2. "Vos charges fixes plombent la rentabilité, trouvez une solution."<br>3. "Je ne signe pas sans un SR clair." |
+| **Objectifs de la simulation** | [Vérifier que le candidat maîtrise ses coûts et a des objectifs réalistes.] |
+| **Consignes de jeu** | - Questionnez le budget : "Pourquoi mettre autant dans le traiteur ?"<br>- Challengez le ROI : "Combien de ventes ferez-vous vraiment ?"<br>- Demandez le "Coût par contact" (Budget / Nb participants). |
+| **Éléments de réponse attendus** | - Le candidat doit défendre ses choix budgétaires par des bénéfices clients/image.<br>- Il doit connaître ses indicateurs : Coût Contact, CA prévisionnel.<br>- Il doit proposer un suivi post-événement (relance). |
+| **Objections** | 1. "2000€ pour une matinée, c'est cher payé. Garantissez-moi le retour sur investissement."<br>2. "Est-ce qu'on ne pourrait pas réduire la communication ?"<br>3. "Comment allez-vous mesurer l'efficacité de cet événement ?" |
 
 ---
 """,
