@@ -553,7 +553,7 @@ export default function GeneratePage() {
                         {['jeu_de_role', 'jeu_de_role_evenement', 'sujet_e5b_wp', 'sujet_e5b_presta'].includes(docType) ? (
                             <textarea
                                 className="w-full border rounded-md p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none min-h-[150px]"
-                                placeholder="Collez ici le contexte complet de l'entreprise, du client et de la situation..."
+                                placeholder={['sujet_e5b_wp', 'sujet_e5b_presta'].includes(docType) ? "Collez ici le contexte complet de l'entreprise, de son manager et de sa stratégie digitale..." : "Collez ici le contexte complet de l'entreprise, du client et de la situation..."}
                                 value={topic}
                                 onChange={(e) => setTopic(e.target.value)}
                             />
