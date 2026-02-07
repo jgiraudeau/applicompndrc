@@ -548,7 +548,7 @@ export default function GeneratePage() {
 
                     <div>
                         <label className="text-sm font-medium text-slate-700 mb-1 block">
-                            {['jeu_de_role', 'jeu_de_role_evenement', 'sujet_e5b_wp', 'sujet_e5b_presta'].includes(docType) ? 'Contexte / Fiche de Situation *' : 'Thème du cours *'}
+                            {['sujet_e5b_wp', 'sujet_e5b_presta'].includes(docType) ? 'Contexte Commercial et Digital *' : ['jeu_de_role', 'jeu_de_role_evenement'].includes(docType) ? 'Contexte / Fiche de Situation *' : 'Thème du cours *'}
                         </label>
                         {['jeu_de_role', 'jeu_de_role_evenement', 'sujet_e5b_wp', 'sujet_e5b_presta'].includes(docType) ? (
                             <textarea
