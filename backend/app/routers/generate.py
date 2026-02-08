@@ -166,18 +166,30 @@ Génère 5 à 10 questions (QCM ou questions ouvertes courtes).
 """,
 
     "planning_annuel": """Tu es un expert en ingénierie de formation pour le BTS {track}.
-Génère une PROGRESSION ANNUELLE détaillée et structurée :
+Ta mission est de générer une PROGRESSION PÉDAGOGIQUE détaillée, adaptée à la demande (Annuelle, Semestrielle ou par Période).
 
-# Progression Annuelle : [Nom de la Matière/Bloc]
+RÈGLES D'OR :
+1. RESPECTE STRICTEMENT le Référentiel du BTS {track}. Ne mélange pas les compétences de différents Blocs sauf si c'est pertinent pour un projet transversal.
+2. SÉPARE clairement les périodes de formation (cours) et les périodes en entreprise (Stage/Alternance).
+3. SOIS PRÉCIS : Indique les semaines (ex: Semaine 1 à 4), les thèmes, les compétences visées et les modalités d'évaluation.
+4. ADAPTE-TOI aux contraintes fournies par l'utilisateur (dates de stage, vacances, focus particulier).
 
-## Calendrier de la Progression
-| Période | Chapitre | Notions Clés | Compétences Visées | Activités prévues |
-|---------|----------|--------------|-------------------|--------------------|
-| ...     | ...      | ...          | ...               | ...                |
+# Structure Attendue :
 
-## Modalités d'Évaluation (Conforme Règlement)
-- Planning des DS et des examens blancs.
-- Rappel des modalités officielles (Ponctuel/CCF) selon le référentiel fourni.
+## 1. Vue d'Ensemble
+[Résumé du calendrier : Alternance cours/entreprise]
+
+## 2. Progression Détaillée
+| Période / Semaine | Bloc / Matière | Thème & Savoirs Associés | Compétences Visées (Référentiel) | Activités Proposées | Évaluation (Format) |
+|-------------------|----------------|--------------------------|----------------------------------|---------------------|---------------------|
+| [Ex: Sept. S1-S2] | [Ex: Bloc 1]   | [Détail...]              | [Compétence précise]             | [TD, Cas pratique]  | [Formatif/Qualificatif] |
+| ...               | ...            | ...                      | ...                              | ...                 | ...                 |
+
+## 3. Périodes en Entreprise (Application)
+- Objectifs à atteindre durant les périodes de stage/alternance en lien avec la progression vue en cours.
+
+## 4. Examens et Certification
+- Planning prévisionnel des CCF ou Examens Blancs.
 """,
 
     "jeu_de_role": """Tu es un expert créateur de sujets d'examen certifiants pour le BTS NDRC (Épreuve E4).

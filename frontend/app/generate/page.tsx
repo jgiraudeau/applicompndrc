@@ -548,12 +548,16 @@ export default function GeneratePage() {
 
                     <div>
                         <label className="text-sm font-medium text-slate-700 mb-1 block">
-                            {['sujet_e5b_wp', 'sujet_e5b_presta'].includes(docType) ? 'Contexte Commercial et Digital *' : ['jeu_de_role', 'jeu_de_role_evenement'].includes(docType) ? 'Contexte / Fiche de Situation *' : 'Thème du cours *'}
+                            {['sujet_e5b_wp', 'sujet_e5b_presta'].includes(docType) ? 'Contexte Commercial et Digital *' : ['jeu_de_role', 'jeu_de_role_evenement'].includes(docType) ? 'Contexte / Fiche de Situation *' : (docType === 'planning_annuel' ? 'Périodes, Semaines de stage & Contraintes *' : 'Thème du cours *')}
                         </label>
-                        {['jeu_de_role', 'jeu_de_role_evenement', 'sujet_e5b_wp', 'sujet_e5b_presta'].includes(docType) ? (
+                        {['jeu_de_role', 'jeu_de_role_evenement', 'sujet_e5b_wp', 'sujet_e5b_presta', 'planning_annuel'].includes(docType) ? (
                             <textarea
                                 className="w-full border rounded-md p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none min-h-[150px]"
-                                placeholder={['sujet_e5b_wp', 'sujet_e5b_presta'].includes(docType) ? "Collez ici le contexte complet de l'entreprise, de son manager et de sa stratégie digitale..." : "Collez ici le contexte complet de l'entreprise, du client et de la situation..."}
+                                placeholder={
+                                    ['sujet_e5b_wp', 'sujet_e5b_presta'].includes(docType)
+                                        ? "Collez ici le contexte complet de l'entreprise, de son manager et de sa stratégie digitale..."
+                                        : (docType === 'planning_annuel' ? "Détaillez ici la période visée (Année complète, Semestre 1...), les semaines de stage en entreprise, les vacances, et les objectifs spécifiques par bloc..." : "Collez ici le contexte complet de l'entreprise, du client et de la situation...")
+                                }
                                 value={topic}
                                 onChange={(e) => setTopic(e.target.value)}
                             />
