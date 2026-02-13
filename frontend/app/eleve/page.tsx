@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { API_BASE_URL } from "@/lib/api";
+import Link from "next/link";
 
 interface QuizData {
     title: string;
@@ -125,7 +126,11 @@ export default function StudentPage() {
                             </Button>
                         </div>
 
-                        <div className="pt-4 border-t w-full">
+                        <div className="pt-4 border-t w-full flex flex-col gap-3">
+                            <Link href="/eleve/saisie" className="w-full flex items-center justify-center gap-2 p-3 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 font-bold hover:bg-indigo-100 transition-colors">
+                                <span className="material-symbols-outlined text-sm">edit_document</span>
+                                Saisir une Fiche E4
+                            </Link>
                             <p className="text-xs text-slate-400">BTS NDRC • Plateforme d'Apprentissage Virtuelle</p>
                         </div>
                     </div>

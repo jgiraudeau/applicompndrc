@@ -12,6 +12,7 @@ import remarkGfm from "remark-gfm";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
 import { Navbar } from "@/components/Navbar";
+import { useSearchParams } from "next/navigation";
 
 const DOCUMENT_TYPES = [
     { id: "dossier_prof", label: "Dossier Professeur", icon: FileText, color: "text-blue-600 bg-blue-50 border-blue-200" },
@@ -96,10 +97,39 @@ export default function GeneratePage() {
     const [isSaved, setIsSaved] = useState(false);
     const [currentTrack, setCurrentTrack] = useState("NDRC"); // Default track
     const [activeTab, setActiveTab] = useState<'setup' | 'result'>('setup'); // Mobile tab state
+    const [savedDocs, setSavedDocs] = useState<any[]>([]); // Documents for dropdown
+
+    const searchParams = useSearchParams();
 
     useEffect(() => {
         setMounted(true);
-    }, []);
+        if (searchParams) {
+            const typeParam = searchParams.get('type');
+            const contextParam = searchParams.get('context');
+            if (typeParam) setDocType(typeParam);
+            if (contextParam) {
+                setTopic(decodeURIComponent(contextParam));
+            }
+        }
+    }, [searchParams]);
+
+    // Fetch saved documents for dropdown
+    useEffect(() => {
+        if (session?.accessToken) {
+            fetch(`${API_BASE_URL}/api/documents/list`, {
+                headers: { Authorization: `Bearer ${session.accessToken}` }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        // Filter or use all? User says "old fiches are memorized".
+                        // Maybe filter by type if needed, but let's show all relevant ones.
+                        setSavedDocs(data);
+                    }
+                })
+                .catch(err => console.error("Failed to fetch docs:", err));
+        }
+    }, [session]);
 
     // Placeholder handlers if they were missing from the view (implied by usage in JSX)
     const handleRefine = async () => {
@@ -545,6 +575,30 @@ export default function GeneratePage() {
                     </div>
 
                     <hr className="my-2" />
+
+                    {/* Dropdown for Student Fiches (E4) */}
+                    {['jeu_de_role', 'jeu_de_role_evenement'].includes(docType) && savedDocs.length > 0 && (
+                        <div className="mb-4 p-4 bg-purple-50 rounded-lg border border-purple-100 dark:bg-purple-900/10 dark:border-purple-800 animate-in fade-in slide-in-from-top-2">
+                            <label className="text-sm font-bold text-purple-800 dark:text-purple-300 mb-2 block flex items-center gap-2">
+                                <Download className="w-4 h-4" />
+                                Charger depuis une fiche étudiante
+                            </label>
+                            <select
+                                className="w-full border rounded-md p-2 text-sm bg-white dark:bg-slate-800 text-slate-700 focus:ring-2 focus:ring-purple-200 outline-none"
+                                onChange={(e) => {
+                                    const doc = savedDocs.find(d => d.id === e.target.value);
+                                    if (doc) setTopic(doc.content);
+                                }}
+                            >
+                                <option value="">-- Sélectionner une fiche --</option>
+                                {savedDocs.filter(d => ['student_fiche', 'dossier_eleve', 'jeu_de_role'].includes(d.document_type) || !d.document_type).map(doc => (
+                                    <option key={doc.id} value={doc.id}>
+                                        {doc.title} ({new Date(doc.created_at).toLocaleDateString()})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     <div>
                         <label className="text-sm font-medium text-slate-700 mb-1 block">
