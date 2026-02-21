@@ -617,25 +617,24 @@ function GenerateContent() {
                                             <button onClick={() => setSelectedFile(null)} className="hover:text-purple-900 bg-purple-200 rounded-full w-6 h-6 flex items-center justify-center transition-colors">×</button>
                                         </div>
                                     )}
-                                    <input
-                                        id="file-upload"
-                                        type="file"
-                                        className="hidden"
-                                        onChange={(e) => {
-                                            if (e.target.files && e.target.files[0]) {
-                                                setSelectedFile(e.target.files[0]);
-                                            }
-                                        }}
-                                        accept=".pdf,.md,.txt,.docx"
-                                    />
-                                    {!selectedFile && (
-                                        <label
-                                            htmlFor="file-upload"
-                                            className="w-full bg-white border-2 border-purple-200 text-purple-600 hover:bg-purple-100 hover:border-purple-300 font-bold h-12 rounded-xl border-dashed transition-all shadow-sm flex items-center justify-center cursor-pointer"
-                                        >
-                                            Choisir un fichier...
-                                        </label>
-                                    )}
+                                    <div className="relative w-full">
+                                        <input
+                                            id="file-upload"
+                                            type="file"
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                            onChange={(e) => {
+                                                if (e.target.files && e.target.files[0]) {
+                                                    setSelectedFile(e.target.files[0]);
+                                                }
+                                            }}
+                                            accept=".pdf,.md,.txt,.docx"
+                                        />
+                                        {!selectedFile && (
+                                            <div className="w-full bg-white border-2 border-purple-200 text-purple-600 hover:bg-purple-100 hover:border-purple-300 font-bold h-12 rounded-xl border-dashed transition-all shadow-sm flex items-center justify-center pointer-events-none">
+                                                Choisir un fichier...
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         )}
