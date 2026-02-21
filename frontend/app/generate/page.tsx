@@ -491,169 +491,181 @@ export default function GeneratePage() {
                     </button>
                 </div>
 
-                {/* Left Panel - Form */}
-                <div className={`w-full lg:w-1/3 border-r bg-white p-6 flex flex-col gap-4 overflow-y-auto ${activeTab === 'setup' ? 'block' : 'hidden lg:flex'}`}>
+                {/* Left Panel - Gamified Form */}
+                <div className={`w-full lg:w-1/3 border-r bg-[#F7F7F8] p-4 lg:p-6 flex flex-col gap-5 overflow-y-auto ${activeTab === 'setup' ? 'block' : 'hidden lg:flex'}`}>
 
-                    <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-semibold text-slate-800">Paramètres</h3>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleReset}
-                            disabled={!topic && !generatedContent}
-                            className="text-slate-400 hover:text-red-600 hover:bg-red-50"
-                            title="Réinitialiser le formulaire"
-                        >
-                            <RotateCcw className="w-4 h-4 mr-2" />
-                            Réinitialiser
-                        </Button>
-                    </div>
-
-                    {/* Track Selector */}
-                    <div>
-                        <label className="text-sm font-medium text-slate-700 mb-2 block">Filière / Matière</label>
-                        <select
-                            className="w-full border rounded-md p-2 text-sm font-medium bg-slate-50 border-slate-200 focus:ring-2 focus:ring-primary/20"
-                            value={currentTrack}
-                            onChange={(e) => {
-                                setCurrentTrack(e.target.value);
-                                setBlock(""); // Reset block when track changes
-                            }}
-                        >
-                            {Object.entries(TRACKS_DATA).map(([key, data]) => (
-                                <option key={key} value={key}>{data.label}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Dynamic Block Selector */}
-                    <div>
-                        <label className="text-sm font-medium text-slate-700 mb-1 block">
-                            {currentTrack === "CEJM" ? "Thème ciblé (optionnel)" : "Bloc de compétences (optionnel)"}
-                        </label>
-                        <select
-                            className="w-full border rounded-md p-2 text-sm text-slate-600"
-                            value={block}
-                            onChange={(e) => setBlock(e.target.value)}
-                        >
-                            <option value="">-- {currentTrack === "CEJM" ? "Tous les thèmes" : "Tous les blocs"} --</option>
-                            {TRACKS_DATA[currentTrack]?.blocks.map((b) => (
-                                <option key={b.id} value={b.id}>{b.label}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <hr className="my-1 border-slate-100" />
-
-                    {/* Document Type Selector */}
-                    <div>
-                        <label className="text-sm font-medium text-slate-700 mb-2 block">Type de document</label>
-                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                            {DOCUMENT_TYPES.filter(type => {
-                                const isNDRCSpecific = ["jeu_de_role", "sujet_e5b_wp", "sujet_e5b_presta"].includes(type.id);
-                                return currentTrack === "NDRC" || !isNDRCSpecific;
-                            }).map((type) => {
-                                const Icon = type.icon;
-                                const isSelected = docType === type.id;
-                                return (
-                                    <button
-                                        key={type.id}
-                                        onClick={() => setDocType(type.id)}
-                                        className={`p-3 rounded-lg border text-left transition-all active:scale-95 touch-manipulation min-h-[80px] flex flex-col justify-between ${isSelected
-                                            ? `${type.color} border-2`
-                                            : "bg-white border-slate-200 hover:border-slate-300"
-                                            }`}
-                                    >
-                                        <Icon className={`w-5 h-5 mb-1 ${isSelected ? "" : "text-slate-400"}`} />
-                                        <div className={`text-xs font-medium leading-tight ${isSelected ? "" : "text-slate-600"}`}>
-                                            {type.label}
-                                        </div>
-                                    </button>
-                                );
-                            })}
+                    {/* Progress Bar & Reset Header */}
+                    <div className="flex justify-between items-center bg-white p-3 rounded-2xl border-2 border-slate-100 shadow-sm">
+                        <div className="flex items-center gap-3 w-full mr-4">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={handleReset}
+                                disabled={!topic && !generatedContent}
+                                className="text-slate-300 hover:text-red-500 rounded-full h-8 w-8 shrink-0"
+                                title="Réinitialiser"
+                            >
+                                <RotateCcw className="w-5 h-5" />
+                            </Button>
+                            <div className="w-full bg-slate-200 h-4 rounded-full overflow-hidden">
+                                <div className="bg-[#58cc02] h-full w-[33%] rounded-full transition-all"></div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-1 bg-yellow-100 text-yellow-600 px-3 py-1 rounded-xl font-black shrink-0">
+                            <Sparkles className="w-4 h-4 text-yellow-500" />
+                            <span className="text-xs">XP</span>
                         </div>
                     </div>
 
-                    <hr className="my-2" />
+                    {/* Merlin Greeting */}
+                    <div className="flex items-start gap-3 relative z-10 w-full mb-2">
+                        <div className="text-5xl filter drop-shadow-md z-10 shrink-0">🧙‍♂️</div>
+                        <div className="bg-white text-slate-600 font-bold p-4 rounded-2xl rounded-tl-none border-2 border-slate-200 text-sm shadow-sm flex-1 relative mt-3">
+                            <div className="absolute -left-2 top-0 w-4 h-4 bg-white border-l-2 border-t-2 border-slate-200 transform -rotate-45"></div>
+                            Commençons par le type de document ! Cliquez sur une carte.
+                        </div>
+                    </div>
 
-                    {/* Dropdown for Student Fiches (E4) */}
-                    {['jeu_de_role', 'jeu_de_role_evenement'].includes(docType) && savedDocs.length > 0 && (
-                        <div className="mb-4 p-4 bg-purple-50 rounded-lg border border-purple-100 dark:bg-purple-900/10 dark:border-purple-800 animate-in fade-in slide-in-from-top-2">
-                            <label className="text-sm font-bold text-purple-800 dark:text-purple-300 mb-2 block flex items-center gap-2">
-                                <Download className="w-4 h-4" />
-                                Charger depuis une fiche étudiante
-                            </label>
+                    {/* Document Type Selector (Gamified Grid) */}
+                    <div className="grid grid-cols-2 gap-3">
+                        {DOCUMENT_TYPES.filter(type => {
+                            const isNDRCSpecific = ["jeu_de_role", "sujet_e5b_wp", "sujet_e5b_presta"].includes(type.id);
+                            return currentTrack === "NDRC" || !isNDRCSpecific;
+                        }).map((type) => {
+                            const Icon = type.icon;
+                            const isSelected = docType === type.id;
+                            return (
+                                <button
+                                    key={type.id}
+                                    onClick={() => setDocType(type.id)}
+                                    className={`relative p-3 rounded-2xl border-2 text-left transition-all active:translate-y-1 touch-manipulation min-h-[90px] flex flex-col justify-between ${isSelected
+                                        ? "bg-[#f0f9ff] border-[#38bdf8] shadow-[0_4px_0_0_#38bdf8]"
+                                        : "bg-white border-slate-200 shadow-[0_4px_0_0_#e2e8f0] hover:bg-slate-50 hover:shadow-[0_4px_0_0_#cbd5e1]"
+                                        }`}
+                                >
+                                    <Icon className={`w-6 h-6 mb-2 ${isSelected ? "text-[#0ea5e9]" : "text-slate-400"}`} />
+                                    <div className={`text-xs sm:text-sm font-extrabold leading-tight ${isSelected ? "text-[#0284c7]" : "text-slate-600"}`}>
+                                        {type.label}
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    <div className="bg-white p-5 rounded-3xl border-2 border-slate-200 shadow-sm space-y-5 mt-2">
+                        {/* Track Selector */}
+                        <div>
+                            <label className="text-sm font-extrabold text-slate-500 mb-2 block uppercase tracking-wider">Filière / Matière</label>
                             <select
-                                className="w-full border rounded-md p-2 text-sm bg-white dark:bg-slate-800 text-slate-700 focus:ring-2 focus:ring-purple-200 outline-none"
+                                className="w-full border-2 rounded-xl p-3 text-sm font-bold bg-slate-50 border-slate-200 focus:bg-white focus:border-[#58cc02] focus:ring-0 outline-none transition-colors"
+                                value={currentTrack}
                                 onChange={(e) => {
-                                    const doc = savedDocs.find(d => d.id === e.target.value);
-                                    if (doc) setTopic(doc.content);
+                                    setCurrentTrack(e.target.value);
+                                    setBlock(""); // Reset block when track changes
                                 }}
                             >
-                                <option value="">-- Sélectionner une fiche --</option>
-                                {savedDocs.filter(d => ['student_fiche', 'dossier_eleve', 'jeu_de_role'].includes(d.document_type) || !d.document_type).map(doc => (
-                                    <option key={doc.id} value={doc.id}>
-                                        {doc.title} ({new Date(doc.created_at).toLocaleDateString()})
-                                    </option>
+                                {Object.entries(TRACKS_DATA).map(([key, data]) => (
+                                    <option key={key} value={key}>{data.label}</option>
                                 ))}
                             </select>
                         </div>
-                    )}
 
-                    <div>
-                        <label className="text-sm font-medium text-slate-700 mb-1 block">
-                            {['sujet_e5b_wp', 'sujet_e5b_presta'].includes(docType) ? 'Contexte Commercial et Digital *' : ['jeu_de_role', 'jeu_de_role_evenement'].includes(docType) ? 'Contexte / Fiche de Situation *' : (docType === 'planning_annuel' ? 'Périodes, Semaines de stage & Contraintes *' : 'Thème du cours *')}
-                        </label>
-                        {['jeu_de_role', 'jeu_de_role_evenement', 'sujet_e5b_wp', 'sujet_e5b_presta', 'planning_annuel'].includes(docType) ? (
-                            <textarea
-                                className="w-full border rounded-md p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none min-h-[150px]"
-                                placeholder={
-                                    ['sujet_e5b_wp', 'sujet_e5b_presta'].includes(docType)
-                                        ? "Collez ici le contexte complet de l'entreprise, de son manager et de sa stratégie digitale..."
-                                        : (docType === 'planning_annuel' ? "Détaillez ici la période visée (Année complète, Semestre 1...), les semaines de stage en entreprise, les vacances, et les objectifs spécifiques par bloc..." : "Collez ici le contexte complet de l'entreprise, du client et de la situation...")
-                                }
-                                value={topic}
-                                onChange={(e) => setTopic(e.target.value)}
-                            />
-                        ) : (
-                            <Input
-                                placeholder="Ex: La négociation commerciale en B2B"
-                                value={topic}
-                                onChange={(e) => setTopic(e.target.value)}
-                            />
+                        {/* Dynamic Block Selector */}
+                        <div>
+                            <label className="text-sm font-extrabold text-slate-500 mb-2 block uppercase tracking-wider">
+                                {currentTrack === "CEJM" ? "Thème ciblé (optionnel)" : "Bloc de compétences (optionnel)"}
+                            </label>
+                            <select
+                                className="w-full border-2 rounded-xl p-3 text-sm font-bold bg-slate-50 border-slate-200 focus:bg-white focus:border-[#58cc02] focus:ring-0 outline-none transition-colors"
+                                value={block}
+                                onChange={(e) => setBlock(e.target.value)}
+                            >
+                                <option value="">-- {currentTrack === "CEJM" ? "Tous les thèmes" : "Tous les blocs"} --</option>
+                                {TRACKS_DATA[currentTrack]?.blocks.map((b) => (
+                                    <option key={b.id} value={b.id}>{b.label}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Dropdown for Student Fiches (E4) */}
+                        {['jeu_de_role', 'jeu_de_role_evenement'].includes(docType) && savedDocs.length > 0 && (
+                            <div className="p-4 bg-purple-50 rounded-2xl border-2 border-purple-200 animate-in fade-in slide-in-from-top-2">
+                                <label className="text-xs font-extrabold text-purple-600 mb-2 flex items-center gap-2 uppercase tracking-widest">
+                                    <Download className="w-4 h-4" />
+                                    Charger depuis fiche
+                                </label>
+                                <select
+                                    className="w-full border-2 rounded-xl p-3 text-sm font-bold bg-white border-purple-200 text-purple-900 focus:border-purple-400 focus:ring-0 outline-none"
+                                    onChange={(e) => {
+                                        const doc = savedDocs.find(d => d.id === e.target.value);
+                                        if (doc) setTopic(doc.content);
+                                    }}
+                                >
+                                    <option value="">-- Sélectionner une fiche --</option>
+                                    {savedDocs.filter(d => ['student_fiche', 'dossier_eleve', 'jeu_de_role'].includes(d.document_type) || !d.document_type).map(doc => (
+                                        <option key={doc.id} value={doc.id}>
+                                            {doc.title} ({new Date(doc.created_at).toLocaleDateString()})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         )}
-                    </div>
 
-                    <div>
-                        <label className="text-sm font-medium text-slate-700 mb-1 block">Durée (heures)</label>
-                        <Input
-                            type="number"
-                            min={1}
-                            max={500}
-                            value={duration}
-                            onChange={(e) => setDuration(parseInt(e.target.value) || 0)}
-                        />
+                        <div>
+                            <label className="text-sm font-extrabold text-slate-500 mb-2 block uppercase tracking-wider">
+                                {['sujet_e5b_wp', 'sujet_e5b_presta'].includes(docType) ? 'Contexte Commercial *' : ['jeu_de_role', 'jeu_de_role_evenement'].includes(docType) ? 'Contexte Situation *' : (docType === 'planning_annuel' ? 'Périodes et Contraintes *' : 'Thème du document *')}
+                            </label>
+                            {['jeu_de_role', 'jeu_de_role_evenement', 'sujet_e5b_wp', 'sujet_e5b_presta', 'planning_annuel'].includes(docType) ? (
+                                <textarea
+                                    className="w-full border-2 rounded-xl p-4 text-sm font-medium focus:border-[#1cb0f6] focus:bg-[#f0f9ff] border-slate-200 outline-none transition-colors min-h-[140px] shadow-sm"
+                                    placeholder={
+                                        ['sujet_e5b_wp', 'sujet_e5b_presta'].includes(docType)
+                                            ? "Collez ici le contexte complet de l'entreprise..."
+                                            : (docType === 'planning_annuel' ? "Détaillez ici la période visée..." : "Collez ici le contexte complet...")
+                                    }
+                                    value={topic}
+                                    onChange={(e) => setTopic(e.target.value)}
+                                />
+                            ) : (
+                                <Input
+                                    placeholder="Ex: La négociation commerciale"
+                                    value={topic}
+                                    onChange={(e) => setTopic(e.target.value)}
+                                    className="w-full h-14 text-base border-2 rounded-xl px-4 font-bold border-slate-200 focus-visible:ring-0 focus:border-[#1cb0f6] focus:bg-[#f0f9ff] shadow-sm transition-colors"
+                                />
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="text-sm font-extrabold text-slate-500 mb-2 block uppercase tracking-wider">Durée (H)</label>
+                            <Input
+                                type="number"
+                                min={1}
+                                max={500}
+                                value={duration}
+                                onChange={(e) => setDuration(parseInt(e.target.value) || 0)}
+                                className="w-24 h-12 text-center text-lg font-black border-2 rounded-xl border-slate-200 focus-visible:ring-0 focus:border-[#58cc02] shadow-sm"
+                            />
+                        </div>
                     </div>
 
                     <Button
                         onClick={handleGenerate}
                         disabled={isLoading || !topic.trim()}
-                        className={`mt-4 w-full min-h-[48px] active:scale-95 transition-transform touch-manipulation ${selectedType.color.includes('blue') ? 'bg-blue-500 hover:bg-blue-600' :
-                            selectedType.color.includes('green') ? 'bg-green-500 hover:bg-green-600' :
-                                selectedType.color.includes('purple') ? 'bg-purple-500 hover:bg-purple-600' :
-                                    selectedType.color.includes('indigo') ? 'bg-indigo-500 hover:bg-indigo-600' :
-                                        selectedType.color.includes('emerald') ? 'bg-emerald-500 hover:bg-emerald-600' :
-                                            'bg-amber-500 hover:bg-amber-600'}`}
+                        className={`mt-2 w-full h-[60px] rounded-2xl text-lg font-black uppercase tracking-widest transition-all active:translate-y-2 touch-manipulation flex items-center justify-center ${topic.trim()
+                                ? 'bg-[#58cc02] hover:bg-[#46a302] text-white border-b-[6px] border-[#46a302] active:border-b-0 shadow-sm'
+                                : 'bg-slate-200 text-slate-400 border-b-[6px] border-slate-300 active:border-b-0 shadow-sm'
+                            }`}
                     >
                         {isLoading ? (
                             <>
-                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                                Génération en cours...
+                                <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin mr-3" />
+                                Génération...
                             </>
                         ) : (
                             <>
-                                <Sparkles className="w-4 h-4 mr-2" />
-                                Générer {selectedType.label}
+                                <Sparkles className="w-6 h-6 mr-3" />
+                                Générer ce document
                             </>
                         )}
                     </Button>

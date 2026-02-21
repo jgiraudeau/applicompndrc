@@ -16,7 +16,10 @@ import {
     Tag,
     Share2,
     ExternalLink,
-    Sparkles // Added Sparkles
+    Sparkles,
+    Target,
+    Award,
+    Briefcase
 } from "lucide-react";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
@@ -59,7 +62,11 @@ const TYPE_LABELS: Record<string, string> = {
     "fiche_deroulement": "Fiche Déroulement",
     "evaluation": "Évaluation",
     "quiz": "Quiz / QCM",
-    "planning_annuel": "Planning Annuel"
+    "planning_annuel": "Planning Annuel",
+    "jeu_de_role": "Fiche CCF E4",
+    "jeu_de_role_evenement": "Jeu de Rôle Évènement",
+    "sujet_e5b_wp": "Sujet E5B WordPress",
+    "sujet_e5b_presta": "Sujet E5B PrestaShop"
 };
 
 const DEFAULT_STATS: Stats = {
@@ -80,7 +87,7 @@ const DEFAULT_STATS: Stats = {
 
 export default function DashboardPage() {
     const { data: session }: any = useSession();
-    const [stats, setStats] = useState<Stats>(DEFAULT_STATS); // Initialize with default
+    const [stats, setStats] = useState<Stats>(DEFAULT_STATS);
     const [isLoading, setIsLoading] = useState(true);
     const [mounted, setMounted] = useState(false);
 
@@ -88,13 +95,11 @@ export default function DashboardPage() {
         if (session?.user) {
             const user = session.user as any;
 
-            // GATEKEEPER: Redirect to payment if Pro checked but not paid
             if (user.plan_selection === 'subscription' && !user.stripeCustomerId) {
                 window.location.href = "/onboarding";
                 return;
             }
 
-            // Fetch stats WITH TOKEN
             const token = (session as any).accessToken || user.accessToken;
             setMounted(true);
 
@@ -113,234 +118,273 @@ export default function DashboardPage() {
                     })
                     .catch(err => {
                         console.error("Error fetching stats:", err);
-                        // Keep default stats
                     })
                     .finally(() => {
                         setIsLoading(false);
                     });
             } else {
-                console.warn("No token found, stopping loader.");
                 setIsLoading(false);
             }
         } else if (session === null) {
-            // Not authenticated, stop loader (page will likely redirect via middleware or showing empty)
             setIsLoading(false);
         }
     }, [session]);
 
-    // Loading state
     if (isLoading) {
         return (
-            <div className="flex flex-col h-screen bg-slate-50">
+            <div className="flex flex-col h-screen bg-[#F7F7F8]">
                 <Navbar />
                 <div className="flex-1 flex items-center justify-center">
                     <div className="flex flex-col items-center gap-4">
                         <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-                        <p className="text-slate-400 text-sm">Chargement du tableau de bord...</p>
+                        <p className="text-slate-400 text-sm font-bold">Le magicien prépare votre espace...</p>
                     </div>
                 </div>
             </div>
         );
     }
 
+    const userName = session?.user?.name?.split(' ')[0] || "Prof";
+
     return (
-        <div className="flex flex-col h-screen bg-slate-50">
+        <div className="flex flex-col h-screen bg-[#F7F7F8]">
             <Navbar />
 
-            <main className="flex-1 overflow-y-auto p-6">
-                <div className="max-w-6xl mx-auto space-y-6">
-                    {/* Subscription & Quota Section */}
-                    {stats?.quota && (
-                        <Card className="p-6 bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-lg relative overflow-hidden">
-                            <div className="absolute top-0 right-0 p-4 opacity-10">
-                                <Sparkles className="w-32 h-32" />
+            <main className="flex-1 overflow-y-auto p-4 md:p-8">
+                <div className="max-w-6xl mx-auto space-y-10">
+
+                    {/* --- HEADER GAMIFIÉ --- */}
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white p-6 rounded-[2rem] border-2 border-slate-100 shadow-sm relative overflow-hidden">
+                        <div className="flex items-center gap-6 relative z-10">
+                            <div className="text-6xl filter drop-shadow-md">🧙‍♂️</div>
+                            <div>
+                                <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">
+                                    Bonjour {userName} !
+                                </h2>
+                                <p className="text-slate-500 font-bold text-lg mt-1">Qu&apos;allons-nous créer de génial aujourd&apos;hui ?</p>
                             </div>
-                            <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        </div>
+
+                        {/* Flammes & Stats XP */}
+                        <div className="flex items-center gap-3 relative z-10">
+                            <div className="flex items-center gap-2 bg-orange-100 text-orange-600 px-4 py-2.5 rounded-2xl font-black border-b-[4px] border-orange-200">
+                                <span className="text-xl">🔥</span>
+                                <span className="tracking-wide">3 Jours</span>
+                            </div>
+                            <div className="flex items-center gap-2 bg-blue-100 text-blue-500 px-4 py-2.5 rounded-2xl font-black border-b-[4px] border-blue-200">
+                                <span className="text-yellow-500 text-xl">⚡</span>
+                                <span className="tracking-wide">{(stats?.total_generated || 0) * 15 + 500} XP</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* --- ACTIONS PRINCIPALES (CARTES 3D DUOLINGO) --- */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {/* Carte 1 : Cours */}
+                        <Link href="/generate?type=dossier_prof" className="group outline-none">
+                            <div className="relative h-full">
+                                {/* Ombre / Base */}
+                                <div className="absolute inset-0 bg-[#42a818] rounded-[2rem] translate-y-2"></div>
+                                {/* Bouton principal */}
+                                <div className="relative h-full bg-[#58cc02] border-2 border-[#45a300] rounded-[2rem] p-6 flex flex-col items-center text-center gap-4 transition-transform group-active:translate-y-2 group-hover:-translate-y-1">
+                                    <div className="bg-white/20 p-4 rounded-full mb-2">
+                                        <GraduationCap className="w-10 h-10 text-white" />
+                                    </div>
+                                    <h3 className="text-xl font-extrabold text-white leading-tight">Créer un Cours complet</h3>
+                                    <div className="mt-auto w-full bg-white text-[#58cc02] font-black py-3 px-4 rounded-xl uppercase tracking-widest text-sm shadow-sm">Commencer</div>
+                                </div>
+                            </div>
+                        </Link>
+
+                        {/* Carte 2 : Exercices/Quiz */}
+                        <Link href="/generate?type=quiz" className="group outline-none">
+                            <div className="relative h-full">
+                                <div className="absolute inset-0 bg-[#168ed0] rounded-[2rem] translate-y-2"></div>
+                                <div className="relative h-full bg-[#1cb0f6] border-2 border-[#1899d6] rounded-[2rem] p-6 flex flex-col items-center text-center gap-4 transition-transform group-active:translate-y-2 group-hover:-translate-y-1">
+                                    <div className="bg-white/20 p-4 rounded-full mb-2">
+                                        <Target className="w-10 h-10 text-white" />
+                                    </div>
+                                    <h3 className="text-xl font-extrabold text-white leading-tight">Générer des Exercices</h3>
+                                    <div className="mt-auto w-full bg-white text-[#1cb0f6] font-black py-3 px-4 rounded-xl uppercase tracking-widest text-sm shadow-sm">Commencer</div>
+                                </div>
+                            </div>
+                        </Link>
+
+                        {/* Carte 3 : Examen E5B */}
+                        <Link href="/generate?type=sujet_e5b_wp" className="group outline-none">
+                            <div className="relative h-full">
+                                <div className="absolute inset-0 bg-[#a34aba] rounded-[2rem] translate-y-2"></div>
+                                <div className="relative h-full bg-[#ce82ff] border-2 border-[#b961f6] rounded-[2rem] p-6 flex flex-col items-center text-center gap-4 transition-transform group-active:translate-y-2 group-hover:-translate-y-1">
+                                    <div className="bg-white/20 p-4 rounded-full mb-2">
+                                        <Award className="w-10 h-10 text-white" />
+                                    </div>
+                                    <h3 className="text-xl font-extrabold text-white leading-tight">Sujet d&apos;Examen</h3>
+                                    <div className="mt-auto w-full bg-white text-[#ce82ff] font-black py-3 px-4 rounded-xl uppercase tracking-widest text-sm shadow-sm">Commencer</div>
+                                </div>
+                            </div>
+                        </Link>
+
+                        {/* Carte 4 : Fiche E4 */}
+                        <Link href="/generate?type=jeu_de_role" className="group outline-none">
+                            <div className="relative h-full">
+                                <div className="absolute inset-0 bg-[#cc6500] rounded-[2rem] translate-y-2"></div>
+                                <div className="relative h-full bg-[#ff9600] border-2 border-[#e67e00] rounded-[2rem] p-6 flex flex-col items-center text-center gap-4 transition-transform group-active:translate-y-2 group-hover:-translate-y-1">
+                                    <div className="bg-white/20 p-4 rounded-full mb-2">
+                                        <Briefcase className="w-10 h-10 text-white" />
+                                    </div>
+                                    <h3 className="text-xl font-extrabold text-white leading-tight">Paramétrer Fiche CCF</h3>
+                                    <div className="mt-auto w-full bg-white text-[#ff9600] font-black py-3 px-4 rounded-xl uppercase tracking-widest text-sm shadow-sm">Commencer</div>
+                                </div>
+                            </div>
+                        </Link>
+                    </div>
+
+                    {/* --- STATISTIQUES & TABLEAUX CLASSIQUES --- */}
+                    <div className="pt-6 border-t-4 border-slate-200 border-dashed">
+                        {/* Subscription & Quota Section */}
+                        {stats?.quota && (
+                            <Card className="p-6 bg-white border-2 border-slate-200 rounded-[2rem] shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                                 <div>
-                                    <h2 className="text-2xl font-bold flex items-center gap-2">
-                                        {stats.quota.plan === 'subscription' ? 'Abonnement Pro' : 'Essai Gratuit'}
-                                        {stats.quota.plan === 'subscription' && <span className="bg-purple-500 text-xs px-2 py-1 rounded-full">ACTIF</span>}
+                                    <h2 className="text-2xl font-extrabold text-slate-800 flex items-center gap-3">
+                                        {stats.quota.plan === 'subscription' ? 'Abonnement Pro' : 'Votre Progression'}
+                                        {stats.quota.plan === 'subscription' && <span className="bg-purple-100 text-purple-700 text-xs px-3 py-1 rounded-full font-bold border-b-2 border-purple-200">ACTIF</span>}
                                     </h2>
-                                    <p className="text-slate-300 mt-1">
+                                    <p className="text-slate-500 font-bold mt-2">
                                         {stats.quota.plan === 'subscription'
-                                            ? "Vous profitez de toutes les fonctionnalités en illimité."
-                                            : `Il vous reste ${stats.quota.trial_days_remaining} jours d'essai.`
+                                            ? "Vous profitez de l'assistant en illimité ! Continuez sur cette lancée."
+                                            : `Il vous reste ${stats.quota.trial_days_remaining} jours d'essai pour utiliser la magie de l'IA.`
                                         }
                                     </p>
                                 </div>
 
                                 {stats.quota.plan !== 'subscription' && (
-                                    <div className="flex flex-col gap-4 min-w-[250px]">
+                                    <div className="flex flex-col gap-4 min-w-[250px] bg-slate-50 p-4 rounded-2xl border-2 border-slate-100">
                                         <div>
-                                            <div className="flex justify-between text-xs mb-1">
+                                            <div className="flex justify-between text-sm font-bold text-slate-600 mb-2">
                                                 <span>Générations de cours</span>
-                                                <span className="font-bold">{stats.quota.generation_count} / {stats.quota.max_generations}</span>
+                                                <span>{stats.quota.generation_count} / {stats.quota.max_generations}</span>
                                             </div>
-                                            <div className="w-full bg-slate-700 rounded-full h-2">
+                                            <div className="w-full bg-slate-200 rounded-full h-3">
                                                 <div
-                                                    className={`h-2 rounded-full ${stats.quota.generation_count >= stats.quota.max_generations ? 'bg-red-500' : 'bg-blue-400'}`}
+                                                    className={`h-3 rounded-full transition-all ${stats.quota.generation_count >= stats.quota.max_generations ? 'bg-red-400' : 'bg-blue-400'}`}
                                                     style={{ width: `${Math.min(100, (stats.quota.generation_count / stats.quota.max_generations) * 100)}%` }}
                                                 />
                                             </div>
                                         </div>
                                         <div>
-                                            <div className="flex justify-between text-xs mb-1">
+                                            <div className="flex justify-between text-sm font-bold text-slate-600 mb-2">
                                                 <span>Messages Chat IA</span>
-                                                <span className="font-bold">{stats.quota.chat_count} / {stats.quota.max_chat}</span>
+                                                <span>{stats.quota.chat_count} / {stats.quota.max_chat}</span>
                                             </div>
-                                            <div className="w-full bg-slate-700 rounded-full h-2">
+                                            <div className="w-full bg-slate-200 rounded-full h-3">
                                                 <div
-                                                    className={`h-2 rounded-full ${stats.quota.chat_count >= stats.quota.max_chat ? 'bg-red-500' : 'bg-green-400'}`}
+                                                    className={`h-3 rounded-full transition-all ${stats.quota.chat_count >= stats.quota.max_chat ? 'bg-red-400' : 'bg-[#58cc02]'}`}
                                                     style={{ width: `${Math.min(100, (stats.quota.chat_count / stats.quota.max_chat) * 100)}%` }}
                                                 />
                                             </div>
                                         </div>
-                                        <Button size="sm" variant="secondary" onClick={() => window.location.href = "/onboarding"} className="w-full mt-2">
-                                            Passer en Pro & Illimité
+                                        <Button onClick={() => window.location.href = "/onboarding"} className="w-full mt-2 bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-xl border-b-4 border-indigo-700 active:border-b-0 active:translate-y-1">
+                                            Passer en Illimité
                                         </Button>
                                     </div>
                                 )}
-                            </div>
-                        </Card>
-                    )}
+                            </Card>
+                        )}
 
-                    {/* Top Stats */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <Card className="p-6 flex items-center gap-4 bg-white">
-                            <div className="bg-blue-50 p-3 rounded-full">
-                                <FileText className="w-6 h-6 text-blue-600" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-slate-500 font-medium">Documents générés</p>
-                                <p className="text-3xl font-bold text-slate-800">{stats?.total_generated || 0}</p>
-                            </div>
-                        </Card>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                            <Card className="p-6 flex items-center gap-4 bg-white border-2 border-slate-200 rounded-[2rem] shadow-sm">
+                                <div className="bg-blue-100 p-4 rounded-2xl">
+                                    <FileText className="w-8 h-8 text-blue-500" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-slate-400 font-bold uppercase tracking-wider">Documents générés</p>
+                                    <p className="text-4xl font-black text-slate-800 tracking-tight">{stats?.total_generated || 0}</p>
+                                </div>
+                            </Card>
 
-                        <Card className="p-6 flex items-center gap-4 bg-white">
-                            <div className="bg-green-50 p-3 rounded-full">
-                                <BarChart3 className="w-6 h-6 text-green-600" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-slate-500 font-medium">Types différents</p>
-                                <p className="text-3xl font-bold text-slate-800">{Object.keys(stats?.by_type || {}).length}</p>
-                            </div>
-                        </Card>
+                            <Card className="p-6 flex items-center gap-4 bg-white border-2 border-slate-200 rounded-[2rem] shadow-sm">
+                                <div className="bg-[#e6fbf2] p-4 rounded-2xl">
+                                    <BarChart3 className="w-8 h-8 text-[#58cc02]" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-slate-400 font-bold uppercase tracking-wider">Types différents</p>
+                                    <p className="text-4xl font-black text-slate-800 tracking-tight">{Object.keys(stats?.by_type || {}).length}</p>
+                                </div>
+                            </Card>
 
-                        <Card className="p-6 flex items-center gap-4 bg-white">
-                            <div className="bg-purple-50 p-3 rounded-full">
-                                <Tag className="w-6 h-6 text-purple-600" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-slate-500 font-medium">Blocs travaillés</p>
-                                <p className="text-3xl font-bold text-slate-800">{Object.keys(stats?.by_block || {}).length}</p>
-                            </div>
-                        </Card>
-                    </div>
+                            <Card className="p-6 flex items-center gap-4 bg-white border-2 border-slate-200 rounded-[2rem] shadow-sm">
+                                <div className="bg-purple-100 p-4 rounded-2xl">
+                                    <Tag className="w-8 h-8 text-purple-500" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-slate-400 font-bold uppercase tracking-wider">Blocs travaillés</p>
+                                    <p className="text-4xl font-black text-slate-800 tracking-tight">{Object.keys(stats?.by_block || {}).length}</p>
+                                </div>
+                            </Card>
+                        </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* By Type Breakdown */}
-                        <Card className="p-6 bg-white">
-                            <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                                <BarChart3 className="w-5 h-5 text-slate-400" />
-                                Répartition par type
-                            </h2>
-                            <div className="space-y-4">
-                                {Object.entries(stats?.by_type || {}).map(([type, count]) => (
-                                    <div key={type}>
-                                        <div className="flex justify-between text-sm mb-1">
-                                            <span className="text-slate-600">{TYPE_LABELS[type] || type}</span>
-                                            <span className="font-semibold">{count}</span>
-                                        </div>
-                                        <div className="w-full bg-slate-100 rounded-full h-2">
-                                            <div
-                                                className="bg-blue-500 h-2 rounded-full"
-                                                style={{ width: `${(count / (stats?.total_generated || 1)) * 100}%` }}
-                                            />
-                                        </div>
-                                    </div>
-                                ))}
-                                {Object.keys(stats?.by_type || {}).length === 0 && (
-                                    <p className="text-slate-400 text-sm italic">Aucune donnée disponible</p>
-                                )}
-                            </div>
-                        </Card>
-
-                        {/* Recent Activity */}
-                        <Card className="p-6 bg-white flex flex-col">
-                            <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                                <History className="w-5 h-5 text-slate-400" />
-                                Activité récente
-                            </h2>
-                            <ScrollArea className="flex-1 max-h-[300px]">
-                                <div className="space-y-3">
-                                    {stats?.recent?.map((activity) => (
-                                        <div key={activity.id} className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-                                            <div className="flex justify-between items-start mb-1">
-                                                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600">
-                                                    {TYPE_LABELS[activity.document_type] || activity.document_type}
-                                                </span>
-                                                <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                                                    <Clock className="w-3 h-3" />
-                                                    {activity.timestamp}
-                                                </span>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* By Type Breakdown */}
+                            <Card className="p-6 bg-white border-2 border-slate-200 rounded-[2rem] shadow-sm">
+                                <h2 className="text-xl font-extrabold text-slate-800 mb-6 flex items-center gap-3">
+                                    <div className="bg-amber-100 p-2 rounded-xl"><BarChart3 className="w-5 h-5 text-amber-500" /></div>
+                                    Répartition par type
+                                </h2>
+                                <div className="space-y-5">
+                                    {Object.entries(stats?.by_type || {}).map(([type, count]) => (
+                                        <div key={type}>
+                                            <div className="flex justify-between text-sm font-bold mb-2">
+                                                <span className="text-slate-600">{TYPE_LABELS[type] || type}</span>
+                                                <span className="text-slate-800">{count}</span>
                                             </div>
-                                            <p className="text-sm font-medium text-slate-700 truncate">{activity.topic}</p>
+                                            <div className="w-full bg-slate-100 rounded-full h-3">
+                                                <div
+                                                    className="bg-amber-400 h-3 rounded-full"
+                                                    style={{ width: `${(count / (stats?.total_generated || 1)) * 100}%` }}
+                                                />
+                                            </div>
                                         </div>
                                     ))}
-                                    {(stats?.recent?.length === 0 || !stats?.recent) && (
-                                        <div className="flex flex-col items-center justify-center py-8 text-slate-400">
-                                            <History className="w-8 h-8 mb-2 opacity-20" />
-                                            <p className="text-sm">Aucune activité enregistrée</p>
-                                        </div>
+                                    {Object.keys(stats?.by_type || {}).length === 0 && (
+                                        <p className="text-slate-400 text-sm italic font-bold text-center py-4">Commencez à créer pour voir vos statistiques !</p>
                                     )}
                                 </div>
-                            </ScrollArea>
-                        </Card>
+                            </Card>
+
+                            {/* Recent Activity */}
+                            <Card className="p-6 bg-white border-2 border-slate-200 rounded-[2rem] shadow-sm flex flex-col">
+                                <h2 className="text-xl font-extrabold text-slate-800 mb-6 flex items-center gap-3">
+                                    <div className="bg-rose-100 p-2 rounded-xl"><History className="w-5 h-5 text-rose-500" /></div>
+                                    Dernières créations
+                                </h2>
+                                <ScrollArea className="flex-1 max-h-[300px]">
+                                    <div className="space-y-4 pr-4">
+                                        {stats?.recent?.map((activity) => (
+                                            <div key={activity.id} className="p-4 bg-[#f7f7f8] rounded-2xl border-2 border-slate-100 transition-colors hover:border-slate-300">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <span className="text-xs font-black px-3 py-1 rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200 uppercase tracking-widest">
+                                                        {TYPE_LABELS[activity.document_type] || activity.document_type}
+                                                    </span>
+                                                    <span className="text-xs font-bold text-slate-400 flex items-center gap-1 bg-white px-2 py-1 rounded-full">
+                                                        <Clock className="w-3 h-3" />
+                                                        {activity.timestamp}
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm font-bold text-slate-800 line-clamp-2">{activity.topic}</p>
+                                            </div>
+                                        ))}
+                                        {(stats?.recent?.length === 0 || !stats?.recent) && (
+                                            <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+                                                <History className="w-12 h-12 mb-4 opacity-20" />
+                                                <p className="text-sm font-bold">Aucune activité enregistrée</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </ScrollArea>
+                            </Card>
+                        </div>
                     </div>
 
-                    {/* Published Quizzes Section */}
-                    <Card className="p-6 bg-white overflow-hidden">
-                        <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                            <Share2 className="w-5 h-5 text-indigo-500" />
-                            Quizzes publiés (Espace Élève)
-                        </h2>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm">
-                                <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold">
-                                    <tr>
-                                        <th className="px-4 py-3 rounded-l-lg">Code</th>
-                                        <th className="px-4 py-3">Titre</th>
-                                        <th className="px-4 py-3">Date</th>
-                                        <th className="px-4 py-3 rounded-r-lg">Lien</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100">
-                                    {(stats?.published || []).map((q) => (
-                                        <tr key={q.code} className="hover:bg-slate-50 transition-colors">
-                                            <td className="px-4 py-3 font-mono font-bold text-indigo-600">{q.code}</td>
-                                            <td className="px-4 py-3 text-slate-700 font-medium">{q.title}</td>
-                                            <td className="px-4 py-3 text-slate-400">{q.date}</td>
-                                            <td className="px-4 py-3">
-                                                <Link
-                                                    href={`/eleve?code=${q.code}`}
-                                                    className="text-indigo-500 hover:text-indigo-700 font-semibold flex items-center gap-1"
-                                                >
-                                                    Accès <ExternalLink className="w-3 h-3" />
-                                                </Link>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    {(stats?.published?.length === 0 || !stats?.published) && (
-                                        <tr>
-                                            <td colSpan={4} className="px-4 py-8 text-center text-slate-400 italic">
-                                                Aucun quiz publié pour le moment
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </Card>
                 </div>
             </main>
         </div>
