@@ -610,32 +610,30 @@ function GenerateContent() {
                                     <Download className="w-4 h-4" />
                                     Charger la fiche de l'élève (PDF, DOCX)
                                 </label>
-                                <div className="flex flex-col gap-2 relative">
-                                    {selectedFile && (
-                                        <div className="bg-white border-2 border-purple-300 text-purple-700 px-4 py-2 rounded-xl text-sm font-bold flex items-center justify-between shadow-sm">
-                                            <span className="truncate max-w-[200px]">📄 {selectedFile.name}</span>
-                                            <button onClick={() => setSelectedFile(null)} className="hover:text-purple-900 bg-purple-200 rounded-full w-6 h-6 flex items-center justify-center transition-colors">×</button>
-                                        </div>
-                                    )}
-                                    <div className="relative w-full">
-                                        <input
-                                            id="file-upload"
-                                            type="file"
-                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                            onChange={(e) => {
-                                                if (e.target.files && e.target.files[0]) {
-                                                    setSelectedFile(e.target.files[0]);
-                                                }
-                                            }}
-                                            accept=".pdf,.md,.txt,.docx"
-                                        />
-                                        {!selectedFile && (
-                                            <div className="w-full bg-white border-2 border-purple-200 text-purple-600 hover:bg-purple-100 hover:border-purple-300 font-bold h-12 rounded-xl border-dashed transition-all shadow-sm flex items-center justify-center pointer-events-none">
-                                                Choisir un fichier...
-                                            </div>
-                                        )}
+                                {!selectedFile ? (
+                                    <input
+                                        type="file"
+                                        onChange={(e) => {
+                                            if (e.target.files && e.target.files[0]) {
+                                                setSelectedFile(e.target.files[0]);
+                                            }
+                                        }}
+                                        accept=".pdf,.md,.txt,.docx"
+                                        className="block w-full text-sm text-slate-500
+                                              file:mr-4 file:py-3 file:px-4
+                                              file:rounded-xl file:border-0
+                                              file:text-sm file:font-bold
+                                              file:bg-purple-100 file:text-purple-700
+                                              hover:file:bg-purple-200
+                                              file:cursor-pointer cursor-pointer
+                                              bg-white border-2 border-purple-200 border-dashed rounded-xl p-2 transition-all shadow-sm"
+                                    />
+                                ) : (
+                                    <div className="bg-white border-2 border-purple-300 text-purple-700 px-4 py-3 rounded-xl text-sm font-bold flex items-center justify-between shadow-sm">
+                                        <span className="truncate max-w-[200px]">📄 {selectedFile.name}</span>
+                                        <button onClick={() => setSelectedFile(null)} className="hover:text-purple-900 bg-purple-200 rounded-full w-8 h-8 flex items-center justify-center transition-colors text-lg">×</button>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         )}
 
