@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -72,6 +72,8 @@ function GenerateContent() {
     const [duration, setDuration] = useState(4);
     const [block, setBlock] = useState("");
     const [docType, setDocType] = useState("dossier_prof");
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [generatedContent, setGeneratedContent] = useState("");
     const [copied, setCopied] = useState(false);
@@ -326,11 +328,24 @@ function GenerateContent() {
     }, []);
 
     const handleGenerate = async () => {
-        if (!topic.trim()) return;
+        if (!topic.trim() && !selectedFile) return;
         setIsLoading(true);
         setGeneratedContent("");
 
         try {
+            let fileId = null;
+            if (selectedFile) {
+                const formData = new FormData();
+                formData.append("file", selectedFile);
+                const uploadRes = await fetch(`${API_BASE_URL}/api/documents/upload`, {
+                    method: "POST",
+                    body: formData
+                });
+                if (!uploadRes.ok) throw new Error("Échec de l'upload de la fiche");
+                const uploadData = await uploadRes.json();
+                fileId = uploadData.gemini_file_name;
+            }
+
             const token = (session as any)?.accessToken;
             const response = await fetch(`${API_BASE_URL}/api/generate/course`, {
                 method: "POST",
@@ -339,11 +354,12 @@ function GenerateContent() {
                     "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    topic: topic,
+                    topic: topic || "Fiche étudiant jointe.",
                     duration_hours: duration,
                     target_block: block || null,
                     document_type: docType,
                     category: currentTrack,
+                    file_id: fileId
                 }),
             });
 
@@ -587,27 +603,41 @@ function GenerateContent() {
                             </select>
                         </div>
 
-                        {/* Dropdown for Student Fiches (E4) */}
-                        {['jeu_de_role', 'jeu_de_role_evenement'].includes(docType) && savedDocs.length > 0 && (
+                        {/* Upload for Student Fiches (E4) */}
+                        {['jeu_de_role', 'jeu_de_role_evenement'].includes(docType) && (
                             <div className="p-4 bg-purple-50 rounded-2xl border-2 border-purple-200 animate-in fade-in slide-in-from-top-2">
                                 <label className="text-xs font-extrabold text-purple-600 mb-2 flex items-center gap-2 uppercase tracking-widest">
                                     <Download className="w-4 h-4" />
-                                    Charger depuis fiche
+                                    Charger la fiche de l'élève (PDF, DOCX)
                                 </label>
-                                <select
-                                    className="w-full border-2 rounded-xl p-3 text-sm font-bold bg-white border-purple-200 text-purple-900 focus:border-purple-400 focus:ring-0 outline-none"
-                                    onChange={(e) => {
-                                        const doc = savedDocs.find(d => d.id === e.target.value);
-                                        if (doc) setTopic(doc.content);
-                                    }}
-                                >
-                                    <option value="">-- Sélectionner une fiche --</option>
-                                    {savedDocs.filter(d => ['student_fiche', 'dossier_eleve', 'jeu_de_role'].includes(d.document_type) || !d.document_type).map(doc => (
-                                        <option key={doc.id} value={doc.id}>
-                                            {doc.title} ({new Date(doc.created_at).toLocaleDateString()})
-                                        </option>
-                                    ))}
-                                </select>
+                                <div className="flex flex-col gap-2 relative">
+                                    {selectedFile && (
+                                        <div className="bg-white border-2 border-purple-300 text-purple-700 px-4 py-2 rounded-xl text-sm font-bold flex items-center justify-between shadow-sm">
+                                            <span className="truncate max-w-[200px]">📄 {selectedFile.name}</span>
+                                            <button onClick={() => setSelectedFile(null)} className="hover:text-purple-900 bg-purple-200 rounded-full w-6 h-6 flex items-center justify-center transition-colors">×</button>
+                                        </div>
+                                    )}
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            if (e.target.files && e.target.files[0]) {
+                                                setSelectedFile(e.target.files[0]);
+                                            }
+                                        }}
+                                        accept=".pdf,.md,.txt,.docx"
+                                    />
+                                    {!selectedFile && (
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="w-full bg-white border-2 border-purple-200 text-purple-600 hover:bg-purple-100 hover:border-purple-300 font-bold h-12 rounded-xl border-dashed transition-all shadow-sm"
+                                        >
+                                            Choisir un fichier...
+                                        </Button>
+                                    )}
+                                </div>
                             </div>
                         )}
 
@@ -651,8 +681,8 @@ function GenerateContent() {
 
                     <Button
                         onClick={handleGenerate}
-                        disabled={isLoading || !topic.trim()}
-                        className={`mt-2 w-full h-[60px] rounded-2xl text-lg font-black uppercase tracking-widest transition-all active:translate-y-2 touch-manipulation flex items-center justify-center ${topic.trim()
+                        disabled={isLoading || (!topic.trim() && !selectedFile)}
+                        className={`mt-2 w-full h-[60px] rounded-2xl text-lg font-black uppercase tracking-widest transition-all active:translate-y-2 touch-manipulation flex items-center justify-center ${(topic.trim() || selectedFile)
                             ? 'bg-[#58cc02] hover:bg-[#46a302] text-white border-b-[6px] border-[#46a302] active:border-b-0 shadow-sm'
                             : 'bg-slate-200 text-slate-400 border-b-[6px] border-slate-300 active:border-b-0 shadow-sm'
                             }`}

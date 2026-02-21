@@ -475,6 +475,7 @@ class GenerateRequest(BaseModel):
     target_block: Optional[str] = None
     document_type: Literal["dossier_prof", "dossier_eleve", "fiche_deroulement", "evaluation", "quiz", "planning_annuel", "jeu_de_role", "jeu_de_role_evenement", "sujet_e5b_wp", "sujet_e5b_presta"] = "dossier_prof"
     category: Optional[str] = "NDRC"
+    file_id: Optional[str] = None
 
 class GenerateResponse(BaseModel):
     content: str
@@ -536,6 +537,15 @@ async def generate_document(request: GenerateRequest, db: Session = Depends(get_
                 pass
         
         content_parts.append(user_prompt)
+        
+        # Add the dynamically uploaded user file if provided
+        if request.file_id:
+            try:
+                user_file = gemini_service.client.files.get(name=request.file_id)
+                content_parts.append(user_file)
+                print(f"✅ Fiche étudiant / Fichier utilisateur attaché au contexte : {request.file_id}")
+            except Exception as e:
+                print(f"⚠️ Erreur lors de la récupération du fichier utilisateur : {e}")
         
         response = model.generate_content(content_parts)
         
