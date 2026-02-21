@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,7 +67,7 @@ const TRACKS_DATA: Record<string, { label: string; blocks: { id: string; label: 
     }
 };
 
-export default function GeneratePage() {
+function GenerateContent() {
     const [topic, setTopic] = useState("");
     const [duration, setDuration] = useState(4);
     const [block, setBlock] = useState("");
@@ -653,8 +653,8 @@ export default function GeneratePage() {
                         onClick={handleGenerate}
                         disabled={isLoading || !topic.trim()}
                         className={`mt-2 w-full h-[60px] rounded-2xl text-lg font-black uppercase tracking-widest transition-all active:translate-y-2 touch-manipulation flex items-center justify-center ${topic.trim()
-                                ? 'bg-[#58cc02] hover:bg-[#46a302] text-white border-b-[6px] border-[#46a302] active:border-b-0 shadow-sm'
-                                : 'bg-slate-200 text-slate-400 border-b-[6px] border-slate-300 active:border-b-0 shadow-sm'
+                            ? 'bg-[#58cc02] hover:bg-[#46a302] text-white border-b-[6px] border-[#46a302] active:border-b-0 shadow-sm'
+                            : 'bg-slate-200 text-slate-400 border-b-[6px] border-slate-300 active:border-b-0 shadow-sm'
                             }`}
                     >
                         {isLoading ? (
@@ -885,5 +885,20 @@ export default function GeneratePage() {
                 )
             }
         </div >
+    );
+}
+
+export default function GeneratePage() {
+    return (
+        <Suspense fallback={
+            <div className="flex h-screen items-center justify-center bg-[#F7F7F8]">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="w-10 h-10 animate-spin text-[#1cb0f6]" />
+                    <p className="text-slate-500 font-bold uppercase tracking-wider text-sm">Chargement du Générateur...</p>
+                </div>
+            </div>
+        }>
+            <GenerateContent />
+        </Suspense>
     );
 }
