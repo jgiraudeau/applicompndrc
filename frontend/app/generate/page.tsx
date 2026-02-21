@@ -606,12 +606,16 @@ function GenerateContent() {
                         {/* Upload for Student Fiches (E4) */}
                         {['jeu_de_role', 'jeu_de_role_evenement'].includes(docType) && (
                             <div className="p-4 bg-purple-50 rounded-2xl border-2 border-purple-200 animate-in fade-in slide-in-from-top-2">
-                                <label className="text-xs font-extrabold text-purple-600 mb-2 flex items-center gap-2 uppercase tracking-widest">
+                                <label
+                                    htmlFor="file-upload"
+                                    className="text-xs font-extrabold text-purple-600 mb-2 flex items-center gap-2 uppercase tracking-widest cursor-pointer hover:text-purple-800 transition-colors"
+                                >
                                     <Download className="w-4 h-4" />
                                     Charger la fiche de l'élève (PDF, DOCX)
                                 </label>
                                 {!selectedFile ? (
                                     <input
+                                        id="file-upload"
                                         type="file"
                                         onChange={(e) => {
                                             if (e.target.files && e.target.files[0]) {
