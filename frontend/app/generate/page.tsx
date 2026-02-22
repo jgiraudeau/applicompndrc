@@ -431,8 +431,8 @@ function GenerateContent() {
                 body: JSON.stringify({
                     content: generatedContent,
                     filename: suggestedFilename
-                        ? `${suggestedFilename}_${docType}`
-                        : `${topic.slice(0, 30).replace(/\s+/g, '_')}_${docType}` // Fallback truncated to 30 chars
+                        ? `${suggestedFilename.slice(0, 40)}_${docType}`
+                        : `${topic.slice(0, 30).replace(/\s+/g, '_')}_${docType}`
                 }),
             });
 
@@ -452,7 +452,7 @@ function GenerateContent() {
             a.href = url;
             // Use same filename logic for download attribute
             const safeName = suggestedFilename
-                ? `${suggestedFilename}_${docType}`
+                ? `${suggestedFilename.slice(0, 40)}_${docType}`
                 : `${topic.slice(0, 30).replace(/\s+/g, '_')}_${docType}`;
 
             a.download = `${safeName}_export.${extension}`;

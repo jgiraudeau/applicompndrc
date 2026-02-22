@@ -34,20 +34,64 @@ class ExportRequest(BaseModel):
     content: str
     filename: Optional[str] = "document"
 
+def _load_unicode_font(pdf):
+    """Try to load a Unicode TTF font. Returns font family name or None."""
+    import os
+    font_candidates = [
+        # Linux / Railway (Docker)
+        ('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+         '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+         '/usr/share/fonts/truetype/dejavu/DejaVuSans-Oblique.ttf',
+         '/usr/share/fonts/truetype/dejavu/DejaVuSans-BoldOblique.ttf'),
+        # macOS
+        ('/System/Library/Fonts/Supplemental/Arial.ttf',
+         '/System/Library/Fonts/Supplemental/Arial Bold.ttf',
+         '/System/Library/Fonts/Supplemental/Arial Italic.ttf',
+         '/System/Library/Fonts/Supplemental/Arial Bold Italic.ttf'),
+    ]
+    for regular, bold, italic, bold_italic in font_candidates:
+        if os.path.exists(regular):
+            try:
+                pdf.add_font('UniFont', '', regular)
+                pdf.add_font('UniFont', 'B', bold if os.path.exists(bold) else regular)
+                pdf.add_font('UniFont', 'I', italic if os.path.exists(italic) else regular)
+                pdf.add_font('UniFont', 'BI', bold_italic if os.path.exists(bold_italic) else regular)
+                print(f"DEBUG: Loaded Unicode font from {regular}")
+                return 'UniFont'
+            except Exception as e:
+                print(f"DEBUG: Font load failed for {regular}: {e}")
+                continue
+    return None
+
+def _sanitize_for_latin1(text):
+    """Replace Unicode chars not in latin-1 with ASCII equivalents."""
+    replacements = {
+        '\u2019': "'", '\u2018': "'",
+        '\u201c': '"', '\u201d': '"',
+        '\u2013': '-', '\u2014': '--',
+        '\u2026': '...', '\u00a0': ' ',
+        '\u2022': '-', '\u2192': '->',
+        '\u2610': '[ ]', '\u2611': '[x]', '\u2612': '[x]',
+        '\u25cf': '-', '\u25cb': 'o',
+        '\u2713': 'v', '\u2717': 'x',
+        '\u20ac': 'EUR',
+    }
+    for old, new in replacements.items():
+        text = text.replace(old, new)
+    return text.encode('latin-1', 'replace').decode('latin-1')
+
 def md_to_pdf(md_text):
     """
-    Converts Markdown to PDF using FPDF2 with manual parsing for better control.
-    Supports Landscape switching for Grids.
+    Converts Markdown to PDF using FPDF2 + markdown library for proper HTML rendering.
+    Supports: bold, italic, headers, tables, lists, landscape pages for grids.
     """
     print(f"DEBUG: Starting PDF generation... Content len: {len(md_text)}")
     try:
         from fpdf import FPDF
-        
+        import markdown
+        import os
+
         class PDF(FPDF):
-            def header(self):
-                # Optional: Add logo or title on every page
-                pass
-            
             def footer(self):
                 self.set_y(-15)
                 self.set_font('Helvetica', 'I', 8)
@@ -55,66 +99,59 @@ def md_to_pdf(md_text):
 
         pdf = PDF()
         pdf.set_auto_page_break(auto=True, margin=15)
-        pdf.add_page()
-        pdf.set_font("Helvetica", size=11)
-        
-        lines = md_text.split('\n')
-        
-        in_code_block = False
-        
-        for line in lines:
-            stripped = line.strip()
-            
-            # Detect Landscape Trigger
-            if stripped.upper().startswith('# PAGE 2') or stripped.upper().startswith('## PAGE 2') or "GRILLE D'AIDE" in stripped.upper():
-                pdf.add_page(orientation='L')
-            
-            # Headers
-            if stripped.startswith('# '):
-                pdf.set_font("Helvetica", 'B', 16)
-                pdf.cell(0, 10, stripped[2:], new_x="LMARGIN", new_y="NEXT")
-                pdf.set_font("Helvetica", size=11)
-            elif stripped.startswith('## '):
-                pdf.set_font("Helvetica", 'B', 14)
-                pdf.ln(5)
-                pdf.cell(0, 10, stripped[3:], new_x="LMARGIN", new_y="NEXT")
-                pdf.set_font("Helvetica", size=11)
-            elif stripped.startswith('### '):
-                pdf.set_font("Helvetica", 'B', 12)
-                pdf.ln(2)
-                pdf.cell(0, 10, stripped[4:], new_x="LMARGIN", new_y="NEXT")
-                pdf.set_font("Helvetica", size=11)
-            
-            # Simple Table Handling (Basic support)
-            elif stripped.startswith('|'):
-                # FPDF simple table rendering is complex, falling back to monospaced text for tables for robustness in PDF
-                # or we could attempt to parse it. For now, monospaced is safer than crashing unless we implement full table logic.
-                pdf.set_font("Courier", size=9)
-                pdf.multi_cell(0, 5, line)
-                pdf.set_font("Helvetica", size=11)
-            
-            # Lists
-            elif stripped.startswith('- ') or stripped.startswith('* '):
-                pdf.set_x(15) # Indent
-                pdf.multi_cell(0, 6, chr(149) + " " + stripped[2:]) # Bullet char
-            
-            elif re.match(r'^\d+\. ', stripped):
-                 pdf.set_x(15) # Indent
-                 pdf.multi_cell(0, 6, stripped)
 
-            # Normal Text
+        # Load Unicode font for proper French character support
+        font_name = _load_unicode_font(pdf)
+        if not font_name:
+            print("DEBUG: No Unicode font found, sanitizing text for latin-1")
+            md_text = _sanitize_for_latin1(md_text)
+            font_name = 'Helvetica'
+
+        # Split content into sections by "---" horizontal rules
+        sections = re.split(r'\n---+\n', md_text)
+
+        for idx, section in enumerate(sections):
+            section = section.strip()
+            if not section:
+                continue
+
+            # Check if this section needs landscape (grille d'aide)
+            is_landscape = bool(re.search(r"GRILLE D.AIDE", section, re.IGNORECASE))
+
+            if idx == 0:
+                pdf.add_page()
             else:
-                if stripped:
-                    pdf.multi_cell(0, 6, stripped)
-                    pdf.ln(1)
+                pdf.add_page(orientation='L' if is_landscape else 'P')
+
+            # Convert markdown to HTML with table support
+            html = markdown.markdown(section, extensions=['tables'])
+
+            # FPDF2 limitation: no nested HTML tags inside <td>/<th>
+            # Strip formatting tags and convert <br> to newlines
+            def clean_cell(match):
+                content = match.group(2)
+                content = re.sub(r'<br\s*/?>', '\n', content)
+                content = re.sub(r'</?(?:strong|em|b|i|code|p)>', '', content)
+                return match.group(1) + content + match.group(3)
+            html = re.sub(r'(<t[dh][^>]*>)(.*?)(</t[dh]>)', clean_cell, html, flags=re.DOTALL)
+
+            # Style tables for PDF rendering
+            html = html.replace('<table>', '<table border="1" cellpadding="5" width="100%">')
+            html = html.replace('<th>', '<th bgcolor="#DDDDDD">')
+
+            # Render HTML
+            pdf.set_font(font_name, size=11)
+            pdf.write_html(html)
 
         output = bytes(pdf.output())
         print(f"DEBUG: PDF generation success, bytes: {len(output)}")
         return output
 
     except Exception as e:
-        print(f"❌ Pure Python PDF Error: {e}")
-        # Fallback to Text
+        print(f"❌ PDF generation error: {e}")
+        import traceback
+        traceback.print_exc()
+        # Fallback: plain text PDF
         from fpdf import FPDF
         pdf = FPDF()
         pdf.add_page()

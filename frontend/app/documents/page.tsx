@@ -79,7 +79,7 @@ export default function DocumentsPage() {
                 },
                 body: JSON.stringify({
                     content: selectedDoc.content,
-                    filename: selectedDoc.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()
+                    filename: selectedDoc.title.slice(0, 40).replace(/[^a-z0-9]/gi, '_').replace(/_+/g, '_').replace(/_$/, '').toLowerCase()
                 })
             });
 
@@ -102,7 +102,7 @@ export default function DocumentsPage() {
                 if (format === 'gift') ext = 'txt';
                 if (format === 'wooclap') ext = 'xlsx';
 
-                a.download = `${selectedDoc.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.${ext}`;
+                a.download = `${selectedDoc.title.slice(0, 40).replace(/[^a-z0-9]/gi, '_').replace(/_+/g, '_').replace(/_$/, '').toLowerCase()}.${ext}`;
                 a.click();
             }
 
