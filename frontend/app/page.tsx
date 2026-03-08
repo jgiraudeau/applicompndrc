@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle2, Sparkles, GraduationCap, BarChart3, ArrowRight } from "lucide-react"
@@ -13,8 +14,11 @@ export default async function LandingPage() {
         <div className="min-h-screen bg-white">
             {/* Navigation */}
             <nav className="flex items-center justify-between p-6 max-w-7xl mx-auto">
-                <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-                    Votre Assistant Professeur
+                <div className="flex items-center gap-3">
+                    <Image src="/logo.png" alt="ProfVirtuel" width={48} height={48} className="rounded-xl shadow-md border border-slate-100" />
+                    <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 hidden sm:block">
+                        Votre Assistant Professeur
+                    </div>
                 </div>
                 <div className="gap-4 flex">
                     {session ? (

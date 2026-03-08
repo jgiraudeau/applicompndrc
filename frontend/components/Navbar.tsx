@@ -1,6 +1,6 @@
-
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -49,8 +49,8 @@ export function Navbar() {
                 </Button>
 
                 <Link href="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                    <div className="bg-primary/10 p-2 rounded-lg">
-                        <GraduationCap className="w-6 h-6 text-primary" />
+                    <div className="flex-shrink-0">
+                        <Image src="/logo.png" alt="Logo ProfVirtuel" width={40} height={40} className="rounded-xl shadow-sm border border-slate-100" />
                     </div>
                     <div className="hidden md:block">
                         <h1 className="font-bold text-lg text-slate-800">Votre Assistant Professeur</h1>
@@ -66,13 +66,13 @@ export function Navbar() {
                         <Button
                             variant={isActive(link.href) ? "secondary" : "ghost"}
                             className={`gap-2 ${isActive(link.href)
-                                    ? link.color === "text-slate-600" ? "bg-slate-50 text-slate-600"
-                                        : link.color === "text-blue-600" ? "bg-blue-50 text-blue-600"
-                                            : link.color === "text-amber-600" ? "bg-amber-50 text-amber-600"
-                                                : link.color === "text-indigo-600" ? "bg-indigo-50 text-indigo-600"
-                                                    : link.color === "text-purple-600" ? "bg-purple-50 text-purple-600"
-                                                        : "bg-slate-50 text-slate-600"
-                                    : "text-slate-600"
+                                ? link.color === "text-slate-600" ? "bg-slate-50 text-slate-600"
+                                    : link.color === "text-blue-600" ? "bg-blue-50 text-blue-600"
+                                        : link.color === "text-amber-600" ? "bg-amber-50 text-amber-600"
+                                            : link.color === "text-indigo-600" ? "bg-indigo-50 text-indigo-600"
+                                                : link.color === "text-purple-600" ? "bg-purple-50 text-purple-600"
+                                                    : "bg-slate-50 text-slate-600"
+                                : "text-slate-600"
                                 }`}
                         >
                             <link.icon className="w-4 h-4" />
