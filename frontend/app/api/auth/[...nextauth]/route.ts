@@ -5,10 +5,17 @@ import { API_BASE_URL } from "@/lib/api";
 
 // Helper to ensure API_BASE_URL is available
 const getApiUrl = () => {
-    let url = API_BASE_URL;
+    // Fallback if not defined
+    let url = API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
     // Fix for Node v17+ expecting 127.0.0.1 instead of localhost for fetch
     if (url.includes("localhost")) {
         url = url.replace("localhost", "127.0.0.1");
+    }
+
+    // Remove trailing slash if present to avoid double slashes
+    if (url.endsWith('/')) {
+        url = url.slice(0, -1);
     }
     return url;
 }
@@ -126,6 +133,8 @@ const authOptions: AuthOptions = {
                 console.log("🔄 Fetching User Profile with token:", token.accessToken.substring(0, 10) + "...");
                 try {
                     const apiUrl = getApiUrl();
+                    if (!apiUrl) throw new Error("API URL is undefined");
+
                     const meRes = await fetch(`${apiUrl}/api/auth/me`, {
                         headers: { Authorization: `Bearer ${token.accessToken}` },
                         cache: 'no-store'
